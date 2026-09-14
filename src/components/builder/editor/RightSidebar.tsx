@@ -22,6 +22,7 @@ import {
   Image as ImageIcon,
   MousePointer,
   Film,
+  Upload,
   LayoutGrid,
   AlignLeft,
   AlignCenter,
@@ -92,6 +93,28 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   const handlePropChange = (key: string, value: any) => {
     if (!selectedComponentId) return;
     updateComponentProps(selectedComponentId, { [key]: value });
+  };
+
+  const handleLocalFileUploadToProp = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    propKey: string,
+    onSuccess?: (dataUrl: string) => void
+  ) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (reader.result) {
+        const dataUrl = reader.result as string;
+        if (onSuccess) {
+          onSuccess(dataUrl);
+        } else {
+          handlePropChange(propKey, dataUrl);
+        }
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleStyleOverride = (key: string, value: string) => {
@@ -232,18 +255,31 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                 {selectedComponent.props.image !== undefined && (
                   <div>
                     <label className="block text-[11px] text-slate-400 mb-1 font-medium flex items-center justify-between">
-                      <span>URL da Imagem</span>
-                      {onOpenAssetManager && (
-                        <button
-                          onClick={() => onOpenAssetManager((url) => handlePropChange('image', url))}
-                          className="text-[10px] text-amber-400 hover:underline flex items-center gap-1"
-                        >
-                          <ImageIcon className="w-3 h-3" /> Biblioteca
-                        </button>
-                      )}
+                      <span>Imagem de Destaque / Fundo</span>
+                      <div className="flex items-center gap-2">
+                        {onOpenAssetManager && (
+                          <button
+                            type="button"
+                            onClick={() => onOpenAssetManager((url) => handlePropChange('image', url))}
+                            className="text-[10px] text-amber-400 hover:underline flex items-center gap-1 font-bold"
+                          >
+                            <ImageIcon className="w-3 h-3" /> Biblioteca
+                          </button>
+                        )}
+                        <label className="text-[10px] text-amber-400 hover:underline flex items-center gap-1 font-bold cursor-pointer">
+                          <Upload className="w-3 h-3" /> Subir Foto
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleLocalFileUploadToProp(e, 'image')}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
                     </label>
                     <input
                       type="text"
+                      placeholder="https://... ou faça upload"
                       value={selectedComponent.props.image || ''}
                       onChange={(e) => handlePropChange('image', e.target.value)}
                       className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white font-mono focus:border-amber-500 focus:outline-none"
@@ -435,9 +471,48 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
                             {(item.image !== undefined || item.url !== undefined || item.avatar !== undefined) && (
                               <div>
-                                <label className="block text-[10px] text-slate-400 font-medium">URL da Foto / Avatar</label>
+                                <label className="block text-[10px] text-slate-400 font-medium flex items-center justify-between">
+                                  <span>URL da Foto / Avatar</span>
+                                  <div className="flex items-center gap-2">
+                                    {onOpenAssetManager && (
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          onOpenAssetManager((url) => {
+                                            const newItems = [...itemsList];
+                                            if (item.image !== undefined) newItems[idx].image = url;
+                                            if (item.url !== undefined) newItems[idx].url = url;
+                                            if (item.avatar !== undefined) newItems[idx].avatar = url;
+                                            handlePropChange('items', newItems);
+                                          })
+                                        }
+                                        className="text-[9px] text-amber-400 hover:underline flex items-center gap-0.5 font-bold"
+                                      >
+                                        <ImageIcon className="w-2.5 h-2.5" /> Biblioteca
+                                      </button>
+                                    )}
+                                    <label className="text-[9px] text-amber-400 hover:underline flex items-center gap-0.5 font-bold cursor-pointer">
+                                      <Upload className="w-2.5 h-2.5" /> Subir Foto
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) =>
+                                          handleLocalFileUploadToProp(e, '', (dataUrl) => {
+                                            const newItems = [...itemsList];
+                                            if (item.image !== undefined) newItems[idx].image = dataUrl;
+                                            if (item.url !== undefined) newItems[idx].url = dataUrl;
+                                            if (item.avatar !== undefined) newItems[idx].avatar = dataUrl;
+                                            handlePropChange('items', newItems);
+                                          })
+                                        }
+                                        className="hidden"
+                                      />
+                                    </label>
+                                  </div>
+                                </label>
                                 <input
                                   type="text"
+                                  placeholder="https://... ou faça upload"
                                   value={item.image ?? item.url ?? item.avatar ?? ''}
                                   onChange={(e) => {
                                     const newItems = [...itemsList];
@@ -567,10 +642,32 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
                     {/* Video URL Input */}
                     <div>
-                      <label className="block text-[11px] text-slate-400 mb-1 font-medium">URL do Vídeo de Fundo (MP4)</label>
+                      <label className="block text-[11px] text-slate-400 mb-1 font-medium flex items-center justify-between">
+                        <span>URL ou Arquivo de Vídeo (MP4)</span>
+                        <div className="flex items-center gap-2">
+                          {onOpenAssetManager && (
+                            <button
+                              type="button"
+                              onClick={() => onOpenAssetManager((url) => handlePropChange('videoUrl', url))}
+                              className="text-[10px] text-amber-400 hover:underline flex items-center gap-1 font-bold"
+                            >
+                              <Film className="w-3 h-3" /> Biblioteca
+                            </button>
+                          )}
+                          <label className="text-[10px] text-amber-400 hover:underline flex items-center gap-1 font-bold cursor-pointer">
+                            <Upload className="w-3 h-3" /> Subir Vídeo
+                            <input
+                              type="file"
+                              accept="video/*"
+                              onChange={(e) => handleLocalFileUploadToProp(e, 'videoUrl')}
+                              className="hidden"
+                            />
+                          </label>
+                        </div>
+                      </label>
                       <input
                         type="text"
-                        placeholder="https://assets.mixkit.co/.../video.mp4"
+                        placeholder="https://.../video.mp4 ou faça upload"
                         value={selectedComponent.props.videoUrl || ''}
                         onChange={(e) => handlePropChange('videoUrl', e.target.value)}
                         className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white font-mono focus:border-amber-500 focus:outline-none"

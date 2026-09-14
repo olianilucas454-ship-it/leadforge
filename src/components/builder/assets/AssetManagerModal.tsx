@@ -85,37 +85,74 @@ export const AssetManagerModal: React.FC<AssetManagerModalProps> = ({
     return true;
   });
 
+  const [customUrl, setCustomUrl] = useState('');
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    setUploadingProgress(10);
-    const interval = setInterval(() => {
-      setUploadingProgress((prev) => {
-        if (prev === null || prev >= 100) {
-          clearInterval(interval);
+    const file = files[0];
+    setUploadingProgress(15);
 
-          // Add uploaded asset
-          const file = files[0];
-          const newAsset: AssetSchema = {
-            id: `ast-${Date.now()}`,
-            name: file.name,
-            type: file.type.startsWith('video') ? 'video' : 'image',
-            url: URL.createObjectURL(file),
-            sizeKb: Math.round(file.size / 1024),
-          };
+    const reader = new FileReader();
+    reader.onprogress = (evt) => {
+      if (evt.lengthComputable) {
+        const percent = Math.round((evt.loaded / evt.total) * 100);
+        setUploadingProgress(percent);
+      }
+    };
 
-          const updatedSite = {
-            ...activeSite,
-            assets: [newAsset, ...currentAssets],
-          };
-          saveSite(updatedSite);
-          setTimeout(() => setUploadingProgress(null), 300);
-          return 100;
-        }
-        return prev + 30;
-      });
-    }, 200);
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      const newAsset: AssetSchema = {
+        id: `ast-${Date.now()}`,
+        name: file.name,
+        type: file.type.startsWith('video') ? 'video' : 'image',
+        url: dataUrl,
+        sizeKb: Math.round(file.size / 1024),
+      };
+
+      const updatedSite = {
+        ...activeSite,
+        assets: [newAsset, ...currentAssets],
+      };
+      saveSite(updatedSite);
+      setUploadingProgress(100);
+      setTimeout(() => setUploadingProgress(null), 300);
+
+      if (onSelectAsset) {
+        onSelectAsset(dataUrl);
+        onClose();
+      }
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  const handleAddCustomUrl = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customUrl.trim()) return;
+
+    const isVideo = customUrl.toLowerCase().includes('.mp4') || customUrl.toLowerCase().includes('.webm');
+    const newAsset: AssetSchema = {
+      id: `ast-${Date.now()}`,
+      name: customUrl.split('/').pop()?.split('?')[0] || 'Mídia Web Externa',
+      type: isVideo ? 'video' : 'image',
+      url: customUrl.trim(),
+      sizeKb: 100,
+    };
+
+    const updatedSite = {
+      ...activeSite,
+      assets: [newAsset, ...currentAssets],
+    };
+    saveSite(updatedSite);
+    setCustomUrl('');
+
+    if (onSelectAsset) {
+      onSelectAsset(newAsset.url);
+      onClose();
+    }
   };
 
   const handleCopyUrl = (url: string, id: string) => {
@@ -147,7 +184,7 @@ export const AssetManagerModal: React.FC<AssetManagerModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-white">Gerenciador de Assets & Mídia</h2>
-              <p className="text-xs text-slate-400">Bibliotecas de imagens, vídeos e sequências 60fps</p>
+              <p className="text-xs text-slate-400">Bibliotecas de imagens, vídeos e sequências de alta resolução</p>
             </div>
           </div>
 
@@ -204,11 +241,32 @@ export const AssetManagerModal: React.FC<AssetManagerModalProps> = ({
 
             <label className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs rounded cursor-pointer flex items-center gap-1.5 transition-all shadow-md shadow-amber-500/20">
               <Upload className="w-3.5 h-3.5" />
-              <span>Upload Arquivo</span>
+              <span>Subir Imagem / Vídeo</span>
               <input type="file" accept="image/*,video/*" onChange={handleFileUpload} className="hidden" />
             </label>
           </div>
         </div>
+
+        {/* URL Importer Bar */}
+        <form onSubmit={handleAddCustomUrl} className="px-6 py-2 bg-slate-950/90 border-b border-slate-800 flex items-center gap-2">
+          <span className="text-[11px] text-slate-400 font-mono flex items-center gap-1">
+            <Plus className="w-3 h-3 text-amber-400" /> Link URL:
+          </span>
+          <input
+            type="text"
+            placeholder="Cole o link direto da imagem ou vídeo (https://...)"
+            value={customUrl}
+            onChange={(e) => setCustomUrl(e.target.value)}
+            className="flex-1 bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-xs text-white font-mono focus:border-amber-500 focus:outline-none"
+          />
+          <button
+            type="submit"
+            disabled={!customUrl.trim()}
+            className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold rounded border border-slate-700 disabled:opacity-50"
+          >
+            Adicionar à Biblioteca
+          </button>
+        </form>
 
         {/* Uploading Progress Indicator */}
         {uploadingProgress !== null && (
