@@ -126,6 +126,28 @@ export class OverpassDataProvider implements BusinessDataProvider {
     return true;
   }
 
+  private getSearchKeywords(niche: string): string[] {
+    const n = niche.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    if (n.includes('barbearia') || n.includes('barbeiro')) return ['barbearia', 'barber'];
+    if (n.includes('restaurante')) return ['restaurante'];
+    if (n.includes('pizza')) return ['pizzaria', 'pizza'];
+    if (n.includes('odonto') || n.includes('dentista')) return ['dentista', 'odontologia'];
+    if (n.includes('clinica')) return ['clinica odontologica', 'clinica'];
+    if (n.includes('academia') || n.includes('fitness')) return ['academia', 'crossfit'];
+    if (n.includes('salao') || n.includes('beleza')) return ['salao de beleza', 'cabeleireiro'];
+    if (n.includes('oficina') || n.includes('mecanic')) return ['oficina mecanica', 'auto center'];
+    if (n.includes('pet') || n.includes('veterinari')) return ['veterinaria', 'pet shop'];
+    if (n.includes('imobiliari') || n.includes('imove')) return ['imobiliaria', 'imoveis'];
+    if (n.includes('advocac') || n.includes('advogad')) return ['advogado', 'advocacia'];
+    if (n.includes('contabil') || n.includes('contador')) return ['contabilidade', 'contador'];
+    if (n.includes('padaria') || n.includes('panificador')) return ['padaria'];
+    if (n.includes('hotel') || n.includes('pousada')) return ['hotel', 'pousada'];
+    if (n.includes('farmacia') || n.includes('drogaria')) return ['farmacia', 'drogaria'];
+
+    const singular = n.endsWith('s') && n.length > 3 ? n.slice(0, -1) : n;
+    return [singular, n];
+  }
+
   public async search(params: SearchParams): Promise<RawBusinessData[]> {
     let lat = params.lat;
     let lon = params.lon;
@@ -137,36 +159,38 @@ export class OverpassDataProvider implements BusinessDataProvider {
       lon = coords.lon;
     }
 
-    const cleanNiche = params.niche.trim();
+    const keywords = this.getSearchKeywords(params.niche);
     const limit = Math.min(params.limit || 50, 100);
     const maxRadius = Math.max(params.radiusKm || 25, 5);
 
-    // Single high-speed query to Photon API (<300ms)
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const leads: RawBusinessData[] = [];
+    const seen = new Set<string>();
 
-      const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(cleanNiche)}&lat=${lat}&lon=${lon}&limit=${limit * 2}`;
-      
-      const res = await fetch(photonUrl, {
-        headers: {
-          'User-Agent': 'LeadForge-DiscoveryEngine/1.0',
-        },
-        signal: controller.signal,
-      });
+    for (const kw of keywords) {
+      if (leads.length >= limit) break;
 
-      clearTimeout(timeoutId);
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2500);
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.features && Array.isArray(data.features) && data.features.length > 0) {
-          const leads: RawBusinessData[] = [];
-          const seen = new Set<string>();
+        const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(kw)}&lat=${lat}&lon=${lon}&limit=${limit * 2}`;
+        
+        const res = await fetch(photonUrl, {
+          headers: {
+            'User-Agent': 'LeadForge-DiscoveryEngine/1.0',
+          },
+          signal: controller.signal,
+        });
 
-          for (const feat of data.features) {
-            const prop = feat.properties || {};
-            const name = prop.name;
-            if (!name || name.trim().length < 2) continue;
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.features && Array.isArray(data.features)) {
+            for (const feat of data.features) {
+              const prop = feat.properties || {};
+              const name = prop.name;
+              if (!name || name.trim().length < 2) continue;
 
             const norm = name.toLowerCase().trim();
             if (seen.has(norm)) continue;
@@ -208,7 +232,7 @@ export class OverpassDataProvider implements BusinessDataProvider {
             ].filter(Boolean);
 
             const fullAddress = addressParts.join(' - ');
-            const categoryFormatted = this.formatCategoryName(prop.osm_value || prop.osm_key, cleanNiche);
+            const categoryFormatted = this.formatCategoryName(prop.osm_value || prop.osm_key, params.niche);
 
             const phone = prop.phone || prop['contact:phone'] || prop['contact:mobile'];
             const website = prop.website || prop['contact:website'];
@@ -242,9 +266,10 @@ export class OverpassDataProvider implements BusinessDataProvider {
     } catch (err) {
       console.warn('[OverpassDataProvider] Fast search error or timeout:', err);
     }
-
-    return [];
   }
+
+  return leads;
+}
 
   private formatCategoryName(tag: string | undefined, fallback: string): string {
     if (!tag) return fallback;
