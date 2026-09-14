@@ -180,7 +180,7 @@ export const SiteBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   // Update Component Props Granually
-  const updateComponentProps = (componentId: string, newProps: Record<string, any>) => {
+  const updateComponentProps = (componentId: string, updates: Record<string, any>) => {
     if (!activeSite) return;
 
     const updated = JSON.parse(JSON.stringify(activeSite)) as SiteSchema;
@@ -190,7 +190,25 @@ export const SiteBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
       page.sections.forEach((sec) => {
         sec.components.forEach((cmp) => {
           if (cmp.id === componentId) {
-            cmp.props = { ...cmp.props, ...newProps };
+            const { styleOverrides, animation, interaction, frameSequence, hiddenOnMobile, ...propUpdates } = updates;
+
+            if (styleOverrides !== undefined) {
+              cmp.styleOverrides = { ...cmp.styleOverrides, ...styleOverrides };
+            }
+            if (animation !== undefined) {
+              cmp.animation = { ...cmp.animation, ...animation };
+            }
+            if (interaction !== undefined) {
+              cmp.interaction = { ...cmp.interaction, ...interaction };
+            }
+            if (frameSequence !== undefined) {
+              cmp.frameSequence = { ...cmp.frameSequence, ...frameSequence };
+            }
+            if (hiddenOnMobile !== undefined) {
+              cmp.hiddenOnMobile = hiddenOnMobile;
+            }
+
+            cmp.props = { ...cmp.props, ...propUpdates };
             modified = true;
           }
         });
