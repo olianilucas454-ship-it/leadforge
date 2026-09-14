@@ -176,11 +176,19 @@ export default function LeadDetailPage() {
           )}
 
           {/* Ação Comercial */}
-          <Card className="p-5 bg-accent/5 border-accent/20">
-            <h2 className="text-lg font-semibold mb-4">Ação Comercial</h2>
+          <Card className="p-5 bg-accent/5 border-accent/20 space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Ação Comercial & Apresentação</h2>
+              <Button
+                onClick={() => router.push(`/sites/builder?leadId=${lead.id}`)}
+                className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs"
+              >
+                ✨ Criar Site Premium (R$5k+)
+              </Button>
+            </div>
             {!showApproach ? (
-              <Button onClick={() => setShowApproach(true)} className="w-full">
-                GERAR ABORDAGEM
+              <Button onClick={() => setShowApproach(true)} className="w-full" variant="secondary">
+                GERAR ABORDAGEM COM IA
               </Button>
             ) : (
               <ApproachGenerator lead={lead} isOpen={true} />
