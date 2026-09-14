@@ -250,6 +250,280 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                     />
                   </div>
                 )}
+
+                {/* ITEMS ARRAY INSPECTOR */}
+                {Array.isArray(selectedComponent.props.items) && (() => {
+                  const itemsList = selectedComponent.props.items as any[];
+                  return (
+                    <div className="pt-3 border-t border-slate-800 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+                          Itens / Cards da Seção ({itemsList.length})
+                        </label>
+                        <button
+                          onClick={() => {
+                            const newItem = {
+                              name: 'Novo Item',
+                              title: 'Novo Título',
+                              price: 'R$ 100',
+                              role: 'Especialista',
+                              specialty: 'Serviço Autoral',
+                              description: 'Descrição detalhada do novo item ou ritual.',
+                              question: 'Nova pergunta frequente?',
+                              answer: 'Resposta explicativa da pergunta.',
+                              quote: 'Depoimento autêntico do cliente.',
+                              clientName: 'Nome do Cliente',
+                              rating: 5,
+                              url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800',
+                              image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800',
+                              avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200',
+                            };
+                            handlePropChange('items', [...itemsList, newItem]);
+                          }}
+                          className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 font-bold"
+                        >
+                          + Adicionar Item
+                        </button>
+                      </div>
+
+                      <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
+                        {itemsList.map((item: any, idx: number) => (
+                          <div key={idx} className="p-2.5 bg-slate-900 border border-slate-800 rounded-md space-y-2 relative group/item">
+                            <div className="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
+                              <span className="text-[10px] font-mono text-slate-400 font-bold">
+                                Item #{idx + 1}
+                              </span>
+                              <button
+                                onClick={() => {
+                                  const newItems = itemsList.filter((_: any, i: number) => i !== idx);
+                                  handlePropChange('items', newItems);
+                                }}
+                                className="text-[10px] text-red-400 hover:text-red-300 font-bold"
+                              >
+                                Remover
+                              </button>
+                            </div>
+
+                            {(item.name !== undefined || item.title !== undefined || item.clientName !== undefined) && (
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-medium">Nome / Título</label>
+                                <input
+                                  type="text"
+                                  value={item.name ?? item.title ?? item.clientName ?? ''}
+                                  onChange={(e) => {
+                                    const newItems = [...itemsList];
+                                    const val = e.target.value;
+                                    if (item.name !== undefined) newItems[idx].name = val;
+                                    if (item.title !== undefined) newItems[idx].title = val;
+                                    if (item.clientName !== undefined) newItems[idx].clientName = val;
+                                    handlePropChange('items', newItems);
+                                  }}
+                                  className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:border-amber-500 focus:outline-none"
+                                />
+                              </div>
+                            )}
+
+                            {item.question !== undefined && (
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-medium">Pergunta (FAQ)</label>
+                                <input
+                                  type="text"
+                                  value={item.question || ''}
+                                  onChange={(e) => {
+                                    const newItems = [...itemsList];
+                                    newItems[idx].question = e.target.value;
+                                    handlePropChange('items', newItems);
+                                  }}
+                                  className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:border-amber-500 focus:outline-none"
+                                />
+                              </div>
+                            )}
+
+                            {(item.price !== undefined || item.rating !== undefined) && (
+                              <div className="grid grid-cols-2 gap-2">
+                                {item.price !== undefined && (
+                                  <div>
+                                    <label className="block text-[10px] text-slate-400 font-medium">Preço / Valor</label>
+                                    <input
+                                      type="text"
+                                      value={item.price || ''}
+                                      onChange={(e) => {
+                                        const newItems = [...itemsList];
+                                        newItems[idx].price = e.target.value;
+                                        handlePropChange('items', newItems);
+                                      }}
+                                      className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:border-amber-500 focus:outline-none"
+                                    />
+                                  </div>
+                                )}
+                                {item.rating !== undefined && (
+                                  <div>
+                                    <label className="block text-[10px] text-slate-400 font-medium">Avaliação (Estrelas)</label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max="5"
+                                      value={item.rating || 5}
+                                      onChange={(e) => {
+                                        const newItems = [...itemsList];
+                                        newItems[idx].rating = parseInt(e.target.value) || 5;
+                                        handlePropChange('items', newItems);
+                                      }}
+                                      className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:border-amber-500 focus:outline-none"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {(item.role !== undefined || item.specialty !== undefined || item.city !== undefined) && (
+                              <div className="grid grid-cols-2 gap-2">
+                                {(item.role !== undefined || item.city !== undefined) && (
+                                  <div>
+                                    <label className="block text-[10px] text-slate-400 font-medium">Cargo / Cidade</label>
+                                    <input
+                                      type="text"
+                                      value={item.role ?? item.city ?? ''}
+                                      onChange={(e) => {
+                                        const newItems = [...itemsList];
+                                        const val = e.target.value;
+                                        if (item.role !== undefined) newItems[idx].role = val;
+                                        if (item.city !== undefined) newItems[idx].city = val;
+                                        handlePropChange('items', newItems);
+                                      }}
+                                      className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:border-amber-500 focus:outline-none"
+                                    />
+                                  </div>
+                                )}
+                                {item.specialty !== undefined && (
+                                  <div>
+                                    <label className="block text-[10px] text-slate-400 font-medium font-medium">Especialidade</label>
+                                    <input
+                                      type="text"
+                                      value={item.specialty || ''}
+                                      onChange={(e) => {
+                                        const newItems = [...itemsList];
+                                        newItems[idx].specialty = e.target.value;
+                                        handlePropChange('items', newItems);
+                                      }}
+                                      className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:border-amber-500 focus:outline-none"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {(item.description !== undefined || item.quote !== undefined || item.answer !== undefined || item.caption !== undefined) && (
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-medium">Descrição / Depoimento / Resposta</label>
+                                <textarea
+                                  rows={2}
+                                  value={item.description ?? item.quote ?? item.answer ?? item.caption ?? ''}
+                                  onChange={(e) => {
+                                    const newItems = [...itemsList];
+                                    const val = e.target.value;
+                                    if (item.description !== undefined) newItems[idx].description = val;
+                                    if (item.quote !== undefined) newItems[idx].quote = val;
+                                    if (item.answer !== undefined) newItems[idx].answer = val;
+                                    if (item.caption !== undefined) newItems[idx].caption = val;
+                                    handlePropChange('items', newItems);
+                                  }}
+                                  className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:border-amber-500 focus:outline-none resize-none"
+                                />
+                              </div>
+                            )}
+
+                            {(item.image !== undefined || item.url !== undefined || item.avatar !== undefined) && (
+                              <div>
+                                <label className="block text-[10px] text-slate-400 font-medium">URL da Foto / Avatar</label>
+                                <input
+                                  type="text"
+                                  value={item.image ?? item.url ?? item.avatar ?? ''}
+                                  onChange={(e) => {
+                                    const newItems = [...itemsList];
+                                    const val = e.target.value;
+                                    if (item.image !== undefined) newItems[idx].image = val;
+                                    if (item.url !== undefined) newItems[idx].url = val;
+                                    if (item.avatar !== undefined) newItems[idx].avatar = val;
+                                    handlePropChange('items', newItems);
+                                  }}
+                                  className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs font-mono text-white focus:border-amber-500 focus:outline-none"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* STATS ARRAY INSPECTOR */}
+                {Array.isArray(selectedComponent.props.stats) && (() => {
+                  const statsList = selectedComponent.props.stats as any[];
+                  return (
+                    <div className="pt-3 border-t border-slate-800 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+                          Estatísticas & Métricas ({statsList.length})
+                        </label>
+                        <button
+                          onClick={() => {
+                            const newStat = { number: '100+', label: 'Nova Métrica' };
+                            handlePropChange('stats', [...statsList, newStat]);
+                          }}
+                          className="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 font-bold"
+                        >
+                          + Adicionar Métrica
+                        </button>
+                      </div>
+
+                      <div className="space-y-2">
+                        {statsList.map((st: any, idx: number) => (
+                          <div key={idx} className="p-2 bg-slate-900 border border-slate-800 rounded-md grid grid-cols-12 gap-2 items-center">
+                            <div className="col-span-5">
+                              <input
+                                type="text"
+                                placeholder="Número"
+                                value={st.number || ''}
+                                onChange={(e) => {
+                                  const newStats = [...statsList];
+                                  newStats[idx].number = e.target.value;
+                                  handlePropChange('stats', newStats);
+                                }}
+                                className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs font-mono text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
+                              />
+                            </div>
+                            <div className="col-span-5">
+                              <input
+                                type="text"
+                                placeholder="Rótulo"
+                                value={st.label || ''}
+                                onChange={(e) => {
+                                  const newStats = [...statsList];
+                                  newStats[idx].label = e.target.value;
+                                  handlePropChange('stats', newStats);
+                                }}
+                                className="w-full bg-slate-950 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:border-amber-500 focus:outline-none"
+                              />
+                            </div>
+                            <div className="col-span-2 text-right">
+                              <button
+                                onClick={() => {
+                                  const newStats = statsList.filter((_: any, i: number) => i !== idx);
+                                  handlePropChange('stats', newStats);
+                                }}
+                                className="text-[10px] text-red-400 hover:text-red-300 font-bold"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>

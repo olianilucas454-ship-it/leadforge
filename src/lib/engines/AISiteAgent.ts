@@ -33,7 +33,12 @@ export interface BusinessAnalysis {
   heroVariant: HeroVariant;
   vibeBadge: string;
   tagline: string;
-  services: { name: string; price: string; description: string }[];
+  services: { name: string; price: string; description: string; image?: string }[];
+  team?: { name: string; role: string; specialty: string; image: string; whatsapp?: string }[];
+  galleryImages?: { url: string; title: string; caption?: string }[];
+  testimonials?: { clientName: string; city: string; avatar: string; quote: string; rating: number }[];
+  stats?: { number: string; label: string }[];
+  faqs?: { question: string; answer: string }[];
 }
 
 export class AISiteAgent {
@@ -344,6 +349,38 @@ export class AISiteAgent {
     const state = leadData.state || 'SP';
     const cleanPhone = leadData.whatsapp || leadData.phone || '5511999999999';
 
+    const defaultTeam = analysis.team || [
+      { name: 'Mestre Visagista', role: 'Fundador & Master Barber', specialty: 'Cortes Autorais & Navalha', image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800' },
+      { name: 'Especialista VIP', role: 'Senior Stylist', specialty: 'Tratamentos & Coloração', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800' },
+      { name: 'Consultor de Imagem', role: 'Stylist & Visagismo', specialty: 'Barboterapia & Alinhamento', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800' },
+    ];
+
+    const defaultGallery = analysis.galleryImages || [
+      { url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800', title: 'Ambiente Principal' },
+      { url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=800', title: 'Camarim VIP' },
+      { url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800', title: 'Recepção & Degustação' },
+      { url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800', title: 'Atelier de Detalhes' },
+    ];
+
+    const defaultTestimonials = analysis.testimonials || [
+      { clientName: 'Carlos Eduardo', city: `${city}, ${state}`, rating: 5, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200', quote: 'Atendimento espetacular. O nível de cuidado, visagismo e o ambiente são incomparáveis.' },
+      { clientName: 'Fernanda Lima', city: `${city}, ${state}`, rating: 5, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200', quote: 'Lugar impecável! Pontualidade, ambiente acolhedor e profissionais que entendem o cliente.' },
+      { clientName: 'Lucas Mendes', city: `${city}, ${state}`, rating: 5, avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200', quote: 'Vale cada centavo. Experiência de agência de alto padrão que fideliza do início ao fim.' },
+    ];
+
+    const defaultStats = analysis.stats || [
+      { number: '10.000+', label: 'Clientes Atendidos' },
+      { number: '15 Anos', label: 'Tradição & Visagismo' },
+      { number: '4.9 ★', label: 'Google Review' },
+      { number: '100%', label: 'Garantia de Satisfação' },
+    ];
+
+    const defaultFaqs = analysis.faqs || [
+      { question: 'Como funciona o agendamento de horários?', answer: 'Você pode agendar diretamente pelo WhatsApp ou selecionar o horário desejado em nosso menu digital.' },
+      { question: 'Quais formas de pagamento são aceitas?', answer: 'Aceitamos Cartão de Crédito em até 12x, Pix com desconto e Dinheiro.' },
+      { question: 'Existe estacionamento no local?', answer: 'Sim, oferecemos serviço de valet gratuito para a comodidade dos nossos clientes.' },
+    ];
+
     // Page 1: HOME
     const homeSections: SiteSectionSchema[] = [
       {
@@ -384,6 +421,28 @@ export class AISiteAgent {
         ],
       },
       {
+        id: `sec-about-${Date.now()}`,
+        name: 'Sobre & Diferenciais',
+        category: 'about',
+        variant: 'HeroSplit',
+        components: [
+          {
+            id: `cmp-about-${Date.now()}`,
+            name: 'Sobre Component',
+            category: 'about',
+            variant: 'HeroSplit',
+            props: {
+              badge: 'TRADIÇÃO & EXCELÊNCIA',
+              title: `Conheça a ${brandName}`,
+              subtitle: `Em ${city}, a ${brandName} é referência em atendimento autoral e padrão de qualidade.`,
+              description: 'Nossa missão é entregar uma experiência transformadora, unindo técnica apurada, materiais premium e ambiente exclusivo.',
+              image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1600',
+              stats: defaultStats,
+            },
+          },
+        ],
+      },
+      {
         id: `sec-serv-${Date.now()}`,
         name: 'Serviços & Especialidades',
         category: 'services',
@@ -399,6 +458,83 @@ export class AISiteAgent {
               title: 'Serviços & Soluções Exclusivas',
               subtitle: 'Conheça nossos diferenciais e rituais de atendimento.',
               items: analysis.services,
+            },
+          },
+        ],
+      },
+      {
+        id: `sec-team-${Date.now()}`,
+        name: 'Equipe de Mestres',
+        category: 'team',
+        variant: 'HeroSplit',
+        components: [
+          {
+            id: `cmp-team-${Date.now()}`,
+            name: 'Equipe Component',
+            category: 'team',
+            variant: 'HeroSplit',
+            props: {
+              badge: 'CORPO TÉCNICO',
+              title: 'Mestres & Especialistas',
+              subtitle: 'Profissionais dedicados a entregar a sua melhor versão em cada detalhe.',
+              items: defaultTeam,
+              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
+            },
+          },
+        ],
+      },
+      {
+        id: `sec-testimonials-${Date.now()}`,
+        name: 'Depoimentos de Clientes',
+        category: 'testimonials',
+        variant: 'HeroSplit',
+        components: [
+          {
+            id: `cmp-testimonials-${Date.now()}`,
+            name: 'Depoimentos Component',
+            category: 'testimonials',
+            variant: 'HeroSplit',
+            props: {
+              badge: 'CRÍTICA & SOCIAL PROOF',
+              title: 'O que Nossos Clientes Dizem',
+              subtitle: `Avaliação ${leadData.rating || 4.9} ★ no Google com mais de ${leadData.reviewCount || 280} clientes satisfeitos.`,
+              items: defaultTestimonials,
+            },
+          },
+        ],
+      },
+      {
+        id: `sec-stats-${Date.now()}`,
+        name: 'Estatísticas de Sucesso',
+        category: 'stats',
+        variant: 'HeroSplit',
+        components: [
+          {
+            id: `cmp-stats-${Date.now()}`,
+            name: 'Stats Component',
+            category: 'stats',
+            variant: 'HeroSplit',
+            props: {
+              stats: defaultStats,
+            },
+          },
+        ],
+      },
+      {
+        id: `sec-faq-${Date.now()}`,
+        name: 'Perguntas Frequentes',
+        category: 'faq',
+        variant: 'HeroSplit',
+        components: [
+          {
+            id: `cmp-faq-${Date.now()}`,
+            name: 'FAQ Component',
+            category: 'faq',
+            variant: 'HeroSplit',
+            props: {
+              badge: 'TIRA-DÚVIDAS',
+              title: 'Perguntas Frequentes',
+              items: defaultFaqs,
             },
           },
         ],
@@ -447,6 +583,7 @@ export class AISiteAgent {
               ctaText: 'AGENDAR UMA VISITA',
               ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
               image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1600',
+              stats: defaultStats,
             },
           },
         ],
@@ -495,9 +632,10 @@ export class AISiteAgent {
               title: 'Mestres & Especialistas Dedicados',
               subtitle: 'Nossa equipe conta com profissionais renomados com anos de bagagem internacional.',
               description: 'Atendimento estritamente personalizado e garantia de resultados impecáveis em cada atendimento.',
-              ctaText: 'CONHECER ESPECIALISTAS',
+              ctaText: 'AGENDAR COM ESPECIALISTA',
               ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
               image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=1600',
+              items: defaultTeam,
             },
           },
         ],
@@ -522,6 +660,7 @@ export class AISiteAgent {
               title: 'Um Ambiente Desenhado para o seu Conforto',
               subtitle: 'Arquitetura sofisticada, climatização perfeita e degustação VIP em cada atendimento.',
               image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1600',
+              items: defaultGallery,
             },
           },
         ],
@@ -549,6 +688,7 @@ export class AISiteAgent {
               ctaText: 'VER AVALIAÇÕES NO GOOGLE',
               ctaLink: '#',
               image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1600',
+              items: defaultTestimonials,
             },
           },
         ],
