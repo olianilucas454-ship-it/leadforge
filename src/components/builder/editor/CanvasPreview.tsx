@@ -6,7 +6,7 @@ import { SiteRenderer } from '../renderers/SiteRenderer';
 import { Monitor, Laptop, Tablet, Smartphone, Sparkles } from 'lucide-react';
 
 export const CanvasPreview: React.FC = () => {
-  const { activeSite, activePageId, breakpoint, isAiProcessing } = useSiteBuilder();
+  const { activeSite, activePageId, breakpoint, isAiProcessing, selectedComponentId, setSelectedComponentId } = useSiteBuilder();
 
   if (!activeSite) {
     return (
@@ -50,7 +50,13 @@ export const CanvasPreview: React.FC = () => {
       <div
         className={`transition-all duration-300 bg-black rounded-lg border border-slate-800 shadow-2xl shadow-black/80 overflow-hidden min-h-[800px] ${getBreakpointWidth()}`}
       >
-        <SiteRenderer site={activeSite} activePageId={activePageId} isEditable={true} />
+        <SiteRenderer
+          site={activeSite}
+          activePageId={activePageId}
+          isEditable={true}
+          selectedComponentId={selectedComponentId}
+          onSelectComponent={setSelectedComponentId}
+        />
       </div>
     </div>
   );
