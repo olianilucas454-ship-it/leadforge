@@ -4,7 +4,7 @@ import { OverpassDataProvider } from './OverpassDataProvider';
 import { MockBusinessDataProvider } from './MockBusinessDataProvider';
 
 export class HybridBusinessDataProvider implements BusinessDataProvider {
-  public name = 'LeadForge Discovery Engine (Google Maps Primary)';
+  public name = 'LeadForge Multi-Engine Discovery (Google Maps + OSM + Hybrid Fallback)';
   private googleMapsProvider: GooglePlacesDataProvider;
   private overpassProvider: OverpassDataProvider;
   private mockProvider: MockBusinessDataProvider;
@@ -20,38 +20,47 @@ export class HybridBusinessDataProvider implements BusinessDataProvider {
   }
 
   public async search(params: SearchParams): Promise<RawBusinessData[]> {
-    console.log(`[Discovery Engine] Fetching leads for "${params.niche}" in ${params.city} - ${params.state} (Source: ${params.searchSource || 'google_maps'})...`);
+    console.log(`[Discovery Engine] Running multi-engine search for "${params.niche}" in ${params.city} - ${params.state}...`);
 
-    // Explicit OpenStreetMap source
-    if (params.searchSource === 'openstreetmap') {
-      try {
-        const osmResults = await this.overpassProvider.search(params);
-        if (osmResults && osmResults.length > 0) return osmResults;
-      } catch (e) {
-        console.error('[Discovery Engine] OpenStreetMap failed:', e);
-      }
-    }
-
-    // Default / Primary: Google Maps Engine
     try {
-      const googleResults = await this.googleMapsProvider.search(params);
-      if (googleResults && googleResults.length > 0) {
-        console.log(`[Discovery Engine] Found ${googleResults.length} leads via Google Maps Engine.`);
-        return googleResults;
+      // Run Google Maps & OpenStreetMap search in parallel
+      const [googleResults, osmResults] = await Promise.allSettled([
+        this.googleMapsProvider.search(params),
+        this.overpassProvider.search(params),
+      ]);
+
+      const merged: RawBusinessData[] = [];
+      const seenNames = new Set<string>();
+
+      // Helper to add unique lead
+      const addUnique = (item: RawBusinessData) => {
+        const key = item.name.toLowerCase().trim();
+        if (!seenNames.has(key)) {
+          seenNames.add(key);
+          merged.push(item);
+        }
+      };
+
+      // 1. Add Google Maps leads first
+      if (googleResults.status === 'fulfilled' && Array.isArray(googleResults.value)) {
+        googleResults.value.forEach(addUnique);
+      }
+
+      // 2. Combine OpenStreetMap leads
+      if (osmResults.status === 'fulfilled' && Array.isArray(osmResults.value)) {
+        osmResults.value.forEach(addUnique);
+      }
+
+      if (merged.length > 0) {
+        console.log(`[Discovery Engine] Multi-engine merged ${merged.length} unique leads from Google Maps + OpenStreetMap.`);
+        return merged.slice(0, params.limit);
       }
     } catch (err) {
-      console.error('[Discovery Engine] Google Maps search error:', err);
+      console.error('[Discovery Engine] Error during multi-engine search:', err);
     }
 
-    // Secondary fallback: OpenStreetMap POIs
-    try {
-      const osmResults = await this.overpassProvider.search(params);
-      if (osmResults && osmResults.length > 0) return osmResults;
-    } catch (err) {
-      console.error('[Discovery Engine] OpenStreetMap fallback error:', err);
-    }
-
-    // Final fallback: Demo Dataset
+    // Fallback if both engines returned 0 items
+    console.log('[Discovery Engine] Fallback to demo dataset.');
     return await this.mockProvider.search(params);
   }
 }
