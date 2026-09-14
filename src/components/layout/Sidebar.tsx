@@ -18,7 +18,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/' },
+    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: Search, label: 'Buscar Leads', href: '/search' },
     { icon: Users, label: 'Resultados', href: '/results' },
     { icon: Kanban, label: 'CRM', href: '/crm' },
