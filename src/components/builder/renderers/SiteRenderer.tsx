@@ -400,35 +400,35 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
 
           {/* Bottom Content Row */}
           <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pb-8 mt-auto">
-            <div className="lg:col-span-6 space-y-4 text-left">
+            <div className="lg:col-span-7 space-y-4 text-left">
               <h1
-                className={`${(props.title || '').length > 25 ? 'text-4xl sm:text-6xl lg:text-7xl' : 'text-6xl sm:text-8xl lg:text-9xl'} font-black tracking-tight leading-none uppercase text-white drop-shadow-2xl`}
+                className={`${(props.title || '').length > 30 ? 'text-2xl sm:text-4xl lg:text-5xl max-w-2xl' : (props.title || '').length > 18 ? 'text-3xl sm:text-5xl lg:text-6xl max-w-3xl' : 'text-5xl sm:text-7xl lg:text-8xl max-w-4xl'} font-extrabold tracking-tight leading-tight uppercase text-white drop-shadow-2xl`}
                 style={{ fontFamily: titleFont || 'Outfit, sans-serif' }}
               >
-                {props.title || 'LAVILLA'}
+                {props.title || 'RESIDÊNCIAS EXCLUSIVAS'}
               </h1>
-              <p className="text-lg sm:text-xl font-light text-slate-200 tracking-wide" style={{ fontFamily: bodyFont }}>
-                {props.subtitle || 'Дизайнерская недвижимость на Бали'}
+              <p className="text-base sm:text-lg font-light text-slate-200 tracking-wide max-w-xl" style={{ fontFamily: bodyFont }}>
+                {props.subtitle || 'Imóveis de alto padrão e empreendimentos selecionados.'}
               </p>
             </div>
 
-            <div className="lg:col-span-6">
+            <div className="lg:col-span-5">
               <div className="p-6 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/15 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                 <div className="space-y-1">
-                  <div className="text-2xl font-bold text-white">1-3</div>
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Спальни</div>
+                  <div className="text-2xl font-bold text-white">120+</div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Imóveis Nobres</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-2xl font-bold text-sky-400">10 <span className="text-xs">MИH</span></div>
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">До пляжа</div>
+                  <div className="text-2xl font-bold text-sky-400">15+ <span className="text-xs">ANOS</span></div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Tradição</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-2xl font-bold text-white">70 — 145 <span className="text-xs">М²</span></div>
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Метраж вилл</div>
+                  <div className="text-2xl font-bold text-white">98%</div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Satisfação VIP</div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-2xl font-bold text-amber-400">25+25</div>
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Аренда земли</div>
+                  <div className="text-2xl font-bold text-amber-400">4.9★</div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Avaliação Google</div>
                 </div>
               </div>
             </div>

@@ -106,8 +106,8 @@ export class CompositionEngine {
 
     if (cat.includes('imóve') || cat.includes('imobiliá') || cat.includes('real estate') || cat.includes('construtora')) {
       return {
-        heroTitle: 'Residências exclusivas & empreendimentos de alto padrão.',
-        heroSubtitle: `Curadoria rigorosa dos imóveis mais desejados e projetos imobiliários em ${city}.`,
+        heroTitle: 'Residências Exclusivas & Luxo',
+        heroSubtitle: `Curadoria rigorosa dos imóveis mais desejados de alto padrão em ${city}.`,
         badge: `LUXURY REAL ESTATE • ${city.toUpperCase()}`,
         navLink1: 'IMÓVEIS',
         navLink2: 'SOBRE NÓS',
