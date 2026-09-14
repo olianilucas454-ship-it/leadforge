@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { SiteSchema, SiteComponentSchema } from '../../../lib/types/siteBuilder';
 import { ScrollFrameSequence } from './ScrollFrameSequence';
 import { HorizontalScrollSection } from './HorizontalScrollSection';
 import { WebGLCanvas } from './WebGLCanvas';
+import { loadAllSiteFonts } from '../../../lib/utils/fontLoader';
 import { ArrowRight, Phone, MessageCircle, Star, CheckCircle2 } from 'lucide-react';
 
 interface SiteRendererProps {
@@ -29,6 +30,17 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
     ? site.pages.find((p) => p.id === activePageId) || site.pages[0]
     : site.pages.find((p) => p.slug === activePageSlug) || site.pages[0];
 
+  useEffect(() => {
+    if (!currentPage) return;
+    const fontsToLoad = [
+      designSystem.headingFont,
+      designSystem.bodyFont,
+      ...currentPage.sections.flatMap((s) => s.components.map((c) => c.styleOverrides?.titleFontFamily)),
+      ...currentPage.sections.flatMap((s) => s.components.map((c) => c.styleOverrides?.bodyFontFamily)),
+    ];
+    loadAllSiteFonts(fontsToLoad);
+  }, [site, currentPage, designSystem]);
+
   if (!currentPage) {
     return (
       <div className="p-12 text-center text-slate-400">
@@ -44,7 +56,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
     const wrapperClass = `relative group transition-all ${
       isEditable ? 'cursor-pointer' : ''
     } ${
-      isSelected ? 'ring-2 ring-emerald-400 ring-offset-4 ring-offset-black' : isEditable ? 'hover:outline hover:outline-1 hover:outline-emerald-500/50' : ''
+      isSelected ? 'ring-2 ring-amber-400 ring-offset-4 ring-offset-black' : isEditable ? 'hover:outline hover:outline-1 hover:outline-amber-500/50' : ''
     }`;
 
     const alignClass = cmp.styleOverrides?.textAlign === 'center' ? 'text-center items-center justify-center mx-auto' :
@@ -52,6 +64,29 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
                       cmp.styleOverrides?.textAlign === 'justify' ? 'text-justify' : 'text-left';
     const widthClass = cmp.styleOverrides?.maxWidth || 'max-w-xl';
     const fontSizeClass = cmp.styleOverrides?.fontSize || '';
+
+    const titleFont = cmp.styleOverrides?.titleFontFamily || designSystem.headingFont;
+    const bodyFont = cmp.styleOverrides?.bodyFontFamily || designSystem.bodyFont;
+    const titleWeight = cmp.styleOverrides?.fontWeight || 'font-bold';
+    const isItalic = cmp.styleOverrides?.fontStyle === 'italic';
+    const isUppercase = cmp.styleOverrides?.textTransform === 'uppercase';
+    const trackingClass = cmp.styleOverrides?.letterSpacing || 'tracking-tight';
+    const titleGradient = cmp.styleOverrides?.gradient || (variant === 'HeroLuxury' ? 'gold' : 'none');
+
+    const getGradientClass = (grad: string) => {
+      switch (grad) {
+        case 'gold':
+          return 'bg-gradient-to-r from-amber-100 via-amber-300 to-amber-500 bg-clip-text text-transparent';
+        case 'silver':
+          return 'bg-gradient-to-r from-slate-100 via-slate-300 to-slate-500 bg-clip-text text-transparent';
+        case 'cyan':
+          return 'bg-gradient-to-r from-sky-200 via-cyan-400 to-blue-500 bg-clip-text text-transparent';
+        case 'emerald':
+          return 'bg-gradient-to-r from-emerald-200 via-teal-400 to-emerald-600 bg-clip-text text-transparent';
+        default:
+          return '';
+      }
+    };
 
     // Render specialized components by variant
     if (variant === 'HeroCinematic') {
@@ -87,6 +122,9 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
           className={`relative min-h-screen flex items-center justify-center py-24 px-6 md:px-12 overflow-hidden ${wrapperClass}`}
           style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor }}
         >
+          {/* Ambient Lighting Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-amber-500/10 rounded-full blur-[160px] pointer-events-none z-0" />
+
           {/* Background Image or Video */}
           {isVideo && props.videoUrl ? (
             <video
@@ -118,10 +156,10 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0 pointer-events-none" />
 
           {/* Content Container */}
-          <div className="relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center space-y-6">
+          <div className={`relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center space-y-6 ${alignClass}`}>
             {props.badge && (
               <span
-                className="inline-block px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-[0.25em] border backdrop-blur-md"
+                className="inline-block px-5 py-2 rounded-full text-xs font-mono font-bold uppercase tracking-[0.25em] border backdrop-blur-md shadow-lg shadow-amber-500/10"
                 style={{
                   backgroundColor: `${designSystem.accentColor}20`,
                   borderColor: `${designSystem.accentColor}50`,
@@ -133,15 +171,20 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
             )}
 
             <h1
-              className={`font-bold tracking-tight leading-[1.08] italic ${fontSizeClass || 'text-4xl sm:text-6xl lg:text-7xl xl:text-8xl'}`}
-              style={{ fontFamily: designSystem.headingFont }}
+              className={`leading-[1.08] transition-all ${titleWeight} ${trackingClass} ${isItalic ? 'italic' : ''} ${isUppercase ? 'uppercase' : ''} ${getGradientClass(titleGradient)} ${fontSizeClass || 'text-4xl sm:text-6xl lg:text-7xl xl:text-8xl'}`}
+              style={{
+                fontFamily: titleFont,
+                color: titleGradient && titleGradient !== 'none' ? undefined : (cmp.styleOverrides?.color || undefined),
+                marginTop: cmp.styleOverrides?.marginTop || undefined,
+                marginBottom: cmp.styleOverrides?.marginBottom || undefined,
+              }}
             >
               {props.title}
             </h1>
 
             <p
               className={`text-base sm:text-xl leading-relaxed text-slate-300 ${widthClass}`}
-              style={{ fontFamily: designSystem.bodyFont }}
+              style={{ fontFamily: bodyFont }}
             >
               {props.subtitle || props.description}
             </p>

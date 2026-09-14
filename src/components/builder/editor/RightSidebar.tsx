@@ -722,6 +722,26 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
             {openSections.positioning && (
               <div className="p-3 space-y-3 text-xs border-t border-slate-800/80">
+                {/* Custom Title Font */}
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1 font-medium">Fonte do Título Selecionado</label>
+                  <select
+                    value={selectedComponent.styleOverrides?.titleFontFamily || activeSite.designSystem.headingFont}
+                    onChange={(e) => {
+                      handleStyleOverride('titleFontFamily', e.target.value);
+                      loadGoogleFont(e.target.value);
+                    }}
+                    className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none font-medium"
+                  >
+                    <option value="">Padrão do Tema ({activeSite.designSystem.headingFont.split(',')[0]})</option>
+                    {AVAILABLE_FONTS.map((font) => (
+                      <option key={font.family} value={font.family}>
+                        {font.name} ({font.category})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Horizontal Alignment */}
                 <div>
                   <label className="block text-[11px] text-slate-400 mb-1 font-medium">Alinhamento Horizontal</label>
@@ -765,6 +785,95 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                   </div>
                 </div>
 
+                {/* Font Style & Uppercase Toggles */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] text-slate-400 mb-1 font-medium">Estilo / Itálico</label>
+                    <button
+                      onClick={() =>
+                        handleStyleOverride(
+                          'fontStyle',
+                          selectedComponent.styleOverrides?.fontStyle === 'italic' ? 'normal' : 'italic'
+                        )
+                      }
+                      className={`w-full py-1.5 rounded border text-xs font-serif italic transition-all ${
+                        selectedComponent.styleOverrides?.fontStyle === 'italic'
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-400 font-bold'
+                          : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <i>italic (Serifa)</i>
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] text-slate-400 mb-1 font-medium">Caixa Alta</label>
+                    <button
+                      onClick={() =>
+                        handleStyleOverride(
+                          'textTransform',
+                          selectedComponent.styleOverrides?.textTransform === 'uppercase' ? 'none' : 'uppercase'
+                        )
+                      }
+                      className={`w-full py-1.5 rounded border text-xs uppercase tracking-wider font-mono transition-all ${
+                        selectedComponent.styleOverrides?.textTransform === 'uppercase'
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-400 font-bold'
+                          : 'bg-slate-900 border-slate-700 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      UPPERCASE
+                    </button>
+                  </div>
+                </div>
+
+                {/* Font Weight & Letter Spacing */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] text-slate-400 mb-1 font-medium">Peso da Fonte</label>
+                    <select
+                      value={selectedComponent.styleOverrides?.fontWeight || 'font-bold'}
+                      onChange={(e) => handleStyleOverride('fontWeight', e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    >
+                      <option value="font-light">Leve (Light 300)</option>
+                      <option value="font-normal">Normal (Regular 400)</option>
+                      <option value="font-semibold">Semi-Bold (600)</option>
+                      <option value="font-bold">Negrito (Bold 700)</option>
+                      <option value="font-extrabold">Ultra Bold (800)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] text-slate-400 mb-1 font-medium">Espaçamento (Tracking)</label>
+                    <select
+                      value={selectedComponent.styleOverrides?.letterSpacing || 'tracking-tight'}
+                      onChange={(e) => handleStyleOverride('letterSpacing', e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    >
+                      <option value="tracking-tight">Compacto (Tight)</option>
+                      <option value="tracking-normal">Normal</option>
+                      <option value="tracking-wider">Amplo (Wide)</option>
+                      <option value="tracking-[0.25em]">Ultra Espaçado (0.25em)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Metallic Gradient Effect */}
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1 font-medium">Efeito de Gradiente Metálico</label>
+                  <select
+                    value={selectedComponent.styleOverrides?.gradient || 'none'}
+                    onChange={(e) => handleStyleOverride('gradient', e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-amber-400 font-bold focus:border-amber-500 focus:outline-none"
+                  >
+                    <option value="none">Texto Sólido (Sem Gradiente)</option>
+                    <option value="gold">✨ Ouro Dourado Imperial (Gold Metallic)</option>
+                    <option value="silver">🥈 Prata Cromada Luxury (Silver Metallic)</option>
+                    <option value="cyan">⚡ Cyan Neon Tech (Electric Blue)</option>
+                    <option value="emerald">🌿 Verde Emerald Vibrant</option>
+                  </select>
+                </div>
+
                 {/* Max Width */}
                 <div>
                   <label className="block text-[11px] text-slate-400 mb-1 font-medium">Largura Máxima do Bloco de Texto</label>
@@ -783,7 +892,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
                 {/* Title Size Override */}
                 <div>
-                  <label className="block text-[11px] text-slate-400 mb-1 font-medium">Escala do Título</label>
+                  <label className="block text-[11px] text-slate-400 mb-1 font-medium">Escala de Tamanho do Título</label>
                   <select
                     value={selectedComponent.styleOverrides?.fontSize || 'default'}
                     onChange={(e) => handleStyleOverride('fontSize', e.target.value)}
@@ -795,6 +904,37 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                     <option value="text-6xl">Grande (60px)</option>
                     <option value="text-8xl">Display Ultra (96px)</option>
                   </select>
+                </div>
+
+                {/* Vertical Margins */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-[11px] text-slate-400 mb-1 font-medium">Margem Superior</label>
+                    <select
+                      value={selectedComponent.styleOverrides?.marginTop || '0px'}
+                      onChange={(e) => handleStyleOverride('marginTop', e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    >
+                      <option value="0px">Sem Margem (0px)</option>
+                      <option value="16px">Pequeno (16px)</option>
+                      <option value="32px">Médio (32px)</option>
+                      <option value="64px">Grande (64px)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] text-slate-400 mb-1 font-medium">Margem Inferior</label>
+                    <select
+                      value={selectedComponent.styleOverrides?.marginBottom || '0px'}
+                      onChange={(e) => handleStyleOverride('marginBottom', e.target.value)}
+                      className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    >
+                      <option value="0px">Sem Margem (0px)</option>
+                      <option value="16px">Pequeno (16px)</option>
+                      <option value="32px">Médio (32px)</option>
+                      <option value="64px">Grande (64px)</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             )}

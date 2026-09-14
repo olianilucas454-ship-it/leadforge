@@ -20,6 +20,7 @@ interface SiteBuilderContextType {
   selectedComponentId: string | null;
   breakpoint: BreakpointMode;
   isAiProcessing: boolean;
+  setIsAiProcessing: (processing: boolean) => void;
   auditResult: QualityAuditResult | null;
   aiActionLogs: import('../types/siteBuilder').AiActionLog[];
   
@@ -290,6 +291,7 @@ export const SiteBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
         selectedComponentId,
         breakpoint,
         isAiProcessing,
+        setIsAiProcessing,
         auditResult,
         aiActionLogs,
         selectSite,

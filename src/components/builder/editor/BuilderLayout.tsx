@@ -9,6 +9,7 @@ import { CommandBar } from './CommandBar';
 import { FrameTimelineEditor } from './FrameTimelineEditor';
 import { AssetManagerModal } from '../assets/AssetManagerModal';
 import { NicheRecommendationModal } from './NicheRecommendationModal';
+import { ReferenceStyleModal } from '../assets/ReferenceStyleModal';
 import {
   ArrowLeft,
   Undo2,
@@ -26,7 +27,8 @@ import {
   Sliders,
   PanelLeft,
   PanelRight,
-  Check
+  Check,
+  Wand2
 } from 'lucide-react';
 import { GenerationProgressModal } from './GenerationProgressModal';
 import Link from 'next/link';
@@ -51,6 +53,7 @@ export const BuilderLayout: React.FC = () => {
   const [isRightOpen, setIsRightOpen] = useState(true);
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
   const [isNicheModalOpen, setIsNicheModalOpen] = useState(false);
+  const [isReferenceModalOpen, setIsReferenceModalOpen] = useState(false);
   const [isGeneratingModalOpen, setIsGeneratingModalOpen] = useState(false);
   const [publishedToast, setPublishedToast] = useState(false);
   const [assetCallback, setAssetCallback] = useState<((url: string) => void) | null>(null);
@@ -261,6 +264,16 @@ export const BuilderLayout: React.FC = () => {
             <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
             <span className="hidden sm:inline">IA Niche</span>
           </button>
+
+          {/* AI Reference Image / Prompt Redesign Trigger */}
+          <button
+            onClick={() => setIsReferenceModalOpen(true)}
+            className="px-2.5 py-1.5 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-amber-400 hover:bg-amber-500/30 text-xs font-bold rounded flex items-center gap-1.5 transition-all shadow-sm"
+            title="Reconstruir por Imagem de Referência ou Prompt IA"
+          >
+            <Wand2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Estilo Referência IA</span>
+          </button>
         </div>
 
         {/* Right: Score, Preview, Save & Right Sidebar Toggle */}
@@ -356,6 +369,11 @@ export const BuilderLayout: React.FC = () => {
       <NicheRecommendationModal
         isOpen={isNicheModalOpen}
         onClose={() => setIsNicheModalOpen(false)}
+      />
+
+      <ReferenceStyleModal
+        isOpen={isReferenceModalOpen}
+        onClose={() => setIsReferenceModalOpen(false)}
       />
 
       <GenerationProgressModal

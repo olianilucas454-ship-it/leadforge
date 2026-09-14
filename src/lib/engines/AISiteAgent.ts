@@ -943,6 +943,116 @@ export class AISiteAgent {
     return { updatedSite: updated, log };
   }
 
+  public static applyReferenceRedesign(
+    site: SiteSchema,
+    promptText?: string,
+    referenceImageDataUrl?: string | null,
+    presetId?: string | null
+  ): SiteSchema {
+    const updated = JSON.parse(JSON.stringify(site)) as SiteSchema;
+    const prompt = (promptText || '').toLowerCase();
+
+    if (presetId === 'haute-barbier' || prompt.includes('barbearia') || prompt.includes('barber') || prompt.includes('ouro') || prompt.includes('haute')) {
+      updated.designSystem.headingFont = 'Cinzel, serif';
+      updated.designSystem.bodyFont = 'Inter, sans-serif';
+      updated.designSystem.accentColor = '#C5A059'; // Imperial Gold
+      updated.designSystem.primaryColor = '#0B0C10';
+      updated.designSystem.backgroundColor = '#050507';
+      updated.designSystem.surfaceColor = '#141519';
+      updated.designSystem.textColor = '#EAEAEA';
+      updated.designSystem.borderRadius = '0.375rem';
+
+      updated.pages.forEach((p) => {
+        p.sections.forEach((sec) => {
+          sec.components.forEach((cmp) => {
+            cmp.styleOverrides = {
+              ...cmp.styleOverrides,
+              titleFontFamily: 'Cinzel, serif',
+              gradient: 'gold',
+              fontWeight: 'font-bold',
+              letterSpacing: 'tracking-tight',
+            };
+            if (cmp.category === 'hero') {
+              cmp.variant = 'HeroLuxury';
+              cmp.props.overlayOpacity = 65;
+            }
+          });
+        });
+      });
+    } else if (presetId === 'gastronomy-michelin' || prompt.includes('gastronomia') || prompt.includes('restaurante') || prompt.includes('vinho')) {
+      updated.designSystem.headingFont = 'Playfair Display, serif';
+      updated.designSystem.bodyFont = 'Manrope, sans-serif';
+      updated.designSystem.accentColor = '#D4AF37';
+      updated.designSystem.primaryColor = '#0A0A0A';
+      updated.designSystem.backgroundColor = '#050505';
+
+      updated.pages.forEach((p) => {
+        p.sections.forEach((sec) => {
+          sec.components.forEach((cmp) => {
+            cmp.styleOverrides = {
+              ...cmp.styleOverrides,
+              titleFontFamily: 'Playfair Display, serif',
+              fontStyle: 'italic',
+              gradient: 'gold',
+            };
+          });
+        });
+      });
+    } else if (presetId === 'syne-futuristic' || prompt.includes('syne') || prompt.includes('agência') || prompt.includes('design')) {
+      updated.designSystem.headingFont = 'Syne, sans-serif';
+      updated.designSystem.bodyFont = 'Space Grotesk, sans-serif';
+      updated.designSystem.accentColor = '#6366F1';
+      updated.designSystem.backgroundColor = '#090A0D';
+
+      updated.pages.forEach((p) => {
+        p.sections.forEach((sec) => {
+          sec.components.forEach((cmp) => {
+            cmp.styleOverrides = {
+              ...cmp.styleOverrides,
+              titleFontFamily: 'Syne, sans-serif',
+              textTransform: 'uppercase',
+              letterSpacing: 'tracking-wider',
+            };
+          });
+        });
+      });
+    } else if (presetId === 'cyber-neon' || prompt.includes('saas') || prompt.includes('tech') || prompt.includes('cyan')) {
+      updated.designSystem.headingFont = 'Space Grotesk, sans-serif';
+      updated.designSystem.bodyFont = 'Inter, sans-serif';
+      updated.designSystem.accentColor = '#0EA5E9';
+      updated.designSystem.backgroundColor = '#04070D';
+
+      updated.pages.forEach((p) => {
+        p.sections.forEach((sec) => {
+          sec.components.forEach((cmp) => {
+            cmp.styleOverrides = {
+              ...cmp.styleOverrides,
+              titleFontFamily: 'Space Grotesk, sans-serif',
+              gradient: 'cyan',
+            };
+          });
+        });
+      });
+    } else {
+      updated.designSystem.headingFont = 'Cormorant Garamond, serif';
+      updated.designSystem.accentColor = '#D4AF37';
+      updated.pages.forEach((p) => {
+        p.sections.forEach((sec) => {
+          sec.components.forEach((cmp) => {
+            cmp.styleOverrides = {
+              ...cmp.styleOverrides,
+              gradient: 'gold',
+            };
+          });
+        });
+      });
+    }
+
+    updated.version += 1;
+    updated.updatedAt = new Date().toISOString();
+    return updated;
+  }
+
   public static executeCommand(site: SiteSchema, command: string): SiteSchema {
     return this.executeCommandWithLog(site, command).updatedSite;
   }
