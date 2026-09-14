@@ -6,6 +6,198 @@ export class CompositionEngine {
    * Generates a rhythmically varied, asymmetric story-driven section sequence
    * based on the CreativeDirection object.
    */
+  /**
+   * Helper to resolve niche-specific titles, badges, CTAs, menu links, and descriptions.
+   */
+  private static getSectorContent(leadData: any) {
+    const cat = (leadData.category || leadData.niche || 'general').toLowerCase();
+    const name = leadData.name || 'Empresa Exclusiva';
+    const city = leadData.city || 'São Paulo';
+
+    if (cat.includes('gastronom') || cat.includes('restaurante') || cat.includes('culinár') || cat.includes('bistrô') || cat.includes('pizzaria') || cat.includes('bar')) {
+      return {
+        heroTitle: 'Sabores autorais. Experiência inesquecível.',
+        heroSubtitle: `Gastronomia contemporânea, ingredientes selecionados e alta culinária em ${city}.`,
+        badge: `GASTRONOMIA AUTORAL • ${city.toUpperCase()}`,
+        navLink1: 'CARDÁPIO',
+        navLink2: 'SOBRE NÓS',
+        navLink3: 'GALERIA',
+        navLink4: 'RESERVAS',
+        ctaText: 'RESERVAR MESA ↗',
+        secondaryCtaText: 'VER CARDÁPIO',
+        headerCta: 'RESERVAS',
+        aboutBadge: '01 / MANIFESTO CULINÁRIO',
+        aboutTitle: 'Gastronomia de alta ordem onde cada prato conta uma história única.',
+        aboutDesc: `No ${name}, cada ingrediente é selecionado a dedo para criar combinações memoráveis. Nossa cozinha combina tradição e inovação para encantar o seu paladar em ${city}.`,
+        servicesBadge: '02 / O CARDÁPIO',
+        servicesTitle: 'Experiências & Seleção Autoral',
+        servicesItems: [
+          { name: 'Menu Degustação Signature', price: 'R$ 280', description: 'Sequência exclusiva de 7 tempos harmonizada por nosso chef master.', duration: '120 MIN' },
+          { name: 'Pratos Principais Autorais', price: 'A partir de R$ 85', description: 'Cortes nobres, frutos do mar frescos e massas artesanais preparadas na hora.', duration: '45 MIN' },
+          { name: 'Carta de Vinhos & Coquetelaria', price: 'Sob Consulta', description: 'Rótulos premiados e coquetéis autorais criados por mixologistas renomados.', duration: '30 MIN' },
+        ],
+        galleryBadge: '03 / O AMBIENTE',
+        galleryTitle: 'Uma atmosfera envolvente para momentos especiais.',
+        ctaTitle: 'SUA MESA ESTÁ ESPERANDO POR VOCÊ.',
+        ctaSubtitle: `Garanta a sua reserva no ${name} e viva uma noite inesquecível em ${city}.`,
+        ctaTextMain: 'RESERVAR MINHA MESA ↗'
+      };
+    }
+
+    if (cat.includes('barb') || cat.includes('barber') || cat.includes('estética masculina')) {
+      return {
+        heroTitle: 'A precisão não é detalhe. É a sua assinatura.',
+        heroSubtitle: `Cortes autorais, ritual de barba tradicional e experiência VIP exclusiva em ${city}.`,
+        badge: `HAUTE BARBIER • ${city.toUpperCase()}`,
+        navLink1: 'SERVIÇOS',
+        navLink2: 'MESTRES',
+        navLink3: 'EXPERIÊNCIA',
+        navLink4: 'CONTATO',
+        ctaText: 'AGENDAR HORÁRIO ↗',
+        secondaryCtaText: 'CONHECER O ATELIER',
+        headerCta: 'AGENDAR HORÁRIO',
+        aboutBadge: '01 / MANIFESTO AUTORAL',
+        aboutTitle: 'Mais que um corte, um ritual de alinhamento e presença.',
+        aboutDesc: `Na ${name}, acreditamos que a imagem pessoal é a sua maior credencial. Ambiente privativo, bebidas selecionadas e mestres barbeiros dedicados a superar suas expectativas.`,
+        servicesBadge: '02 / O MENU',
+        servicesTitle: 'Serviços & Rituais Autorais',
+        servicesItems: [
+          { name: 'Corte Autoral Signature', price: 'R$ 130', description: 'Consultoria de visagismo, lavagem terapêutica e corte preciso com acabamento impecável.', duration: '50 MIN' },
+          { name: 'Barba de Toalha Quente Ritual', price: 'R$ 90', description: 'Barboterapia com óleos essenciais, massagem facial e navalha tradicional.', duration: '40 MIN' },
+          { name: 'Experiência Completa VIP (Corte + Barba)', price: 'R$ 200', description: 'Combo exclusivo com harmonização de imagem e degustação de whisky.', duration: '90 MIN' },
+        ],
+        galleryBadge: '03 / O ATELIER',
+        galleryTitle: 'Onde o ritual de precisão acontece.',
+        ctaTitle: 'SEU PRÓXIMO CORTE COMEÇA AQUI.',
+        ctaSubtitle: `Agende o seu horário privativo com a equipe da ${name} e vivencie a excelência.`,
+        ctaTextMain: 'AGENDAR MEU HORÁRIO AGORA ↗'
+      };
+    }
+
+    if (cat.includes('arq') || cat.includes('architect') || cat.includes('interiores') || cat.includes('design de interiores')) {
+      return {
+        heroTitle: 'Arquitetura que inspira. Espaços que vivem.',
+        heroSubtitle: `Projetos residenciais e corporativos de alto padrão com estética atemporal em ${city}.`,
+        badge: `ARCHITECTURE • INTERIORS • DESIGN`,
+        navLink1: 'PROJETOS',
+        navLink2: 'SERVIÇOS',
+        navLink3: 'SOBRE',
+        navLink4: 'CONTATO',
+        ctaText: 'EXPLORAR PROJETOS ↗',
+        secondaryCtaText: 'INICIAR PROJETO',
+        headerCta: 'FALAR COM ARQUITETO',
+        aboutBadge: '01 / MANIFESTO ARQUITETÔNICO',
+        aboutTitle: 'Criamos formas puras que elevam a experiência humana.',
+        aboutDesc: `Na ${name}, desenvolvemos arquitetura e interiores autorais que combinam sustentabilidade, funcionalidade e sofisticação para clientes exigentes em ${city}.`,
+        servicesBadge: '02 / NOSOS SERVIÇOS',
+        servicesTitle: 'Soluções em Arquitetura & Design',
+        servicesItems: [
+          { name: 'Projeto Arquitetônico Residencial', price: 'Sob Consulta', description: 'Desenvolvimento completo desde a concepção espacial até o detalhamento executivo.', duration: 'FASE 1' },
+          { name: 'Design de Interiores High-End', price: 'Sob Consulta', description: 'Curadoria de mobiliário autoral, iluminação cênica e escolha de revestimentos nobres.', duration: 'FASE 2' },
+          { name: 'Consultoria de Retrofit & Reforma', price: 'Sob Consulta', description: 'Modernização de ambientes com otimização de espaço e materiais sustentáveis.', duration: 'FASE 3' },
+        ],
+        galleryBadge: '03 / PORTFÓLIO',
+        galleryTitle: 'Projetos que redefinem o morar contemporâneo.',
+        ctaTitle: 'TRANSFORME SUA VISÃO EM REALIDADE.',
+        ctaSubtitle: `Entre em contato com o escritório ${name} para apresentar o seu projeto residencial ou comercial.`,
+        ctaTextMain: 'INICIAR MEU PROJETO ↗'
+      };
+    }
+
+    if (cat.includes('imóve') || cat.includes('imobiliá') || cat.includes('real estate') || cat.includes('construtora')) {
+      return {
+        heroTitle: 'Residências exclusivas & empreendimentos de alto padrão.',
+        heroSubtitle: `Curadoria rigorosa dos imóveis mais desejados e projetos imobiliários em ${city}.`,
+        badge: `LUXURY REAL ESTATE • ${city.toUpperCase()}`,
+        navLink1: 'IMÓVEIS',
+        navLink2: 'SOBRE NÓS',
+        navLink3: 'DIFERENCIAIS',
+        navLink4: 'CONTATO',
+        ctaText: 'SOLICITAR CATÁLOGO ↗',
+        secondaryCtaText: 'FALAR COM CORRETOR',
+        headerCta: 'CATÁLOGO DE IMÓVEIS',
+        aboutBadge: '01 / NOSSA CURADORIA',
+        aboutTitle: 'Acesso privilegiado às propriedades mais cobiçadas da região.',
+        aboutDesc: `A ${name} é especializada em conectar clientes de alto poder aquisitivo às melhores oportunidades imobiliárias com total discrição e consultoria jurídica completa.`,
+        servicesBadge: '02 / NOSSOS SERVIÇOS',
+        servicesTitle: 'Assessoria Imobiliária High-End',
+        servicesItems: [
+          { name: 'Venda de Imóveis de Luxo', price: 'Sob Consulta', description: 'Casas em condomínios fechados, coberturas e vilas exclusivas em localizações nobres.', duration: 'PRIVATIVO' },
+          { name: 'Lançamentos & Empreendimentos', price: 'Sob Consulta', description: 'Acesso antecipado a pré-lançamentos imobiliários com alto potencial de valorização.', duration: 'EXCLUSIVO' },
+          { name: 'Consultoria de Investimento Imobiliário', price: 'Sob Consulta', description: 'Análise de rentabilidade e estruturação de carteiras de ativos imobiliários.', duration: 'CONSULTORIA' },
+        ],
+        galleryBadge: '03 / PROPRIEDADES',
+        galleryTitle: 'Imóveis selecionados com acabamentos extraordinários.',
+        ctaTitle: 'ENCONTRE SEU NOVO ENDEREÇO DE PRESTÍGIO.',
+        ctaSubtitle: `Fale com os nossos consultores especializados da ${name} e agende uma visita privativa.`,
+        ctaTextMain: 'AGENDAR VISITA PRIVATIVA ↗'
+      };
+    }
+
+    if (cat.includes('saúde') || cat.includes('odontolog') || cat.includes('médic') || cat.includes('clínica') || cat.includes('dermatolog')) {
+      return {
+        heroTitle: 'Saúde, estética & transformação com excelência.',
+        heroSubtitle: `Atendimento humanizado, tecnologia de ponta e procedimentos exclusivos em ${city}.`,
+        badge: `CLÍNICA VIP • ${city.toUpperCase()}`,
+        navLink1: 'PROCEDIMENTOS',
+        navLink2: 'SOBRE',
+        navLink3: 'EQUIPE',
+        navLink4: 'CONTATO',
+        ctaText: 'AGENDAR CONSULTA ↗',
+        secondaryCtaText: 'CONHECER CLÍNICA',
+        headerCta: 'AGENDAR CONSULTA',
+        aboutBadge: '01 / MANIFESTO DE SAÚDE',
+        aboutTitle: 'Cuidado individualizado pautado na ciência e no bem-estar.',
+        aboutDesc: `Na ${name}, cada paciente é atendido com protocolo personalizado e tecnologias de última geração em um ambiente acolhedor e altamente sofisticado.`,
+        servicesBadge: '02 / PROCEDIMENTOS',
+        servicesTitle: 'Procedimentos & Tratamentos',
+        servicesItems: [
+          { name: 'Avaliação Estética & Protocolo Personalizado', price: 'R$ 350', description: 'Mapeamento detalhado e planejamento integrativo de procedimentos.', duration: '60 MIN' },
+          { name: 'Tratamentos Avançados de Alta Tecnologia', price: 'Sob Consulta', description: 'Tecnologia de ponta para resultados naturais e duradouros.', duration: '45 MIN' },
+          { name: 'Acompanhamento VIP & Pós-Procedimento', price: 'Incluso', description: 'Suporte contínuo e acompanhamento dedicado durante toda a jornada.', duration: 'CONTÍNUO' },
+        ],
+        galleryBadge: '03 / A CLÍNICA',
+        galleryTitle: 'Infraestrutura moderna e ambiente acolhedor.',
+        ctaTitle: 'CUIDE DA SUA SAÚDE E BEM-ESTAR COM ESPECIALISTAS.',
+        ctaSubtitle: `Agende a sua consulta de avaliação na ${name} e descubra o plano ideal para você.`,
+        ctaTextMain: 'AGENDAR CONSULTA AGORA ↗'
+      };
+    }
+
+    // Default General
+    return {
+      heroTitle: 'Excelência autoral & atendimento exclusivo.',
+      heroSubtitle: `Serviços de alto padrão pensados especialmente para suas necessidades em ${city}.`,
+      badge: `EXCELÊNCIA AUTORAL • ${city.toUpperCase()}`,
+      navLink1: 'INÍCIO',
+      navLink2: 'SERVIÇOS',
+      navLink3: 'SOBRE NÓS',
+      navLink4: 'CONTATO',
+      ctaText: 'ENTRAR EM CONTATO ↗',
+      secondaryCtaText: 'SAIBAMAIS',
+      headerCta: 'FALAR CONOSCO',
+      aboutBadge: '01 / MANIFESTO',
+      aboutTitle: 'Compromisso inflexível com a qualidade e satisfação total.',
+      aboutDesc: `Na ${name}, entregamos soluções sob medida com profissionalismo e atenção rigorosa aos detalhes em ${city}.`,
+      servicesBadge: '02 / SERVIÇOS',
+      servicesTitle: 'Nossos Serviços Autorais',
+      servicesItems: [
+        { name: 'Atendimento Autoral Signature', price: 'R$ 150', description: 'Consultoria e execução impecável por especialistas masters.', duration: '60 MIN' },
+        { name: 'Serviço Personalizado VIP', price: 'R$ 250', description: 'Tratamento completo adaptado às suas necessidades individuais.', duration: '90 MIN' },
+        { name: 'Consultoria Executiva Completa', price: 'Sob Consulta', description: 'Solução integral com acompanhamento dedicado do início ao fim.', duration: '120 MIN' },
+      ],
+      galleryBadge: '03 / ESPAÇO',
+      galleryTitle: 'Qualidade que você vê e sente.',
+      ctaTitle: 'SEU PRÓXIMO PASSO COMEÇA AQUI.',
+      ctaSubtitle: `Entre em contato com a equipe da ${name} e agende seu atendimento personalizado.`,
+      ctaTextMain: 'FALAR COM A EQUIPE AGORA ↗'
+    };
+  }
+
+  /**
+   * Generates a rhythmically varied, asymmetric story-driven section sequence
+   * based on the CreativeDirection object.
+   */
   public static buildStoryComposition(
     direction: CreativeDirection,
     leadData: any,
@@ -14,6 +206,7 @@ export class CompositionEngine {
     const concept = direction.chosenConcept;
     const name = leadData.name || 'Empresa Exclusiva';
     const city = leadData.city || 'São Paulo';
+    const sector = this.getSectorContent(leadData);
 
     // Section 1: Immersive Hero Section
     const heroComponent: SiteComponentSchema = {
@@ -22,22 +215,17 @@ export class CompositionEngine {
       category: 'hero',
       variant: concept.heroStructure,
       props: {
-        title: concept.heroStructure === 'HeroEcoGlass'
-          ? 'YOUR VISION OF SUSTAINABLE LIVING'
-          : concept.heroStructure === 'HeroArchevo'
-          ? 'Architecture that inspires. Spaces that live.'
-          : concept.heroStructure === 'HeroLavilla'
-          ? name.toUpperCase()
-          : `A precisão não é detalhe. É a sua assinatura.`,
-        subtitle: leadData.tagline || `Referência autoral e experiência VIP em ${city}.`,
-        badge: concept.heroStructure === 'HeroEcoGlass'
-          ? 'SUSTAINABLE LIVING'
-          : concept.heroStructure === 'HeroArchevo'
-          ? 'ARCHITECTURE • INTERIORS • DESIGN'
-          : `HAUTE ATELIER — ${city.toUpperCase()}`,
-        ctaText: 'AGENDAR HORÁRIO ↗',
+        title: sector.heroTitle,
+        subtitle: leadData.tagline || sector.heroSubtitle,
+        badge: sector.badge,
+        navLink1: sector.navLink1,
+        navLink2: sector.navLink2,
+        navLink3: sector.navLink3,
+        navLink4: sector.navLink4,
+        headerCta: sector.headerCta,
+        ctaText: sector.ctaText,
         ctaLink: '#booking',
-        secondaryCtaText: 'CONHECER O ATELIER',
+        secondaryCtaText: sector.secondaryCtaText,
         secondaryCtaLink: '#about',
         image: imageStrategy.heroImage,
         overlayOpacity: 55,
@@ -65,9 +253,9 @@ export class CompositionEngine {
       category: 'about',
       variant: 'AboutAsymmetric',
       props: {
-        badge: '01 / MANIFESTO',
-        title: 'Criamos experiências atemporais desenhadas com paixão e maestria.',
-        description: `Na ${name}, acreditamos que o luxo autêntico está na precisão milimétrica e no atendimento verdadeiramente exclusivo. Cada detalhe é concebido para transformar a sua rotina em uma celebração de sofisticação.`,
+        badge: sector.aboutBadge,
+        title: sector.aboutTitle,
+        description: sector.aboutDesc,
         stats: [
           { number: '98%', label: 'Satisfação de Clientes VIP' },
           { number: '12+', label: 'Anos de Tradição Autoral' },
@@ -96,14 +284,10 @@ export class CompositionEngine {
       category: 'services',
       variant: 'ServicesList',
       props: {
-        badge: '02 / O MENU',
-        title: 'Serviços & Rituais Autorais',
+        badge: sector.servicesBadge,
+        title: sector.servicesTitle,
         subtitle: 'Curadoria de experiências personalizadas para quem exige o melhor.',
-        items: [
-          { name: 'Atendimento Autoral Signature', price: 'R$ 150', description: 'Consultoria de imagem e execução impecável por especialistas masters.', duration: '60 MIN' },
-          { name: 'Ritual VIP de Imersão', price: 'R$ 220', description: 'Tratamento completo com produtos botânicos e ambiente privativo.', duration: '90 MIN' },
-          { name: 'Experiência Executiva Completa', price: 'Sob Consulta', description: 'Serviço exclusivo sob agendamento corporativo ou celebração privada.', duration: '120 MIN' },
-        ],
+        items: sector.servicesItems,
       },
       styleOverrides: {
         titleFontFamily: concept.typography.headingFont,
@@ -126,8 +310,8 @@ export class CompositionEngine {
       category: 'gallery',
       variant: 'GalleryMosaic',
       props: {
-        badge: '03 / O ATELIER',
-        title: 'Onde a experiência acontece.',
+        badge: sector.galleryBadge,
+        title: sector.galleryTitle,
         subtitle: 'Atmosfera pensada para proporcionar conforto, privacidade e sofisticação.',
         items: imageStrategy.galleryImages,
       },
@@ -155,8 +339,8 @@ export class CompositionEngine {
         badge: '04 / CRÍTICA & DEPOIMENTOS',
         title: 'O que dizem os nossos clientes VIP.',
         items: [
-          { clientName: 'Dr. Ricardo Silveira', city: 'São Paulo', rating: 5, quote: 'A experiência na empresa é simplesmente impecável. A atenção aos detalhes e o profissionalismo superam qualquer expectativa.' },
-          { clientName: 'Fernanda Lins', city: 'Goiânia', rating: 5, quote: 'Atendimento incomparável. O ambiente é acolhedor e a qualidade dos serviços é do mais alto nível de agência.' },
+          { clientName: 'Dr. Ricardo Silveira', city: city, rating: 5, quote: `A experiência na ${name} é simplesmente impecável. A atenção aos detalhes e o profissionalismo superam qualquer expectativa.` },
+          { clientName: 'Fernanda Lins', city: city, rating: 5, quote: 'Atendimento incomparável. O ambiente é acolhedor e a qualidade dos serviços é do mais alto nível de agência.' },
         ],
       },
       styleOverrides: {
@@ -181,9 +365,9 @@ export class CompositionEngine {
       category: 'cta',
       variant: 'CtaCinematic',
       props: {
-        title: 'SEU PRÓXIMO PASSO COMEÇA AQUI.',
-        subtitle: `Agende o seu horário privativo com a equipe da ${name} e vivencie a excelência.`,
-        ctaText: 'RESERVAR MEU HORÁRIO AGORA ↗',
+        title: sector.ctaTitle,
+        subtitle: sector.ctaSubtitle,
+        ctaText: sector.ctaTextMain,
         ctaLink: leadData.whatsapp ? `https://wa.me/55${leadData.whatsapp.replace(/\D/g, '')}` : '#contact',
       },
       styleOverrides: {

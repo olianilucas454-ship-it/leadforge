@@ -101,6 +101,11 @@ export interface ComponentProps {
   subtitle?: string;
   description?: string;
   badge?: string;
+  navLink1?: string;
+  navLink2?: string;
+  navLink3?: string;
+  navLink4?: string;
+  headerCta?: string;
   ctaText?: string;
   ctaLink?: string;
   secondaryCtaText?: string;

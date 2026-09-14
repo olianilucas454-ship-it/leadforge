@@ -151,25 +151,25 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-slate-950/40 z-0" />
 
           {/* Top Bar */}
-          <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto pt-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs">
+          <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto pt-4 gap-4">
+            <div className="flex items-center gap-3 max-w-[200px] sm:max-w-xs md:max-w-sm min-w-0">
+              <div className="w-8 h-8 shrink-0 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs">
                 🌱
               </div>
-              <span className="font-bold text-lg text-white tracking-tight" style={{ fontFamily: titleFont }}>
+              <span className="font-bold text-base sm:text-lg text-white tracking-tight truncate" style={{ fontFamily: titleFont }}>
                 {site.name || 'EcoDream'}
               </span>
             </div>
 
             <div className="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-300">
-              <span className="hover:text-emerald-400 transition-colors cursor-pointer">About Us</span>
-              <span className="hover:text-emerald-400 transition-colors cursor-pointer">Services</span>
-              <span className="hover:text-emerald-400 transition-colors cursor-pointer">Research</span>
-              <span className="hover:text-emerald-400 transition-colors cursor-pointer">Team</span>
+              <span className="hover:text-emerald-400 transition-colors cursor-pointer">{props.navLink1 || 'Sobre'}</span>
+              <span className="hover:text-emerald-400 transition-colors cursor-pointer">{props.navLink2 || 'Serviços'}</span>
+              <span className="hover:text-emerald-400 transition-colors cursor-pointer">{props.navLink3 || 'Diferenciais'}</span>
+              <span className="hover:text-emerald-400 transition-colors cursor-pointer">{props.navLink4 || 'Contato'}</span>
             </div>
 
-            <button className="px-6 py-2.5 rounded-full border border-slate-200/40 bg-slate-900/60 backdrop-blur-md text-xs font-bold text-white hover:bg-white hover:text-slate-950 transition-all">
-              Contact Us
+            <button className="px-6 py-2.5 rounded-full border border-slate-200/40 bg-slate-900/60 backdrop-blur-md text-xs font-bold text-white hover:bg-white hover:text-slate-950 transition-all shrink-0 whitespace-nowrap">
+              {props.headerCta || 'Contato'}
             </button>
           </div>
 
@@ -177,10 +177,10 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
           <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-12 my-auto">
             <div className="lg:col-span-7 space-y-8 text-left">
               <h1
-                className={`text-5xl sm:text-7xl lg:text-8xl leading-[1.02] tracking-tight font-extrabold uppercase ${getGradientClass(titleGradient || 'emerald')}`}
+                className={`${(props.title || '').length > 25 ? 'text-3xl sm:text-5xl lg:text-6xl' : 'text-5xl sm:text-7xl lg:text-8xl'} leading-[1.02] tracking-tight font-extrabold uppercase ${getGradientClass(titleGradient || 'emerald')}`}
                 style={{ fontFamily: titleFont }}
               >
-                {props.title || 'YOUR VISION OF SUSTAINABLE LIVING'}
+                {props.title || 'SUA VISÃO DE UM ESTILO DE VIDA SUSTENTÁVEL'}
               </h1>
 
               <div className="pt-2">
@@ -278,26 +278,27 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0" />
 
           {/* Header Bar */}
-          <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto px-6 md:px-12 pt-8">
-            <div className="flex items-center gap-3">
-              <div className="w-7 h-7 border border-amber-400/60 rotate-45 flex items-center justify-center">
-                <span className="text-[10px] text-amber-300 font-bold -rotate-45">A</span>
+          <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto px-6 md:px-12 pt-8 gap-4">
+            <div className="flex items-center gap-3 max-w-[200px] sm:max-w-xs md:max-w-sm min-w-0">
+              <div className="w-7 h-7 shrink-0 border border-amber-400/60 rotate-45 flex items-center justify-center">
+                <span className="text-[10px] text-amber-300 font-bold -rotate-45">
+                  {(site.name || 'A')[0].toUpperCase()}
+                </span>
               </div>
-              <span className="font-bold text-xl uppercase tracking-widest text-white" style={{ fontFamily: 'Bodoni Moda, serif' }}>
+              <span className="font-bold text-lg sm:text-xl uppercase tracking-widest text-white truncate" style={{ fontFamily: 'Bodoni Moda, serif' }}>
                 {site.name || 'ARCHEVO'}
               </span>
             </div>
 
             <div className="hidden lg:flex items-center gap-10 text-xs tracking-[0.2em] font-semibold text-slate-300 uppercase">
-              <span className="hover:text-amber-400 transition-colors cursor-pointer">Projects</span>
-              <span className="hover:text-amber-400 transition-colors cursor-pointer">Services</span>
-              <span className="hover:text-amber-400 transition-colors cursor-pointer">About</span>
-              <span className="hover:text-amber-400 transition-colors cursor-pointer">Journal</span>
-              <span className="hover:text-amber-400 transition-colors cursor-pointer">Contact</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">{props.navLink1 || 'Projetos'}</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">{props.navLink2 || 'Serviços'}</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">{props.navLink3 || 'Sobre'}</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">{props.navLink4 || 'Contato'}</span>
             </div>
 
-            <button className="px-6 py-2.5 border border-amber-400/40 text-amber-300 hover:bg-amber-400 hover:text-black font-bold text-xs uppercase tracking-[0.2em] transition-all">
-              Start a Project ↗
+            <button className="px-6 py-2.5 border border-amber-400/40 text-amber-300 hover:bg-amber-400 hover:text-black font-bold text-xs uppercase tracking-[0.2em] transition-all shrink-0 whitespace-nowrap">
+              {props.headerCta || 'Falar Conosco ↗'}
             </button>
           </div>
 
@@ -308,7 +309,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
             </div>
 
             <h1
-              className="text-5xl sm:text-7xl lg:text-8xl leading-[1.05] max-w-4xl text-amber-100 font-normal tracking-normal"
+              className={`${(props.title || '').length > 25 ? 'text-3xl sm:text-5xl lg:text-6xl' : 'text-5xl sm:text-7xl lg:text-8xl'} leading-[1.05] max-w-4xl text-amber-100 font-normal tracking-normal`}
               style={{ fontFamily: titleFont || 'Bodoni Moda, serif' }}
             >
               {props.title || 'Architecture that inspires. Spaces that live.'}
@@ -378,20 +379,22 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-black/30 to-black/50 z-0" />
 
           {/* Header */}
-          <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto pt-4">
-            <span className="font-extrabold text-2xl tracking-widest text-white uppercase" style={{ fontFamily: titleFont }}>
-              {site.name || 'LAVILLA'}
-            </span>
-
-            <div className="hidden md:flex items-center gap-8 text-xs font-bold tracking-widest text-slate-200 uppercase">
-              <span className="hover:text-sky-400 transition-colors cursor-pointer">ПОЧЕМУ МЫ</span>
-              <span className="hover:text-sky-400 transition-colors cursor-pointer">ВИЛЛЫ</span>
-              <span className="hover:text-sky-400 transition-colors cursor-pointer">АПАРТАМЕНТЫ</span>
-              <span className="hover:text-sky-400 transition-colors cursor-pointer">ДОХОДНОСТЬ</span>
+          <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto pt-4 gap-4">
+            <div className="flex items-center gap-3 max-w-[200px] sm:max-w-xs md:max-w-sm min-w-0">
+              <span className="font-extrabold text-lg sm:text-2xl tracking-widest text-white uppercase truncate" style={{ fontFamily: titleFont }}>
+                {site.name || 'LAVILLA'}
+              </span>
             </div>
 
-            <button className="px-6 py-2.5 border border-white/30 rounded bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-white hover:bg-white hover:text-black transition-all">
-              {props.ctaText || 'СКАЧАТЬ КАТАЛОГ ↓'}
+            <div className="hidden md:flex items-center gap-8 text-xs font-bold tracking-widest text-slate-200 uppercase">
+              <span className="hover:text-sky-400 transition-colors cursor-pointer">{props.navLink1 || 'SOBRE'}</span>
+              <span className="hover:text-sky-400 transition-colors cursor-pointer">{props.navLink2 || 'SERVIÇOS'}</span>
+              <span className="hover:text-sky-400 transition-colors cursor-pointer">{props.navLink3 || 'PROJETOS'}</span>
+              <span className="hover:text-sky-400 transition-colors cursor-pointer">{props.navLink4 || 'DIFERENCIAIS'}</span>
+            </div>
+
+            <button className="px-6 py-2.5 border border-white/30 rounded bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-white hover:bg-white hover:text-black transition-all shrink-0 whitespace-nowrap">
+              {props.headerCta || props.ctaText || 'AGENDAR HORÁRIO'}
             </button>
           </div>
 
@@ -399,7 +402,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
           <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pb-8 mt-auto">
             <div className="lg:col-span-6 space-y-4 text-left">
               <h1
-                className="text-6xl sm:text-8xl lg:text-9xl font-black tracking-tight leading-none uppercase text-white drop-shadow-2xl"
+                className={`${(props.title || '').length > 25 ? 'text-4xl sm:text-6xl lg:text-7xl' : 'text-6xl sm:text-8xl lg:text-9xl'} font-black tracking-tight leading-none uppercase text-white drop-shadow-2xl`}
                 style={{ fontFamily: titleFont || 'Outfit, sans-serif' }}
               >
                 {props.title || 'LAVILLA'}
@@ -480,8 +483,28 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0 pointer-events-none" />
 
+          {/* Top Bar Header */}
+          <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between w-full max-w-7xl mx-auto px-6 md:px-12 pt-8 gap-4">
+            <div className="flex items-center gap-3 max-w-[200px] sm:max-w-xs md:max-w-sm min-w-0">
+              <span className="font-extrabold text-lg sm:text-xl tracking-wider text-white uppercase truncate" style={{ fontFamily: titleFont }}>
+                {site.name || 'EXCLUSIVA'}
+              </span>
+            </div>
+
+            <div className="hidden lg:flex items-center gap-8 text-xs tracking-[0.2em] font-semibold text-slate-300 uppercase">
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">{props.navLink1 || 'INÍCIO'}</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">{props.navLink2 || 'SERVIÇOS'}</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">{props.navLink3 || 'SOBRE'}</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">{props.navLink4 || 'CONTATO'}</span>
+            </div>
+
+            <button className="px-5 py-2.5 border border-white/30 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-[0.15em] text-white hover:bg-white hover:text-black transition-all shrink-0 whitespace-nowrap">
+              {props.headerCta || props.ctaText || 'AGENDAR HORÁRIO'}
+            </button>
+          </div>
+
           {/* Content Container */}
-          <div className={`relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center space-y-6 ${alignClass}`}>
+          <div className={`relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center space-y-6 ${alignClass} pt-12`}>
             {props.badge && (
               <span
                 className="inline-block px-5 py-2 rounded-full text-xs font-mono font-bold uppercase tracking-[0.25em] border backdrop-blur-md shadow-lg shadow-amber-500/10"
@@ -496,7 +519,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
             )}
 
             <h1
-              className={`leading-[1.08] transition-all ${titleWeight} ${trackingClass} ${isItalic ? 'italic' : ''} ${isUppercase ? 'uppercase' : ''} ${getGradientClass(titleGradient)} ${fontSizeClass || 'text-4xl sm:text-6xl lg:text-7xl xl:text-8xl'}`}
+              className={`leading-[1.08] transition-all ${titleWeight} ${trackingClass} ${isItalic ? 'italic' : ''} ${isUppercase ? 'uppercase' : ''} ${getGradientClass(titleGradient)} ${fontSizeClass || ((props.title || '').length > 25 ? 'text-3xl sm:text-5xl lg:text-6xl' : 'text-4xl sm:text-6xl lg:text-7xl xl:text-8xl')}`}
               style={{
                 fontFamily: titleFont,
                 color: titleGradient && titleGradient !== 'none' ? undefined : (cmp.styleOverrides?.color || undefined),
