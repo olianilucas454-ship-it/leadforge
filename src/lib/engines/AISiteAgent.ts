@@ -7,6 +7,10 @@ import {
   AiActionLog,
 } from '../types/siteBuilder';
 import { DEFAULT_DESIGN_SYSTEM } from '../templates/defaultTemplates';
+import { CreativeDirectorEngine } from './CreativeDirectorEngine';
+import { AIImagePromptEngine } from './AIImagePromptEngine';
+import { CompositionEngine } from './CompositionEngine';
+import { QualityGateEngine } from './QualityGateEngine';
 
 export interface BusinessAnalysis {
   sector:
@@ -341,389 +345,28 @@ export class AISiteAgent {
    * Generates a complete structured SiteSchema tailored to the analyzed business profile with ALL 7 pre-built pages.
    */
   public static generateFromLead(leadData: any, experienceLevel: SiteExperienceLevel = 'premium'): SiteSchema {
-    const analysis = this.analyzeBusiness(leadData);
-
     const brandName = leadData.name || 'Nova Empresa';
-    const category = leadData.category || 'Serviços';
+    const category = leadData.category || 'Serviços Autorais';
     const city = leadData.city || 'São Paulo';
     const state = leadData.state || 'SP';
-    const cleanPhone = leadData.whatsapp || leadData.phone || '5511999999999';
 
-    const defaultTeam = analysis.team || [
-      { name: 'Mestre Visagista', role: 'Fundador & Master Barber', specialty: 'Cortes Autorais & Navalha', image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800' },
-      { name: 'Especialista VIP', role: 'Senior Stylist', specialty: 'Tratamentos & Coloração', image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800' },
-      { name: 'Consultor de Imagem', role: 'Stylist & Visagismo', specialty: 'Barboterapia & Alinhamento', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800' },
-    ];
+    // 1. Run Creative Director Engine to establish Art Direction & Concept
+    const creativeDirection = CreativeDirectorEngine.generateCreativeDirection(leadData);
+    const concept = creativeDirection.chosenConcept;
 
-    const defaultGallery = analysis.galleryImages || [
-      { url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800', title: 'Ambiente Principal' },
-      { url: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=800', title: 'Camarim VIP' },
-      { url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=800', title: 'Recepção & Degustação' },
-      { url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=800', title: 'Atelier de Detalhes' },
-    ];
+    // 2. Run Commercial AI Photography Engine to establish Imagery Strategy
+    const imageStrategy = AIImagePromptEngine.generateStrategy(category, brandName, city);
 
-    const defaultTestimonials = analysis.testimonials || [
-      { clientName: 'Carlos Eduardo', city: `${city}, ${state}`, rating: 5, avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200', quote: 'Atendimento espetacular. O nível de cuidado, visagismo e o ambiente são incomparáveis.' },
-      { clientName: 'Fernanda Lima', city: `${city}, ${state}`, rating: 5, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200', quote: 'Lugar impecável! Pontualidade, ambiente acolhedor e profissionais que entendem o cliente.' },
-      { clientName: 'Lucas Mendes', city: `${city}, ${state}`, rating: 5, avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200', quote: 'Vale cada centavo. Experiência de agência de alto padrão que fideliza do início ao fim.' },
-    ];
+    // 3. Run Composition Engine to generate Asymmetric Storytelling Sections
+    const homeSections = CompositionEngine.buildStoryComposition(creativeDirection, leadData, imageStrategy);
 
-    const defaultStats = analysis.stats || [
-      { number: '10.000+', label: 'Clientes Atendidos' },
-      { number: '15 Anos', label: 'Tradição & Visagismo' },
-      { number: '4.9 ★', label: 'Google Review' },
-      { number: '100%', label: 'Garantia de Satisfação' },
-    ];
+    const now = new Date().toISOString();
+    const siteId = `site-${Date.now()}`;
 
-    const defaultFaqs = analysis.faqs || [
-      { question: 'Como funciona o agendamento de horários?', answer: 'Você pode agendar diretamente pelo WhatsApp ou selecionar o horário desejado em nosso menu digital.' },
-      { question: 'Quais formas de pagamento são aceitas?', answer: 'Aceitamos Cartão de Crédito em até 12x, Pix com desconto e Dinheiro.' },
-      { question: 'Existe estacionamento no local?', answer: 'Sim, oferecemos serviço de valet gratuito para a comodidade dos nossos clientes.' },
-    ];
-
-    // Page 1: HOME
-    const homeSections: SiteSectionSchema[] = [
-      {
-        id: `sec-hero-${Date.now()}`,
-        name: 'Hero Section',
-        category: 'hero',
-        variant: analysis.heroVariant,
-        components: [
-          {
-            id: `cmp-hero-${Date.now()}`,
-            name: 'Hero Component',
-            category: 'hero',
-            variant: analysis.heroVariant,
-            props: {
-              badge: analysis.vibeBadge,
-              title: brandName,
-              subtitle: analysis.tagline,
-              description: leadData.opportunitySuggestion || 'Soluções sob medida com atendimento diferenciado e alto padrão de qualidade.',
-              ctaText: 'FALAR COM ATENDIMENTO',
-              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
-              secondaryCtaText: 'CONHECER SERVIÇOS',
-              secondaryCtaLink: '#servicos',
-              image: analysis.heroImage,
-              overlayOpacity: 65,
-              overlayColor: '#000000',
-              heroHeight: 'screen',
-              focalPoint: 'center',
-              whatsappNumber: cleanPhone,
-            },
-            animation: {
-              enabled: true,
-              type: experienceLevel === 'cinematic' ? 'frame-sequence' : 'fade-up',
-              scrub: true,
-              start: 'top 80%',
-              end: 'bottom 20%',
-            },
-          },
-        ],
-      },
-      {
-        id: `sec-about-${Date.now()}`,
-        name: 'Sobre & Diferenciais',
-        category: 'about',
-        variant: 'HeroSplit',
-        components: [
-          {
-            id: `cmp-about-${Date.now()}`,
-            name: 'Sobre Component',
-            category: 'about',
-            variant: 'HeroSplit',
-            props: {
-              badge: 'TRADIÇÃO & EXCELÊNCIA',
-              title: `Conheça a ${brandName}`,
-              subtitle: `Em ${city}, a ${brandName} é referência em atendimento autoral e padrão de qualidade.`,
-              description: 'Nossa missão é entregar uma experiência transformadora, unindo técnica apurada, materiais premium e ambiente exclusivo.',
-              image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1600',
-              stats: defaultStats,
-            },
-          },
-        ],
-      },
-      {
-        id: `sec-serv-${Date.now()}`,
-        name: 'Serviços & Especialidades',
-        category: 'services',
-        variant: 'ServicesInteractive',
-        components: [
-          {
-            id: `cmp-serv-${Date.now()}`,
-            name: 'Lista de Serviços',
-            category: 'services',
-            variant: 'ServicesInteractive',
-            props: {
-              badge: 'ESPECIALIDADES',
-              title: 'Serviços & Soluções Exclusivas',
-              subtitle: 'Conheça nossos diferenciais e rituais de atendimento.',
-              items: analysis.services,
-            },
-          },
-        ],
-      },
-      {
-        id: `sec-team-${Date.now()}`,
-        name: 'Equipe de Mestres',
-        category: 'team',
-        variant: 'HeroSplit',
-        components: [
-          {
-            id: `cmp-team-${Date.now()}`,
-            name: 'Equipe Component',
-            category: 'team',
-            variant: 'HeroSplit',
-            props: {
-              badge: 'CORPO TÉCNICO',
-              title: 'Mestres & Especialistas',
-              subtitle: 'Profissionais dedicados a entregar a sua melhor versão em cada detalhe.',
-              items: defaultTeam,
-              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
-            },
-          },
-        ],
-      },
-      {
-        id: `sec-testimonials-${Date.now()}`,
-        name: 'Depoimentos de Clientes',
-        category: 'testimonials',
-        variant: 'HeroSplit',
-        components: [
-          {
-            id: `cmp-testimonials-${Date.now()}`,
-            name: 'Depoimentos Component',
-            category: 'testimonials',
-            variant: 'HeroSplit',
-            props: {
-              badge: 'CRÍTICA & SOCIAL PROOF',
-              title: 'O que Nossos Clientes Dizem',
-              subtitle: `Avaliação ${leadData.rating || 4.9} ★ no Google com mais de ${leadData.reviewCount || 280} clientes satisfeitos.`,
-              items: defaultTestimonials,
-            },
-          },
-        ],
-      },
-      {
-        id: `sec-stats-${Date.now()}`,
-        name: 'Estatísticas de Sucesso',
-        category: 'stats',
-        variant: 'HeroSplit',
-        components: [
-          {
-            id: `cmp-stats-${Date.now()}`,
-            name: 'Stats Component',
-            category: 'stats',
-            variant: 'HeroSplit',
-            props: {
-              stats: defaultStats,
-            },
-          },
-        ],
-      },
-      {
-        id: `sec-faq-${Date.now()}`,
-        name: 'Perguntas Frequentes',
-        category: 'faq',
-        variant: 'HeroSplit',
-        components: [
-          {
-            id: `cmp-faq-${Date.now()}`,
-            name: 'FAQ Component',
-            category: 'faq',
-            variant: 'HeroSplit',
-            props: {
-              badge: 'TIRA-DÚVIDAS',
-              title: 'Perguntas Frequentes',
-              items: defaultFaqs,
-            },
-          },
-        ],
-      },
-      {
-        id: `sec-cta-${Date.now()}`,
-        name: 'Chamada Final',
-        category: 'cta',
-        variant: 'CtaMinimal',
-        components: [
-          {
-            id: `cmp-cta-${Date.now()}`,
-            name: 'CTA Block',
-            category: 'cta',
-            variant: 'CtaMinimal',
-            props: {
-              title: 'GARANTA SEU HORÁRIO OU ATENDIMENTO.',
-              subtitle: `Entre em contato com ${brandName} e experimente o padrão de excelência.`,
-              ctaText: 'AGENDAR VIA WHATSAPP',
-              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
-              whatsappNumber: cleanPhone,
-            },
-          },
-        ],
-      },
-    ];
-
-    // Page 2: SOBRE / O ATELIER
-    const sobreSections: SiteSectionSchema[] = [
-      {
-        id: `sec-sobre-hero-${Date.now()}`,
-        name: 'Sobre Nossos Valores',
-        category: 'about',
-        variant: 'HeroSplit',
-        components: [
-          {
-            id: `cmp-sobre-hero-${Date.now()}`,
-            name: 'História & Filosofia',
-            category: 'about',
-            variant: 'HeroSplit',
-            props: {
-              badge: 'TRADIÇÃO & PROPÓSITO',
-              title: `A História por trás da ${brandName}`,
-              subtitle: `Fundada em ${city}, nossa marca nasceu com o compromisso inabalável pela qualidade e atendimento diferenciado.`,
-              description: 'Combinamos técnicas consolidadas, materiais nobres e uma atmosfera acolhedora projetada para proporcionar momentos únicos.',
-              ctaText: 'AGENDAR UMA VISITA',
-              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
-              image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1600',
-              stats: defaultStats,
-            },
-          },
-        ],
-      },
-    ];
-
-    // Page 3: SERVIÇOS & RITUAIS
-    const servicosSections: SiteSectionSchema[] = [
-      {
-        id: `sec-servicos-full-${Date.now()}`,
-        name: 'Menu Completo de Serviços',
-        category: 'services',
-        variant: 'ServicesInteractive',
-        components: [
-          {
-            id: `cmp-servicos-full-${Date.now()}`,
-            name: 'Cardápio de Rituais',
-            category: 'services',
-            variant: 'ServicesInteractive',
-            props: {
-              badge: 'MENU DE SERVIÇOS',
-              title: 'Experiências Completas & Rituais',
-              subtitle: 'Selecione o procedimento desejado e reserve seu horário com nossos mestres.',
-              items: analysis.services,
-            },
-          },
-        ],
-      },
-    ];
-
-    // Page 4: OS MESTRES / EQUIPE
-    const equipeSections: SiteSectionSchema[] = [
-      {
-        id: `sec-equipe-${Date.now()}`,
-        name: 'Nossos Profissionais',
-        category: 'team',
-        variant: 'HeroSplit',
-        components: [
-          {
-            id: `cmp-equipe-${Date.now()}`,
-            name: 'Mestres & Especialistas',
-            category: 'team',
-            variant: 'HeroSplit',
-            props: {
-              badge: 'EQUIPE DE ELITE',
-              title: 'Mestres & Especialistas Dedicados',
-              subtitle: 'Nossa equipe conta com profissionais renomados com anos de bagagem internacional.',
-              description: 'Atendimento estritamente personalizado e garantia de resultados impecáveis em cada atendimento.',
-              ctaText: 'AGENDAR COM ESPECIALISTA',
-              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
-              image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=1600',
-              items: defaultTeam,
-            },
-          },
-        ],
-      },
-    ];
-
-    // Page 5: GALERIA & ESPAÇO
-    const galeriaSections: SiteSectionSchema[] = [
-      {
-        id: `sec-galeria-${Date.now()}`,
-        name: 'Ambiente & Fotos',
-        category: 'gallery',
-        variant: 'HeroSplit',
-        components: [
-          {
-            id: `cmp-galeria-${Date.now()}`,
-            name: 'Galeria Mosaico',
-            category: 'gallery',
-            variant: 'HeroSplit',
-            props: {
-              badge: 'NOSSO ESPAÇO',
-              title: 'Um Ambiente Desenhado para o seu Conforto',
-              subtitle: 'Arquitetura sofisticada, climatização perfeita e degustação VIP em cada atendimento.',
-              image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1600',
-              items: defaultGallery,
-            },
-          },
-        ],
-      },
-    ];
-
-    // Page 6: DEPOIMENTOS
-    const depoimentosSections: SiteSectionSchema[] = [
-      {
-        id: `sec-depoimentos-${Date.now()}`,
-        name: 'Depoimentos de Clientes',
-        category: 'testimonials',
-        variant: 'HeroSplit',
-        components: [
-          {
-            id: `cmp-depoimentos-${Date.now()}`,
-            name: 'Avaliações Google',
-            category: 'testimonials',
-            variant: 'HeroSplit',
-            props: {
-              badge: 'CRÍTICA & SOCIAL PROOF',
-              title: 'O que Nossos Clientes Dizem',
-              subtitle: `Avaliação ${leadData.rating || 4.9} ⭐ no Google com mais de ${leadData.reviewCount || 280} clientes satisfeitos em ${city}.`,
-              description: '"Atendimento incomparável. Desde a recepção até a entrega final, o nível de detalhamento e cuidado supera qualquer expectativa."',
-              ctaText: 'VER AVALIAÇÕES NO GOOGLE',
-              ctaLink: '#',
-              image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1600',
-              items: defaultTestimonials,
-            },
-          },
-        ],
-      },
-    ];
-
-    // Page 7: CONTATO
-    const contatoSections: SiteSectionSchema[] = [
-      {
-        id: `sec-contato-${Date.now()}`,
-        name: 'Localização & Contato',
-        category: 'contact',
-        variant: 'CtaMinimal',
-        components: [
-          {
-            id: `cmp-contato-${Date.now()}`,
-            name: 'Contato Direct',
-            category: 'contact',
-            variant: 'CtaMinimal',
-            props: {
-              title: `VENHA CONHECER A ${brandName.toUpperCase()}`,
-              subtitle: `Endereço: ${leadData.address || `${city} - ${state}`}. WhatsApp: ${cleanPhone}`,
-              ctaText: 'CHAMAR NO WHATSAPP AGORA',
-              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
-              whatsappNumber: cleanPhone,
-            },
-          },
-        ],
-      },
-    ];
-
-    return {
-      id: `site-${Date.now()}`,
-      name: `Site — ${brandName}`,
-      clientName: brandName,
+    const rawSite: SiteSchema = {
+      id: siteId,
+      name: brandName,
+      clientName: leadData.contactPerson || brandName,
       leadId: leadData.id,
       leadData: {
         name: brandName,
@@ -737,40 +380,42 @@ export class AISiteAgent {
         reviewCount: leadData.reviewCount,
         digitalPresence: leadData.digitalPresence,
       },
-      experienceLevel,
+      experienceLevel: 'cinematic',
       status: 'draft',
-      subdomain: brandName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+      subdomain: brandName.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'site',
       version: 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: now,
+      updatedAt: now,
       designSystem: {
         ...DEFAULT_DESIGN_SYSTEM,
-        primaryColor: analysis.primaryColor,
-        accentColor: analysis.accentColor,
-        backgroundColor: analysis.backgroundColor,
-        surfaceColor: analysis.surfaceColor,
-        textColor: analysis.textColor,
-        headingFont: analysis.headingFont,
-        bodyFont: analysis.bodyFont,
-        borderRadius: analysis.borderRadius,
-        spacingScale: analysis.spacingScale,
+        primaryColor: concept.colorPalette.primary,
+        secondaryColor: concept.colorPalette.secondary,
+        accentColor: concept.colorPalette.accent,
+        backgroundColor: concept.colorPalette.background,
+        surfaceColor: concept.colorPalette.surface,
+        textColor: concept.colorPalette.text,
+        headingFont: concept.typography.headingFont,
+        bodyFont: concept.typography.bodyFont,
+        borderRadius: '0.5rem',
+        containerWidth: '1280px',
+        spacingScale: 'spacious',
       },
       seo: {
-        title: `${brandName} — ${category} em ${city}, ${state}`,
-        description: `Conheça ${brandName} em ${city}. ${analysis.tagline}`,
-        keywords: [category, city, state, brandName],
+        title: `${brandName} | ${concept.name} em ${city}`,
+        description: concept.tagline,
+        keywords: [category, city, state, brandName, 'Luxo', 'Alta Costura'],
       },
-      assets: [],
+      assets: [
+        { id: `asset-${Date.now()}`, name: 'Fotografia Comercial Principal', type: 'image', url: imageStrategy.heroImage }
+      ],
       pages: [
         { id: `page-home-${Date.now()}`, title: 'Home', slug: '/', sections: homeSections },
-        { id: `page-sobre-${Date.now()}`, title: 'Sobre / O Atelier', slug: '/sobre', sections: sobreSections },
-        { id: `page-servicos-${Date.now()}`, title: 'Serviços & Rituais', slug: '/servicos', sections: servicosSections },
-        { id: `page-equipe-${Date.now()}`, title: 'Mestres & Equipe', slug: '/equipe', sections: equipeSections },
-        { id: `page-galeria-${Date.now()}`, title: 'Galeria & Espaço', slug: '/galeria', sections: galeriaSections },
-        { id: `page-depoimentos-${Date.now()}`, title: 'Depoimentos', slug: '/depoimentos', sections: depoimentosSections },
-        { id: `page-contato-${Date.now()}`, title: 'Contato & Localização', slug: '/contato', sections: contatoSections },
       ],
     };
+
+    // 4. Run Self-Critique & Quality Gate Loop
+    const { site: finalAuditedSite } = QualityGateEngine.auditAndRefine(rawSite);
+    return finalAuditedSite;
   }
 
   /**
