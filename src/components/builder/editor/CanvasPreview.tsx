@@ -31,6 +31,8 @@ export const CanvasPreview: React.FC = () => {
     }
   };
 
+  const currentPage = activeSite.pages.find((p) => p.id === activePageId) || activeSite.pages[0];
+
   return (
     <div className="flex-1 bg-slate-950 overflow-y-auto relative flex flex-col items-center py-6 px-4 custom-scrollbar">
       {/* AI Processing Overlay */}
@@ -59,6 +61,36 @@ export const CanvasPreview: React.FC = () => {
           onUpdateComponentProps={updateComponentProps}
         />
       </div>
+
+      {/* Floating Section Jump Navigation Bar */}
+      {currentPage?.sections && currentPage.sections.length > 0 && (
+        <div className="sticky bottom-4 mt-6 z-40 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-full px-4 py-2 shadow-2xl flex items-center gap-2 text-xs font-semibold max-w-full overflow-x-auto">
+          <span className="text-[10px] text-amber-400 font-mono uppercase tracking-wider whitespace-nowrap mr-1">
+            Seções ({currentPage.sections.length}):
+          </span>
+          {currentPage.sections.map((sec, idx) => {
+            const isSecSelected = sec.components.some((c) => c.id === selectedComponentId);
+            return (
+              <button
+                key={sec.id}
+                onClick={() => {
+                  const firstCmpId = sec.components[0]?.id;
+                  if (firstCmpId) {
+                    setSelectedComponentId(firstCmpId);
+                  }
+                }}
+                className={`px-3 py-1 rounded-full transition-all text-xs whitespace-nowrap ${
+                  isSecSelected
+                    ? 'bg-amber-500 text-slate-950 font-bold shadow-md'
+                    : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`}
+              >
+                {idx + 1}. {sec.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

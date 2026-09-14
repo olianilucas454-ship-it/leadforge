@@ -49,7 +49,7 @@ export class CreativeDirectorEngine {
    * and selects the strongest direction for the business.
    */
   public static generateCreativeDirection(leadData: any): CreativeDirection {
-    const category = (leadData.category || leadData.niche || 'general').toLowerCase();
+    const category = `${leadData.category || ''} ${leadData.niche || ''} ${leadData.name || ''}`.toLowerCase();
     const name = leadData.name || 'Empresa Exclusiva';
     const city = leadData.city || 'São Paulo';
     const state = leadData.state || 'SP';

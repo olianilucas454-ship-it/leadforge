@@ -98,6 +98,14 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
     loadAllSiteFonts(fontsToLoad);
   }, [site, currentPage, designSystem]);
 
+  useEffect(() => {
+    if (!selectedComponentId) return;
+    const targetEl = document.querySelector(`[data-cmp-id="${selectedComponentId}"]`);
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [selectedComponentId]);
+
   if (!currentPage) {
     return (
       <div className="p-12 text-center text-slate-400">
@@ -195,6 +203,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       return (
         <div
           key={cmp.id}
+          data-cmp-id={cmp.id}
           onClick={() => isEditable && onSelectComponent?.(cmp.id)}
           className={`relative min-h-screen flex flex-col justify-between p-6 md:p-12 overflow-hidden ${wrapperClass}`}
           style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor, ...transformStyle }}
@@ -322,6 +331,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       return (
         <div
           key={cmp.id}
+          data-cmp-id={cmp.id}
           onClick={() => isEditable && onSelectComponent?.(cmp.id)}
           className={`relative min-h-screen flex flex-col justify-between overflow-hidden ${wrapperClass}`}
           style={{ backgroundColor: '#0B0A08', color: '#F5F2EB', ...transformStyle }}
@@ -424,6 +434,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       return (
         <div
           key={cmp.id}
+          data-cmp-id={cmp.id}
           onClick={() => isEditable && onSelectComponent?.(cmp.id)}
           className={`relative min-h-screen flex flex-col justify-between p-6 md:p-12 overflow-hidden ${wrapperClass}`}
           style={{ backgroundColor: '#030A14', color: '#FFFFFF', ...transformStyle }}
@@ -517,6 +528,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       return (
         <div
           key={cmp.id}
+          data-cmp-id={cmp.id}
           onClick={() => isEditable && onSelectComponent?.(cmp.id)}
           className={`relative min-h-screen flex items-center justify-center py-24 px-6 md:px-12 overflow-hidden ${wrapperClass}`}
           style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor }}

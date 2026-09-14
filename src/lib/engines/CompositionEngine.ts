@@ -9,42 +9,16 @@ export class CompositionEngine {
   /**
    * Helper to resolve niche-specific titles, badges, CTAs, menu links, and descriptions.
    */
+  /**
+   * Helper to resolve niche-specific titles, badges, CTAs, menu links, and descriptions.
+   */
   private static getSectorContent(leadData: any) {
-    const cat = (leadData.category || leadData.niche || 'general').toLowerCase();
     const name = leadData.name || 'Empresa Exclusiva';
     const city = leadData.city || 'São Paulo';
+    const cat = `${leadData.category || ''} ${leadData.niche || ''} ${leadData.name || ''}`.toLowerCase();
 
-    if (cat.includes('gastronom') || cat.includes('restaurante') || cat.includes('culinár') || cat.includes('bistrô') || cat.includes('pizzaria') || cat.includes('bar')) {
-      return {
-        heroTitle: 'Sabores autorais. Experiência inesquecível.',
-        heroSubtitle: `Gastronomia contemporânea, ingredientes selecionados e alta culinária em ${city}.`,
-        badge: `GASTRONOMIA AUTORAL • ${city.toUpperCase()}`,
-        navLink1: 'CARDÁPIO',
-        navLink2: 'SOBRE NÓS',
-        navLink3: 'GALERIA',
-        navLink4: 'RESERVAS',
-        ctaText: 'RESERVAR MESA ↗',
-        secondaryCtaText: 'VER CARDÁPIO',
-        headerCta: 'RESERVAS',
-        aboutBadge: '01 / MANIFESTO CULINÁRIO',
-        aboutTitle: 'Gastronomia de alta ordem onde cada prato conta uma história única.',
-        aboutDesc: `No ${name}, cada ingrediente é selecionado a dedo para criar combinações memoráveis. Nossa cozinha combina tradição e inovação para encantar o seu paladar em ${city}.`,
-        servicesBadge: '02 / O CARDÁPIO',
-        servicesTitle: 'Experiências & Seleção Autoral',
-        servicesItems: [
-          { name: 'Menu Degustação Signature', price: 'R$ 280', description: 'Sequência exclusiva de 7 tempos harmonizada por nosso chef master.', duration: '120 MIN' },
-          { name: 'Pratos Principais Autorais', price: 'A partir de R$ 85', description: 'Cortes nobres, frutos do mar frescos e massas artesanais preparadas na hora.', duration: '45 MIN' },
-          { name: 'Carta de Vinhos & Coquetelaria', price: 'Sob Consulta', description: 'Rótulos premiados e coquetéis autorais criados por mixologistas renomados.', duration: '30 MIN' },
-        ],
-        galleryBadge: '03 / O AMBIENTE',
-        galleryTitle: 'Uma atmosfera envolvente para momentos especiais.',
-        ctaTitle: 'SUA MESA ESTÁ ESPERANDO POR VOCÊ.',
-        ctaSubtitle: `Garanta a sua reserva no ${name} e viva uma noite inesquecível em ${city}.`,
-        ctaTextMain: 'RESERVAR MINHA MESA ↗'
-      };
-    }
-
-    if (cat.includes('barb') || cat.includes('barber') || cat.includes('estética masculina')) {
+    // 1. Barbearia & Estética Masculina FIRST
+    if (cat.includes('barb') || cat.includes('barber') || cat.includes('estética masculina') || cat.includes('visagismo')) {
       return {
         heroTitle: 'A precisão não é detalhe. É a sua assinatura.',
         heroSubtitle: `Cortes autorais, ritual de barba tradicional e experiência VIP exclusiva em ${city}.`,
@@ -71,6 +45,37 @@ export class CompositionEngine {
         ctaTitle: 'SEU PRÓXIMO CORTE COMEÇA AQUI.',
         ctaSubtitle: `Agende o seu horário privativo com a equipe da ${name} e vivencie a excelência.`,
         ctaTextMain: 'AGENDAR MEU HORÁRIO AGORA ↗'
+      };
+    }
+
+    // 2. Gastronomia (Restaurante, Bistrô, Pizzaria, Culinária)
+    if (cat.includes('gastronom') || cat.includes('restaurante') || cat.includes('culinár') || cat.includes('bistrô') || cat.includes('pizzaria') || cat.includes('pub') || cat.includes('gourmet')) {
+      return {
+        heroTitle: 'Sabores autorais. Experiência inesquecível.',
+        heroSubtitle: `Gastronomia contemporânea, ingredientes selecionados e alta culinária em ${city}.`,
+        badge: `GASTRONOMIA AUTORAL • ${city.toUpperCase()}`,
+        navLink1: 'CARDÁPIO',
+        navLink2: 'SOBRE NÓS',
+        navLink3: 'GALERIA',
+        navLink4: 'RESERVAS',
+        ctaText: 'RESERVAR MESA ↗',
+        secondaryCtaText: 'VER CARDÁPIO',
+        headerCta: 'RESERVAS',
+        aboutBadge: '01 / MANIFESTO CULINÁRIO',
+        aboutTitle: 'Gastronomia de alta ordem onde cada prato conta uma história única.',
+        aboutDesc: `No ${name}, cada ingrediente é selecionado a dedo para criar combinações memoráveis. Nossa cozinha combina tradição e inovação para encantar o seu paladar em ${city}.`,
+        servicesBadge: '02 / O CARDÁPIO',
+        servicesTitle: 'Experiências & Seleção Autoral',
+        servicesItems: [
+          { name: 'Menu Degustação Signature', price: 'R$ 280', description: 'Sequência exclusiva de 7 tempos harmonizada por nosso chef master.', duration: '120 MIN' },
+          { name: 'Pratos Principais Autorais', price: 'A partir de R$ 85', description: 'Cortes nobres, frutos do mar frescos e massas artesanais preparadas na hora.', duration: '45 MIN' },
+          { name: 'Carta de Vinhos & Coquetelaria', price: 'Sob Consulta', description: 'Rótulos premiados e coquetéis autorais criados por mixologistas renomados.', duration: '30 MIN' },
+        ],
+        galleryBadge: '03 / O AMBIENTE',
+        galleryTitle: 'Uma atmosfera envolvente para momentos especiais.',
+        ctaTitle: 'SUA MESA ESTÁ ESPERANDO POR VOCÊ.',
+        ctaSubtitle: `Garanta a sua reserva no ${name} e viva uma noite inesquecível em ${city}.`,
+        ctaTextMain: 'RESERVAR MINHA MESA ↗'
       };
     }
 
