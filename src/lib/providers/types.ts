@@ -7,6 +7,8 @@ export interface SearchParams {
   limit: number;
   lat?: number;
   lon?: number;
+  searchSource?: 'google_maps' | 'openstreetmap' | 'hybrid';
+  minRating?: number;
 }
 
 export interface RawBusinessData {
@@ -21,6 +23,7 @@ export interface RawBusinessData {
   instagram?: string;
   facebook?: string;
   googleMapsUrl?: string;
+  googlePlaceId?: string;
   address?: string;
   city?: string;
   state?: string;

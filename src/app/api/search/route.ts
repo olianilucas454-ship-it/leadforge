@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { LeadDiscoveryEngine } from '@/lib/engines/LeadDiscoveryEngine';
 import { HybridBusinessDataProvider } from '@/lib/providers';
-import { SearchParams } from '@/lib/types/search';
+import { SearchParams } from '@/lib/providers/types';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,12 +14,14 @@ export async function POST(request: NextRequest) {
       neighborhood: body.neighborhood || undefined,
       radiusKm: Number(body.radiusKm || body.radius || 25),
       limit: Number(body.limit || body.quantity || 50),
+      searchSource: body.searchSource || 'google_maps',
+      minRating: body.minRating ? Number(body.minRating) : undefined,
     };
 
     const provider = new HybridBusinessDataProvider();
-    const engine = new LeadDiscoveryEngine(provider);
+    const engine = new LeadDiscoveryEngine(provider as any);
 
-    const result = await engine.discover(searchParams);
+    const result = await engine.discover(searchParams as any);
 
     return NextResponse.json(result);
   } catch (error: any) {

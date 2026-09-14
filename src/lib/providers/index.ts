@@ -1,13 +1,16 @@
 import { BusinessDataProvider, RawBusinessData, SearchParams } from './types';
+import { GooglePlacesDataProvider } from './GooglePlacesDataProvider';
 import { OverpassDataProvider } from './OverpassDataProvider';
 import { MockBusinessDataProvider } from './MockBusinessDataProvider';
 
 export class HybridBusinessDataProvider implements BusinessDataProvider {
-  public name = 'LeadForge Real Discovery Engine (OpenStreetMap + Live POIs)';
+  public name = 'LeadForge Discovery Engine (Google Maps Primary)';
+  private googleMapsProvider: GooglePlacesDataProvider;
   private overpassProvider: OverpassDataProvider;
   private mockProvider: MockBusinessDataProvider;
 
   constructor() {
+    this.googleMapsProvider = new GooglePlacesDataProvider();
     this.overpassProvider = new OverpassDataProvider();
     this.mockProvider = new MockBusinessDataProvider();
   }
@@ -17,34 +20,49 @@ export class HybridBusinessDataProvider implements BusinessDataProvider {
   }
 
   public async search(params: SearchParams): Promise<RawBusinessData[]> {
-    try {
-      console.log(`[Discovery] Fetching real business leads for "${params.niche}" in ${params.city} - ${params.state}...`);
-      
-      // 1. First attempt: Real OpenStreetMap Overpass live data
-      const realResults = await this.overpassProvider.search(params);
-      
-      if (realResults && realResults.length > 0) {
-        console.log(`[Discovery] Found ${realResults.length} real businesses via OpenStreetMap.`);
-        return realResults;
-      }
+    console.log(`[Discovery Engine] Fetching leads for "${params.niche}" in ${params.city} - ${params.state} (Source: ${params.searchSource || 'google_maps'})...`);
 
-      console.warn(`[Discovery] 0 real results from OSM for "${params.niche}" in ${params.city}. Falling back to demo dataset.`);
-    } catch (err) {
-      console.error('[Discovery] Error fetching real data from OpenStreetMap:', err);
+    // Explicit OpenStreetMap source
+    if (params.searchSource === 'openstreetmap') {
+      try {
+        const osmResults = await this.overpassProvider.search(params);
+        if (osmResults && osmResults.length > 0) return osmResults;
+      } catch (e) {
+        console.error('[Discovery Engine] OpenStreetMap failed:', e);
+      }
     }
 
-    // 2. Fallback to mock data provider if real search returned 0 items
+    // Default / Primary: Google Maps Engine
+    try {
+      const googleResults = await this.googleMapsProvider.search(params);
+      if (googleResults && googleResults.length > 0) {
+        console.log(`[Discovery Engine] Found ${googleResults.length} leads via Google Maps Engine.`);
+        return googleResults;
+      }
+    } catch (err) {
+      console.error('[Discovery Engine] Google Maps search error:', err);
+    }
+
+    // Secondary fallback: OpenStreetMap POIs
+    try {
+      const osmResults = await this.overpassProvider.search(params);
+      if (osmResults && osmResults.length > 0) return osmResults;
+    } catch (err) {
+      console.error('[Discovery Engine] OpenStreetMap fallback error:', err);
+    }
+
+    // Final fallback: Demo Dataset
     return await this.mockProvider.search(params);
   }
 }
 
 let providerInstance: BusinessDataProvider | null = null;
 
-export function getProvider(forceReal = true): BusinessDataProvider {
+export function getProvider(): BusinessDataProvider {
   if (!providerInstance) {
     providerInstance = new HybridBusinessDataProvider();
   }
   return providerInstance;
 }
 
-export { OverpassDataProvider, MockBusinessDataProvider };
+export { GooglePlacesDataProvider, OverpassDataProvider, MockBusinessDataProvider };

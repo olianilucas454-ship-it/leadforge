@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, MapPin, Target, ChevronRight } from 'lucide-react';
+import { Search, MapPin, Target, ChevronRight, Globe, Star } from 'lucide-react';
 import { SearchProgress } from '@/components/search/SearchProgress';
 import { Header } from '@/components/layout/Header';
 import { useRouter } from 'next/navigation';
@@ -22,6 +22,7 @@ export default function SearchPage() {
   const [neighborhood, setNeighborhood] = useState('');
   const [radius, setRadius] = useState(25);
   const [quantity, setQuantity] = useState(100);
+  const [searchSource, setSearchSource] = useState<'google_maps' | 'openstreetmap' | 'hybrid'>('google_maps');
   
   const [isSearching, setIsSearching] = useState(false);
 
@@ -31,10 +32,10 @@ export default function SearchPage() {
     setIsSearching(true);
   };
 
-  const handleSearchComplete = (results: any) => {
+  const handleSearchComplete = () => {
     try {
       localStorage.setItem('leadforge_latest_search', JSON.stringify({
-        params: { niche, city, state, neighborhood, radius, quantity },
+        params: { niche, city, state, neighborhood, radius, quantity, searchSource },
         timestamp: new Date().toISOString()
       }));
     } catch (error) {
@@ -53,21 +54,72 @@ export default function SearchPage() {
       <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 max-w-4xl mx-auto w-full">
         
         <div className="text-center mb-10 w-full">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-accent text-xs font-semibold uppercase tracking-wider mb-4">
+            <Globe className="w-3.5 h-3.5" />
+            Powered by Google Maps Engine
+          </div>
           <h2 className="text-3xl md:text-5xl font-bold text-text-primary mb-4 tracking-tight">
-            Encontre empresas que <span className="text-accent relative inline-block">
-              precisam
+            Encontre empresas no <span className="text-accent relative inline-block">
+              Google Maps
               <svg className="absolute w-full h-3 -bottom-1 left-0 text-accent/30" viewBox="0 0 100 10" preserveAspectRatio="none">
                 <path d="M0,5 Q50,10 100,0" stroke="currentColor" strokeWidth="4" fill="none" />
               </svg>
-            </span> de um site
+            </span> que precisam de um site
           </h2>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-            Prospecção inteligente para venda de sites e serviços digitais
+            Prospecção inteligente de leads locais com nota, avaliações e dados do Google Meu Negócio
           </p>
         </div>
 
         <form onSubmit={handleSearch} className="w-full space-y-8 bg-surface p-6 md:p-8 rounded-2xl border border-border shadow-xl">
           
+          {/* Data Source Selector */}
+          <div className="p-4 bg-background/60 border border-border rounded-xl">
+            <label className="text-xs font-semibold text-text-muted uppercase tracking-wider block mb-3">
+              Fonte Principal de Prospecção
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={() => setSearchSource('google_maps')}
+                className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-xs font-bold uppercase tracking-wider transition-all ${
+                  searchSource === 'google_maps'
+                    ? 'bg-accent border-accent text-black shadow-md'
+                    : 'bg-surface border-border text-text-secondary hover:border-accent/40'
+                }`}
+              >
+                <Star className="w-4 h-4 fill-current" />
+                Google Maps (Recomendado)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSearchSource('hybrid')}
+                className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-xs font-bold uppercase tracking-wider transition-all ${
+                  searchSource === 'hybrid'
+                    ? 'bg-accent border-accent text-black shadow-md'
+                    : 'bg-surface border-border text-text-secondary hover:border-accent/40'
+                }`}
+              >
+                <Globe className="w-4 h-4" />
+                Modo Híbrido
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSearchSource('openstreetmap')}
+                className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-xs font-bold uppercase tracking-wider transition-all ${
+                  searchSource === 'openstreetmap'
+                    ? 'bg-accent border-accent text-black shadow-md'
+                    : 'bg-surface border-border text-text-secondary hover:border-accent/40'
+                }`}
+              >
+                <MapPin className="w-4 h-4" />
+                OpenStreetMap
+              </button>
+            </div>
+          </div>
+
           <div className="space-y-3">
             <label className="text-sm font-medium text-text-secondary block">
               Qual tipo de empresa você quer encontrar?
@@ -193,7 +245,7 @@ export default function SearchPage() {
               disabled={!niche || !city || !state}
               className="group relative w-full max-w-md h-14 bg-accent hover:bg-accent-hover text-black font-bold text-lg rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed overflow-hidden shadow-[0_0_20px_rgba(0,214,143,0.3)]"
             >
-              ENCONTRAR LEADS
+              BUSCAR NO GOOGLE MAPS
               <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
             </button>
@@ -204,7 +256,7 @@ export default function SearchPage() {
       {isSearching && (
         <SearchProgress
           isOpen={isSearching}
-          searchParams={{ niche, city, state, neighborhood, radius, quantity }}
+          searchParams={{ niche, city, state, neighborhood, radius, quantity, searchSource } as any}
           onComplete={handleSearchComplete}
           onViewResults={handleViewResults}
         />
