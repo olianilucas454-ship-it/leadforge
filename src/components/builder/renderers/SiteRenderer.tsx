@@ -15,7 +15,63 @@ interface SiteRendererProps {
   isEditable?: boolean;
   onSelectComponent?: (id: string) => void;
   selectedComponentId?: string | null;
+  onUpdateComponentProps?: (componentId: string, props: Record<string, any>) => void;
 }
+
+const EditableText: React.FC<{
+  text?: string;
+  propKey: string;
+  componentId: string;
+  isEditable?: boolean;
+  className?: string;
+  style?: React.CSSProperties;
+  tagName?: string;
+  onUpdateProps?: (componentId: string, updated: Record<string, any>) => void;
+  onSelectComponent?: (id: string) => void;
+}> = ({ text = '', propKey, componentId, isEditable, className, style, tagName = 'div', onUpdateProps, onSelectComponent }) => {
+  const [localText, setLocalText] = React.useState(text);
+
+  React.useEffect(() => {
+    setLocalText(text);
+  }, [text]);
+
+  const Tag = tagName as any;
+
+  if (!isEditable) {
+    return <Tag className={className} style={style}>{localText}</Tag>;
+  }
+
+  return (
+    <Tag
+      contentEditable
+      suppressContentEditableWarning
+      onFocus={() => {
+        onSelectComponent?.(componentId);
+      }}
+      onBlur={(e: React.FocusEvent<HTMLElement>) => {
+        const val = e.currentTarget.innerText.trim();
+        if (val !== text && onUpdateProps) {
+          onUpdateProps(componentId, { [propKey]: val });
+        }
+      }}
+      onKeyDown={(e: React.KeyboardEvent<HTMLElement>) => {
+        if (e.key === 'Enter' && !e.shiftKey && ['h1', 'h2', 'h3', 'span', 'button'].includes(tagName)) {
+          e.preventDefault();
+          e.currentTarget.blur();
+        }
+      }}
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+        onSelectComponent?.(componentId);
+      }}
+      className={`${className || ''} outline-none focus:ring-2 focus:ring-amber-400 focus:bg-amber-400/20 rounded transition-all hover:ring-2 hover:ring-amber-400/60 cursor-text`}
+      style={style}
+      title="Clique diretamente para editar este texto com o mouse"
+    >
+      {localText}
+    </Tag>
+  );
+};
 
 export const SiteRenderer: React.FC<SiteRendererProps> = ({
   site,
@@ -24,6 +80,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
   isEditable = false,
   onSelectComponent,
   selectedComponentId,
+  onUpdateComponentProps,
 }) => {
   const { designSystem } = site;
   const currentPage = activePageId
@@ -387,48 +444,62 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
             </div>
 
             <div className="hidden md:flex items-center gap-8 text-xs font-bold tracking-widest text-slate-200 uppercase">
-              <span className="hover:text-sky-400 transition-colors cursor-pointer">{props.navLink1 || 'SOBRE'}</span>
-              <span className="hover:text-sky-400 transition-colors cursor-pointer">{props.navLink2 || 'SERVIÇOS'}</span>
-              <span className="hover:text-sky-400 transition-colors cursor-pointer">{props.navLink3 || 'PROJETOS'}</span>
-              <span className="hover:text-sky-400 transition-colors cursor-pointer">{props.navLink4 || 'DIFERENCIAIS'}</span>
+              <EditableText text={props.navLink1 || 'SOBRE'} propKey="navLink1" componentId={cmp.id} isEditable={isEditable} onUpdateProps={onUpdateComponentProps} onSelectComponent={onSelectComponent} tagName="span" className="hover:text-sky-400 transition-colors cursor-pointer" />
+              <EditableText text={props.navLink2 || 'SERVIÇOS'} propKey="navLink2" componentId={cmp.id} isEditable={isEditable} onUpdateProps={onUpdateComponentProps} onSelectComponent={onSelectComponent} tagName="span" className="hover:text-sky-400 transition-colors cursor-pointer" />
+              <EditableText text={props.navLink3 || 'PROJETOS'} propKey="navLink3" componentId={cmp.id} isEditable={isEditable} onUpdateProps={onUpdateComponentProps} onSelectComponent={onSelectComponent} tagName="span" className="hover:text-sky-400 transition-colors cursor-pointer" />
+              <EditableText text={props.navLink4 || 'DIFERENCIAIS'} propKey="navLink4" componentId={cmp.id} isEditable={isEditable} onUpdateProps={onUpdateComponentProps} onSelectComponent={onSelectComponent} tagName="span" className="hover:text-sky-400 transition-colors cursor-pointer" />
             </div>
 
             <button className="px-6 py-2.5 border border-white/30 rounded bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-white hover:bg-white hover:text-black transition-all shrink-0 whitespace-nowrap">
-              {props.headerCta || props.ctaText || 'AGENDAR HORÁRIO'}
+              <EditableText text={props.headerCta || props.ctaText || 'AGENDAR HORÁRIO'} propKey="headerCta" componentId={cmp.id} isEditable={isEditable} onUpdateProps={onUpdateComponentProps} onSelectComponent={onSelectComponent} tagName="span" />
             </button>
           </div>
 
           {/* Bottom Content Row */}
           <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pb-8 mt-auto">
             <div className="lg:col-span-7 space-y-4 text-left">
-              <h1
+              <EditableText
+                text={props.title || 'RESIDÊNCIAS EXCLUSIVAS'}
+                propKey="title"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
                 className={`${(props.title || '').length > 30 ? 'text-2xl sm:text-4xl lg:text-5xl max-w-2xl' : (props.title || '').length > 18 ? 'text-3xl sm:text-5xl lg:text-6xl max-w-3xl' : 'text-5xl sm:text-7xl lg:text-8xl max-w-4xl'} font-extrabold tracking-tight leading-tight uppercase text-white drop-shadow-2xl`}
                 style={{ fontFamily: titleFont || 'Outfit, sans-serif' }}
-              >
-                {props.title || 'RESIDÊNCIAS EXCLUSIVAS'}
-              </h1>
-              <p className="text-base sm:text-lg font-light text-slate-200 tracking-wide max-w-xl" style={{ fontFamily: bodyFont }}>
-                {props.subtitle || 'Imóveis de alto padrão e empreendimentos selecionados.'}
-              </p>
+                tagName="h1"
+              />
+
+              <EditableText
+                text={props.subtitle || 'Imóveis de alto padrão e empreendimentos selecionados.'}
+                propKey="subtitle"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                className="text-base sm:text-lg font-light text-slate-200 tracking-wide max-w-xl"
+                style={{ fontFamily: bodyFont }}
+                tagName="p"
+              />
             </div>
 
             <div className="lg:col-span-5">
-              <div className="p-6 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/15 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold text-white">120+</div>
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Imóveis Nobres</div>
+              <div className="p-5 rounded-2xl bg-black/70 backdrop-blur-xl border border-white/15 grid grid-cols-2 gap-3 text-center shadow-2xl">
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center justify-center">
+                  <div className="text-2xl font-black text-white">120+</div>
+                  <div className="text-[10px] text-slate-300 font-bold uppercase tracking-wider mt-1">Imóveis Nobres</div>
                 </div>
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold text-sky-400">15+ <span className="text-xs">ANOS</span></div>
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Tradição</div>
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center justify-center">
+                  <div className="text-2xl font-black text-sky-400">15+ <span className="text-xs">ANOS</span></div>
+                  <div className="text-[10px] text-slate-300 font-bold uppercase tracking-wider mt-1">Tradição</div>
                 </div>
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold text-white">98%</div>
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Satisfação VIP</div>
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center justify-center">
+                  <div className="text-2xl font-black text-white">98%</div>
+                  <div className="text-[10px] text-slate-300 font-bold uppercase tracking-wider mt-1">Satisfação VIP</div>
                 </div>
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold text-amber-400">4.9★</div>
-                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Avaliação Google</div>
+                <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 flex flex-col items-center justify-center">
+                  <div className="text-2xl font-black text-amber-400">4.9★</div>
+                  <div className="text-[10px] text-slate-300 font-bold uppercase tracking-wider mt-1">Avaliação Google</div>
                 </div>
               </div>
             </div>

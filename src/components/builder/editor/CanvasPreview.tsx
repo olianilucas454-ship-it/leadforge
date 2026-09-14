@@ -6,7 +6,7 @@ import { SiteRenderer } from '../renderers/SiteRenderer';
 import { Monitor, Laptop, Tablet, Smartphone, Sparkles } from 'lucide-react';
 
 export const CanvasPreview: React.FC = () => {
-  const { activeSite, activePageId, breakpoint, isAiProcessing, selectedComponentId, setSelectedComponentId } = useSiteBuilder();
+  const { activeSite, activePageId, breakpoint, isAiProcessing, selectedComponentId, setSelectedComponentId, updateComponentProps } = useSiteBuilder();
 
   if (!activeSite) {
     return (
@@ -56,6 +56,7 @@ export const CanvasPreview: React.FC = () => {
           isEditable={true}
           selectedComponentId={selectedComponentId}
           onSelectComponent={setSelectedComponentId}
+          onUpdateComponentProps={updateComponentProps}
         />
       </div>
     </div>
