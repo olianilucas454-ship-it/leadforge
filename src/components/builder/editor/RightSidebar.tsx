@@ -22,7 +22,11 @@ import {
   Image as ImageIcon,
   MousePointer,
   Film,
-  LayoutGrid
+  LayoutGrid,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify
 } from 'lucide-react';
 import { SiteComponentSchema } from '@/lib/types/siteBuilder';
 
@@ -54,6 +58,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   // Accordion Section Open States
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     content: true,
+    positioning: true,
     typography: true,
     colors: false,
     spacing: false,
@@ -70,6 +75,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
 
   if (!activeSite || !isOpen) return null;
 
+  // Find active page and selected component
   const activePage = activeSite.pages.find((p) => p.id === activePageId) || activeSite.pages[0];
   
   let selectedComponent: SiteComponentSchema | null = null;
@@ -86,6 +92,17 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
   const handlePropChange = (key: string, value: any) => {
     if (!selectedComponentId) return;
     updateComponentProps(selectedComponentId, { [key]: value });
+  };
+
+  const handleStyleOverride = (key: string, value: string) => {
+    if (!selectedComponent || !selectedComponentId) return;
+    const currentOverrides = selectedComponent.styleOverrides || {};
+    updateComponentProps(selectedComponentId, {
+      styleOverrides: {
+        ...currentOverrides,
+        [key]: value,
+      },
+    });
   };
 
   const handleTokenChange = (key: string, value: any) => {
@@ -127,16 +144,17 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
         {/* Section 1: CONTENT */}
         {selectedComponent ? (
-          <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-950/50">
-            <button
-              onClick={() => toggleSection('content')}
-              className="w-full px-3 py-2.5 bg-slate-950 hover:bg-slate-900 flex items-center justify-between text-xs font-semibold text-white transition-colors"
-            >
-              <span className="flex items-center gap-2">
-                <Layers className="w-3.5 h-3.5 text-amber-400" /> Conteúdo do Componente
-              </span>
-              {openSections.content ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
-            </button>
+          <>
+            <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-950/50">
+              <button
+                onClick={() => toggleSection('content')}
+                className="w-full px-3 py-2.5 bg-slate-950 hover:bg-slate-900 flex items-center justify-between text-xs font-semibold text-white transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Layers className="w-3.5 h-3.5 text-amber-400" /> Conteúdo do Componente
+                </span>
+                {openSections.content ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
+              </button>
 
             {openSections.content && (
               <div className="p-3 space-y-3 text-xs border-t border-slate-800/80">
@@ -235,7 +253,100 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
               </div>
             )}
           </div>
-        ) : (
+
+          {/* Section: POSITIONING & ALIGNMENT */}
+          <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-950/50">
+            <button
+              onClick={() => toggleSection('positioning')}
+              className="w-full px-3 py-2.5 bg-slate-950 hover:bg-slate-900 flex items-center justify-between text-xs font-semibold text-white transition-colors"
+            >
+              <span className="flex items-center gap-2">
+                <AlignLeft className="w-3.5 h-3.5 text-amber-400" /> Posicionamento & Alinhamento do Texto
+              </span>
+              {openSections.positioning ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
+            </button>
+
+            {openSections.positioning && (
+              <div className="p-3 space-y-3 text-xs border-t border-slate-800/80">
+                {/* Horizontal Alignment */}
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1 font-medium">Alinhamento Horizontal</label>
+                  <div className="grid grid-cols-4 gap-1 bg-slate-900 p-1 rounded border border-slate-800">
+                    <button
+                      onClick={() => handleStyleOverride('textAlign', 'left')}
+                      className={`py-1.5 rounded flex items-center justify-center transition-colors ${
+                        (selectedComponent.styleOverrides?.textAlign || 'left') === 'left' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                      title="Esquerda"
+                    >
+                      <AlignLeft className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleStyleOverride('textAlign', 'center')}
+                      className={`py-1.5 rounded flex items-center justify-center transition-colors ${
+                        selectedComponent.styleOverrides?.textAlign === 'center' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                      title="Centralizado"
+                    >
+                      <AlignCenter className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleStyleOverride('textAlign', 'right')}
+                      className={`py-1.5 rounded flex items-center justify-center transition-colors ${
+                        selectedComponent.styleOverrides?.textAlign === 'right' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                      title="Direita"
+                    >
+                      <AlignRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleStyleOverride('textAlign', 'justify')}
+                      className={`py-1.5 rounded flex items-center justify-center transition-colors ${
+                        selectedComponent.styleOverrides?.textAlign === 'justify' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                      title="Justificado"
+                    >
+                      <AlignJustify className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Max Width */}
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1 font-medium">Largura Máxima do Bloco de Texto</label>
+                  <select
+                    value={selectedComponent.styleOverrides?.maxWidth || 'max-w-xl'}
+                    onChange={(e) => handleStyleOverride('maxWidth', e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                  >
+                    <option value="max-w-md">Compacto (max-w-md)</option>
+                    <option value="max-w-xl">Médio (max-w-xl)</option>
+                    <option value="max-w-3xl">Amplo (max-w-3xl)</option>
+                    <option value="max-w-5xl">Extra Amplo (max-w-5xl)</option>
+                    <option value="w-full">100% Largura Total (w-full)</option>
+                  </select>
+                </div>
+
+                {/* Title Size Override */}
+                <div>
+                  <label className="block text-[11px] text-slate-400 mb-1 font-medium">Escala do Título</label>
+                  <select
+                    value={selectedComponent.styleOverrides?.fontSize || 'default'}
+                    onChange={(e) => handleStyleOverride('fontSize', e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                  >
+                    <option value="default">Padrão do Tema</option>
+                    <option value="text-2xl">Pequeno (24px)</option>
+                    <option value="text-4xl">Médio (36px)</option>
+                    <option value="text-6xl">Grande (60px)</option>
+                    <option value="text-8xl">Display Ultra (96px)</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
           <div className="p-4 bg-slate-950/60 border border-slate-800 rounded-lg text-center text-slate-500 text-xs">
             Selecione um elemento no canvas para editar o conteúdo.
           </div>

@@ -47,6 +47,12 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       isSelected ? 'ring-2 ring-emerald-400 ring-offset-4 ring-offset-black' : isEditable ? 'hover:outline hover:outline-1 hover:outline-emerald-500/50' : ''
     }`;
 
+    const alignClass = cmp.styleOverrides?.textAlign === 'center' ? 'text-center items-center justify-center mx-auto' :
+                      cmp.styleOverrides?.textAlign === 'right' ? 'text-right items-end justify-end ml-auto' :
+                      cmp.styleOverrides?.textAlign === 'justify' ? 'text-justify' : 'text-left';
+    const widthClass = cmp.styleOverrides?.maxWidth || 'max-w-xl';
+    const fontSizeClass = cmp.styleOverrides?.fontSize || '';
+
     // Render specialized components by variant
     if (variant === 'HeroCinematic') {
       return (
@@ -82,7 +88,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
           )}
 
           <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-7 space-y-6 text-left">
+            <div className={`lg:col-span-7 space-y-6 flex flex-col ${alignClass}`}>
               {props.badge && (
                 <span
                   className="inline-block px-3.5 py-1 rounded-full text-xs font-mono font-semibold uppercase tracking-widest border"
@@ -96,11 +102,11 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
                 </span>
               )}
 
-              <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] font-serif italic">
+              <h1 className={`font-bold tracking-tight leading-[1.1] font-serif italic ${fontSizeClass || 'text-4xl sm:text-6xl lg:text-7xl'}`}>
                 {props.title}
               </h1>
 
-              <p className="text-lg sm:text-xl max-w-xl leading-relaxed" style={{ color: designSystem.mutedColor }}>
+              <p className={`text-lg sm:text-xl leading-relaxed ${widthClass}`} style={{ color: designSystem.mutedColor }}>
                 {props.subtitle || props.description}
               </p>
 

@@ -33,6 +33,8 @@ import Link from 'next/link';
 export const BuilderLayout: React.FC = () => {
   const {
     activeSite,
+    activePageId,
+    setActivePageId,
     breakpoint,
     setBreakpoint,
     undo,
@@ -144,7 +146,7 @@ export const BuilderLayout: React.FC = () => {
 
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xs font-bold text-white tracking-tight truncate max-w-[160px] sm:max-w-xs">
+              <h1 className="text-xs font-bold text-white tracking-tight truncate max-w-[140px] sm:max-w-xs">
                 {activeSite.name}
               </h1>
               <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -157,6 +159,22 @@ export const BuilderLayout: React.FC = () => {
                 <Check className="w-3 h-3" /> Salvo
               </span>
             </div>
+          </div>
+
+          {/* Page Switcher Dropdown */}
+          <div className="hidden lg:flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded border border-slate-800 text-xs">
+            <span className="text-[10px] text-slate-500 font-mono">Página:</span>
+            <select
+              value={activePageId}
+              onChange={(e) => setActivePageId(e.target.value)}
+              className="bg-transparent text-xs font-bold text-amber-400 focus:outline-none cursor-pointer"
+            >
+              {activeSite.pages.map((p) => (
+                <option key={p.id} value={p.id} className="bg-slate-900 text-slate-200">
+                  {p.title} ({p.slug})
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 

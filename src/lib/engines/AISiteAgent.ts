@@ -2,7 +2,7 @@ import { SiteSchema, SiteExperienceLevel, SiteSectionSchema, SiteComponentSchema
 import { DEFAULT_DESIGN_SYSTEM } from '../templates/defaultTemplates';
 
 export interface BusinessAnalysis {
-  sector: 'gastronomy' | 'barbershop' | 'architecture' | 'health' | 'legal' | 'fitness' | 'retail' | 'general';
+  sector: 'barbershop' | 'gastronomy' | 'architecture' | 'health' | 'legal' | 'fitness' | 'retail' | 'general';
   headingFont: string;
   bodyFont: string;
   primaryColor: string;
@@ -28,14 +28,48 @@ export class AISiteAgent {
     const city = leadData.city || 'São Paulo';
     const state = leadData.state || 'SP';
 
-    // 1. Gastronomy (Restaurante, Bar, Pizzaria, Cafe, Bistro, Confeitaria)
+    // 1. Barbearia & Beauty FIRST (Barbearia, Barbeiro, Salão, Estética, Spa, Visagismo)
+    if (
+      category.includes('barbearia') ||
+      category.includes('barbeiro') ||
+      category.includes('estética') ||
+      category.includes('salão') ||
+      category.includes('spa') ||
+      category.includes('beleza') ||
+      name.includes('barber') ||
+      name.includes('barbearia')
+    ) {
+      return {
+        sector: 'barbershop',
+        headingFont: 'Cormorant Garamond, serif',
+        bodyFont: 'Inter, sans-serif',
+        primaryColor: '#0B0C10',
+        accentColor: '#C5A059', // Bronze Gold
+        backgroundColor: '#070709',
+        surfaceColor: '#141519',
+        textColor: '#EAEAEA',
+        borderRadius: '0.375rem',
+        spacingScale: 'spacious',
+        heroImage: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=1600',
+        vibeBadge: `HAUTE BARBIER & ATELIER — ${city.toUpperCase()}, ${state.toUpperCase()}`,
+        tagline: 'A precisão não é detalhe. É a sua assinatura pessoal.',
+        services: [
+          { name: 'Corte Autoral Signature', price: 'R$ 120', description: 'Design personalizado com análise visagista e acabamento à navalha.' },
+          { name: 'Ritual de Barba com Toalha Quente', price: 'R$ 90', description: 'Hidratação profunda com óleos essenciais e alinhamento impecável.' },
+          { name: 'Dia do Noivo & Experiência VIP', price: 'Sob Consulta', description: 'Serviço exclusivo em camarim privativo com degustação de bebidas.' },
+          { name: 'Tratamento Capilar & Camuflagem de Grisalhos', price: 'R$ 150', description: 'Revitalização do couro cabeludo e tonalização natural.' },
+        ],
+      };
+    }
+
+    // 2. Gastronomy (Restaurante, Pizzaria, Cafe, Bistro, Confeitaria, Pub)
     if (
       category.includes('restaurante') ||
       category.includes('gourmet') ||
       category.includes('pizzaria') ||
-      category.includes('bar') ||
       category.includes('café') ||
       category.includes('bistrô') ||
+      (category.includes('bar') && !category.includes('barbearia')) ||
       name.includes('bistrô') ||
       name.includes('restaurante')
     ) {
@@ -55,39 +89,8 @@ export class AISiteAgent {
         tagline: 'Sabores autorais, ingredientes selecionados e experiência gastronômica inesquecível.',
         services: [
           { name: 'Menu Degustação Autoral', price: 'Sob Consulta', description: 'Experiência em etapas harmonizada pelo chef executivo.' },
-          { name: 'Reserva Exclusiva de Salão', price: 'Sob Consulta', description: 'Espaço privativo para eventos coorporativos e celebrações especiais.' },
+          { name: 'Reserva Exclusiva de Salão', price: 'Sob Consulta', description: 'Espaço privativo para eventos corporativos e celebrações especiais.' },
           { name: 'Carta de Vinhos & Cocktails Signature', price: 'Ver Menu', description: 'Rótulos premiados e mixologia autoral refinada.' },
-        ],
-      };
-    }
-
-    // 2. Barbershop & Beauty (Barbearia, Salão, Estética, Spa)
-    if (
-      category.includes('barbearia') ||
-      category.includes('estética') ||
-      category.includes('salão') ||
-      category.includes('spa') ||
-      category.includes('beleza') ||
-      name.includes('barber')
-    ) {
-      return {
-        sector: 'barbershop',
-        headingFont: 'Cormorant Garamond, serif',
-        bodyFont: 'Inter, sans-serif',
-        primaryColor: '#0B0C10',
-        accentColor: '#C5A059', // Bronze Gold
-        backgroundColor: '#070709',
-        surfaceColor: '#141519',
-        textColor: '#EAEAEA',
-        borderRadius: '0.375rem',
-        spacingScale: 'spacious',
-        heroImage: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=1600',
-        vibeBadge: `ATELIER & CORTE MASCULINO — ${city.toUpperCase()}`,
-        tagline: 'A precisão não é detalhe. É a sua assinatura pessoal.',
-        services: [
-          { name: 'Corte Autoral Signature', price: 'R$ 120', description: 'Design personalizado com análise visagista e acabamento à navalha.' },
-          { name: 'Ritual de Barba com Toalha Quente', price: 'R$ 90', description: 'Hidratação profunda com óleos essenciais e alinhamento impecável.' },
-          { name: 'Dia do Noivo & Experiência VIP', price: 'Sob Consulta', description: 'Serviço exclusivo em camarim privativo com degustação de bebidas.' },
         ],
       };
     }
@@ -210,7 +213,7 @@ export class AISiteAgent {
   }
 
   /**
-   * Generates a complete structured SiteSchema tailored to the analyzed business profile.
+   * Generates a complete structured SiteSchema tailored to the analyzed business profile with ALL 7 pre-built pages.
    */
   public static generateFromLead(leadData: any, experienceLevel: SiteExperienceLevel = 'premium'): SiteSchema {
     const analysis = this.analyzeBusiness(leadData);
@@ -221,82 +224,237 @@ export class AISiteAgent {
     const state = leadData.state || 'SP';
     const cleanPhone = leadData.whatsapp || leadData.phone || '5511999999999';
 
-    const heroSection: SiteSectionSchema = {
-      id: `sec-hero-${Date.now()}`,
-      name: 'Hero Section',
-      category: 'hero',
-      variant: experienceLevel === 'cinematic' ? 'HeroCinematic' : 'HeroSplit',
-      components: [
-        {
-          id: `cmp-hero-${Date.now()}`,
-          name: 'Hero Component',
-          category: 'hero',
-          variant: experienceLevel === 'cinematic' ? 'HeroCinematic' : 'HeroSplit',
-          props: {
-            badge: analysis.vibeBadge,
-            title: brandName,
-            subtitle: analysis.tagline,
-            description: leadData.opportunitySuggestion || 'Soluções sob medida com atendimento diferenciado e alto padrão de qualidade.',
-            ctaText: 'FALAR COM ATENDIMENTO',
-            ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
-            secondaryCtaText: 'CONHECER SERVIÇOS',
-            secondaryCtaLink: '#servicos',
-            image: analysis.heroImage,
-            whatsappNumber: cleanPhone,
+    // Page 1: HOME
+    const homeSections: SiteSectionSchema[] = [
+      {
+        id: `sec-hero-${Date.now()}`,
+        name: 'Hero Section',
+        category: 'hero',
+        variant: experienceLevel === 'cinematic' ? 'HeroCinematic' : 'HeroSplit',
+        components: [
+          {
+            id: `cmp-hero-${Date.now()}`,
+            name: 'Hero Component',
+            category: 'hero',
+            variant: experienceLevel === 'cinematic' ? 'HeroCinematic' : 'HeroSplit',
+            props: {
+              badge: analysis.vibeBadge,
+              title: brandName,
+              subtitle: analysis.tagline,
+              description: leadData.opportunitySuggestion || 'Soluções sob medida com atendimento diferenciado e alto padrão de qualidade.',
+              ctaText: 'FALAR COM ATENDIMENTO',
+              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
+              secondaryCtaText: 'CONHECER SERVIÇOS',
+              secondaryCtaLink: '#servicos',
+              image: analysis.heroImage,
+              whatsappNumber: cleanPhone,
+            },
+            animation: {
+              enabled: true,
+              type: experienceLevel === 'cinematic' ? 'frame-sequence' : 'fade-up',
+              scrub: true,
+              start: 'top 80%',
+              end: 'bottom 20%',
+            },
           },
-          animation: {
-            enabled: true,
-            type: experienceLevel === 'cinematic' ? 'frame-sequence' : 'fade-up',
-            scrub: true,
-            start: 'top 80%',
-            end: 'bottom 20%',
+        ],
+      },
+      {
+        id: `sec-serv-${Date.now()}`,
+        name: 'Serviços & Especialidades',
+        category: 'services',
+        variant: 'ServicesInteractive',
+        components: [
+          {
+            id: `cmp-serv-${Date.now()}`,
+            name: 'Lista de Serviços',
+            category: 'services',
+            variant: 'ServicesInteractive',
+            props: {
+              badge: 'ESPECIALIDADES',
+              title: 'Serviços & Soluções Exclusivas',
+              subtitle: 'Conheça nossos diferenciais e rituais de atendimento.',
+              items: analysis.services,
+            },
           },
-        },
-      ],
-    };
+        ],
+      },
+      {
+        id: `sec-cta-${Date.now()}`,
+        name: 'Chamada Final',
+        category: 'cta',
+        variant: 'CtaMinimal',
+        components: [
+          {
+            id: `cmp-cta-${Date.now()}`,
+            name: 'CTA Block',
+            category: 'cta',
+            variant: 'CtaMinimal',
+            props: {
+              title: 'GARANTA SEU HORÁRIO OU ATENDIMENTO.',
+              subtitle: `Entre em contato com ${brandName} e experimente o padrão de excelência.`,
+              ctaText: 'AGENDAR VIA WHATSAPP',
+              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
+              whatsappNumber: cleanPhone,
+            },
+          },
+        ],
+      },
+    ];
 
-    const servicesSection: SiteSectionSchema = {
-      id: `sec-serv-${Date.now()}`,
-      name: 'Serviços & Especialidades',
-      category: 'services',
-      variant: 'ServicesInteractive',
-      components: [
-        {
-          id: `cmp-serv-${Date.now()}`,
-          name: 'Lista de Serviços',
-          category: 'services',
-          variant: 'ServicesInteractive',
-          props: {
-            badge: 'ESPECIALIDADES',
-            title: 'Serviços & Soluções Exclusivas',
-            subtitle: 'Conheça nossos diferenciais e rituais de atendimento.',
-            items: analysis.services,
+    // Page 2: SOBRE / O ATELIER
+    const sobreSections: SiteSectionSchema[] = [
+      {
+        id: `sec-sobre-hero-${Date.now()}`,
+        name: 'Sobre Nossos Valores',
+        category: 'about',
+        variant: 'HeroSplit',
+        components: [
+          {
+            id: `cmp-sobre-hero-${Date.now()}`,
+            name: 'História & Filosofia',
+            category: 'about',
+            variant: 'HeroSplit',
+            props: {
+              badge: 'TRADIÇÃO & PROPÓSITO',
+              title: `A História por trás da ${brandName}`,
+              subtitle: `Fundada em ${city}, nossa marca nasceu com o compromisso inabalável pela qualidade e atendimento diferenciado.`,
+              description: 'Combinamos técnicas consolidadas, materiais nobres e uma atmosfera acolhedora projetada para proporcionar momentos únicos.',
+              ctaText: 'AGENDAR UMA VISITA',
+              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
+              image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1600',
+            },
           },
-        },
-      ],
-    };
+        ],
+      },
+    ];
 
-    const ctaSection: SiteSectionSchema = {
-      id: `sec-cta-${Date.now()}`,
-      name: 'Chamada Final',
-      category: 'cta',
-      variant: 'CtaMinimal',
-      components: [
-        {
-          id: `cmp-cta-${Date.now()}`,
-          name: 'CTA Block',
-          category: 'cta',
-          variant: 'CtaMinimal',
-          props: {
-            title: 'GARANTA SEU HORÁRIO OU ATENDIMENTO.',
-            subtitle: `Entre em contato com ${brandName} e experimente o padrão de excelência.`,
-            ctaText: 'AGENDAR VIA WHATSAPP',
-            ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
-            whatsappNumber: cleanPhone,
+    // Page 3: SERVIÇOS & RITUAIS
+    const servicosSections: SiteSectionSchema[] = [
+      {
+        id: `sec-servicos-full-${Date.now()}`,
+        name: 'Menu Completo de Serviços',
+        category: 'services',
+        variant: 'ServicesInteractive',
+        components: [
+          {
+            id: `cmp-servicos-full-${Date.now()}`,
+            name: 'Cardápio de Rituais',
+            category: 'services',
+            variant: 'ServicesInteractive',
+            props: {
+              badge: 'MENU DE SERVIÇOS',
+              title: 'Experiências Completas & Rituais',
+              subtitle: 'Selecione o procedimento desejado e reserve seu horário com nossos mestres.',
+              items: analysis.services,
+            },
           },
-        },
-      ],
-    };
+        ],
+      },
+    ];
+
+    // Page 4: OS MESTRES / EQUIPE
+    const equipeSections: SiteSectionSchema[] = [
+      {
+        id: `sec-equipe-${Date.now()}`,
+        name: 'Nossos Profissionais',
+        category: 'team',
+        variant: 'HeroSplit',
+        components: [
+          {
+            id: `cmp-equipe-${Date.now()}`,
+            name: 'Mestres & Especialistas',
+            category: 'team',
+            variant: 'HeroSplit',
+            props: {
+              badge: 'EQUIPE DE ELITE',
+              title: 'Mestres & Especialistas Dedicados',
+              subtitle: 'Nossa equipe conta com profissionais renomados com anos de bagagem internacional.',
+              description: 'Atendimento estritamente personalizado e garantia de resultados impecáveis em cada atendimento.',
+              ctaText: 'CONHECER ESPECIALISTAS',
+              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
+              image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=1600',
+            },
+          },
+        ],
+      },
+    ];
+
+    // Page 5: GALERIA & ESPAÇO
+    const galeriaSections: SiteSectionSchema[] = [
+      {
+        id: `sec-galeria-${Date.now()}`,
+        name: 'Ambiente & Fotos',
+        category: 'gallery',
+        variant: 'HeroSplit',
+        components: [
+          {
+            id: `cmp-galeria-${Date.now()}`,
+            name: 'Galeria Mosaico',
+            category: 'gallery',
+            variant: 'HeroSplit',
+            props: {
+              badge: 'NOSSO ESPAÇO',
+              title: 'Um Ambiente Desenhado para o seu Conforto',
+              subtitle: 'Arquitetura sofisticada, climatização perfeita e degustação VIP em cada atendimento.',
+              image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1600',
+            },
+          },
+        ],
+      },
+    ];
+
+    // Page 6: DEPOIMENTOS
+    const depoimentosSections: SiteSectionSchema[] = [
+      {
+        id: `sec-depoimentos-${Date.now()}`,
+        name: 'Depoimentos de Clientes',
+        category: 'testimonials',
+        variant: 'HeroSplit',
+        components: [
+          {
+            id: `cmp-depoimentos-${Date.now()}`,
+            name: 'Avaliações Google',
+            category: 'testimonials',
+            variant: 'HeroSplit',
+            props: {
+              badge: 'CRÍTICA & SOCIAL PROOF',
+              title: 'O que Nossos Clientes Dizem',
+              subtitle: `Avaliação ${leadData.rating || 4.9} ⭐ no Google com mais de ${leadData.reviewCount || 280} clientes satisfeitos em ${city}.`,
+              description: '"Atendimento incomparável. Desde a recepção até a entrega final, o nível de detalhamento e cuidado supera qualquer expectativa."',
+              ctaText: 'VER AVALIAÇÕES NO GOOGLE',
+              ctaLink: '#',
+              image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&q=80&w=1600',
+            },
+          },
+        ],
+      },
+    ];
+
+    // Page 7: CONTATO
+    const contatoSections: SiteSectionSchema[] = [
+      {
+        id: `sec-contato-${Date.now()}`,
+        name: 'Localização & Contato',
+        category: 'contact',
+        variant: 'CtaMinimal',
+        components: [
+          {
+            id: `cmp-contato-${Date.now()}`,
+            name: 'Contato Direct',
+            category: 'contact',
+            variant: 'CtaMinimal',
+            props: {
+              title: `VENHA CONHECER A ${brandName.toUpperCase()}`,
+              subtitle: `Endereço: ${leadData.address || `${city} - ${state}`}. WhatsApp: ${cleanPhone}`,
+              ctaText: 'CHAMAR NO WHATSAPP AGORA',
+              ctaLink: `https://wa.me/55${cleanPhone.replace(/\D/g, '')}`,
+              whatsappNumber: cleanPhone,
+            },
+          },
+        ],
+      },
+    ];
 
     return {
       id: `site-${Date.now()}`,
@@ -340,12 +498,13 @@ export class AISiteAgent {
       },
       assets: [],
       pages: [
-        {
-          id: `page-home-${Date.now()}`,
-          title: 'Home',
-          slug: '/',
-          sections: [heroSection, servicesSection, ctaSection],
-        },
+        { id: `page-home-${Date.now()}`, title: 'Home', slug: '/', sections: homeSections },
+        { id: `page-sobre-${Date.now()}`, title: 'Sobre / O Atelier', slug: '/sobre', sections: sobreSections },
+        { id: `page-servicos-${Date.now()}`, title: 'Serviços & Rituais', slug: '/servicos', sections: servicosSections },
+        { id: `page-equipe-${Date.now()}`, title: 'Mestres & Equipe', slug: '/equipe', sections: equipeSections },
+        { id: `page-galeria-${Date.now()}`, title: 'Galeria & Espaço', slug: '/galeria', sections: galeriaSections },
+        { id: `page-depoimentos-${Date.now()}`, title: 'Depoimentos', slug: '/depoimentos', sections: depoimentosSections },
+        { id: `page-contato-${Date.now()}`, title: 'Contato & Localização', slug: '/contato', sections: contatoSections },
       ],
     };
   }
