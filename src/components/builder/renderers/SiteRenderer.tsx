@@ -109,6 +109,331 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       );
     }
 
+    const translateX = cmp.styleOverrides?.translateX ? parseInt(cmp.styleOverrides.translateX, 10) : 0;
+    const translateY = cmp.styleOverrides?.translateY ? parseInt(cmp.styleOverrides.translateY, 10) : 0;
+    const rotateDeg = cmp.styleOverrides?.rotateDeg ? parseInt(cmp.styleOverrides.rotateDeg, 10) : 0;
+
+    const transformStyle = (translateX || translateY || rotateDeg) ? {
+      transform: `translate(${translateX}px, ${translateY}px) rotate(${rotateDeg}deg)`,
+      transition: 'transform 0.15s ease-out',
+    } : {};
+
+    const CanvaSelectionOverlay = isEditable && isSelected ? (
+      <div className="absolute inset-0 border-2 border-amber-400 pointer-events-none rounded z-50 shadow-[0_0_20px_rgba(251,191,36,0.35)]">
+        <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-amber-400 border border-black rounded-sm pointer-events-none" />
+        <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-amber-400 border border-black rounded-sm pointer-events-none" />
+        <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-amber-400 border border-black rounded-sm pointer-events-none" />
+        <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-amber-400 border border-black rounded-sm pointer-events-none" />
+        <div className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-3 bg-amber-400 border border-black rounded-sm pointer-events-none" />
+        <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 bg-amber-400 border border-black rounded-sm pointer-events-none" />
+        <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-amber-500 text-black text-[10px] font-extrabold px-2.5 py-0.5 rounded shadow-lg uppercase tracking-wider flex items-center gap-1">
+          <span>✨ Modo Canva Selecionado</span>
+        </div>
+      </div>
+    ) : null;
+
+    // 1. Hero EcoDream Glass Architecture
+    if (variant === 'HeroEcoGlass') {
+      const bgImg = props.image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1800';
+      return (
+        <div
+          key={cmp.id}
+          onClick={() => isEditable && onSelectComponent?.(cmp.id)}
+          className={`relative min-h-screen flex flex-col justify-between p-6 md:p-12 overflow-hidden ${wrapperClass}`}
+          style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor, ...transformStyle }}
+        >
+          {CanvaSelectionOverlay}
+          <div
+            className="absolute inset-0 w-full h-full bg-cover bg-center z-0 scale-105 transition-all duration-1000"
+            style={{ backgroundImage: `url(${bgImg})` }}
+          />
+          <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-[2px] z-0" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-slate-950/40 z-0" />
+
+          {/* Top Bar */}
+          <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto pt-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-xs">
+                🌱
+              </div>
+              <span className="font-bold text-lg text-white tracking-tight" style={{ fontFamily: titleFont }}>
+                {site.name || 'EcoDream'}
+              </span>
+            </div>
+
+            <div className="hidden md:flex items-center gap-8 text-xs font-semibold text-slate-300">
+              <span className="hover:text-emerald-400 transition-colors cursor-pointer">About Us</span>
+              <span className="hover:text-emerald-400 transition-colors cursor-pointer">Services</span>
+              <span className="hover:text-emerald-400 transition-colors cursor-pointer">Research</span>
+              <span className="hover:text-emerald-400 transition-colors cursor-pointer">Team</span>
+            </div>
+
+            <button className="px-6 py-2.5 rounded-full border border-slate-200/40 bg-slate-900/60 backdrop-blur-md text-xs font-bold text-white hover:bg-white hover:text-slate-950 transition-all">
+              Contact Us
+            </button>
+          </div>
+
+          {/* Center Main Area: Asymmetric EcoDream Layout */}
+          <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-12 my-auto">
+            <div className="lg:col-span-7 space-y-8 text-left">
+              <h1
+                className={`text-5xl sm:text-7xl lg:text-8xl leading-[1.02] tracking-tight font-extrabold uppercase ${getGradientClass(titleGradient || 'emerald')}`}
+                style={{ fontFamily: titleFont }}
+              >
+                {props.title || 'YOUR VISION OF SUSTAINABLE LIVING'}
+              </h1>
+
+              <div className="pt-2">
+                <a
+                  href={props.ctaLink || '#'}
+                  className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white text-slate-950 font-bold text-xs uppercase tracking-wider shadow-2xl hover:scale-105 transition-all"
+                >
+                  {props.ctaText || 'Lets Explore'}
+                </a>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5">
+              <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/10 shadow-2xl space-y-6">
+                <div className="flex flex-wrap gap-2">
+                  {['Sustainable Living', 'Modern Architecture', 'Energy Efficiency'].map((tag, i) => (
+                    <span key={i} className="px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[11px] text-slate-200 font-semibold">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="space-y-3">
+                  <h3 className="text-lg font-bold text-white" style={{ fontFamily: titleFont }}>
+                    Energy Efficiency & Eco Design
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed" style={{ fontFamily: bodyFont }}>
+                    {props.subtitle || 'Our commitment to eco-friendly practices ensures that every home we create is both beautiful and environmentally responsible.'}
+                  </p>
+                </div>
+
+                <div className="relative h-36 rounded-2xl overflow-hidden border border-white/10 group">
+                  <img
+                    src="https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&q=80&w=800"
+                    alt="Interior"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Floating Glass Ribbons & Badges */}
+          <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 pb-4">
+            <div className="p-5 rounded-2xl bg-amber-950/40 backdrop-blur-xl border border-amber-500/20 text-left space-y-2">
+              <h4 className="text-sm font-bold text-amber-200">Sustainable Materials</h4>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                We use the highest quality, sustainable materials to ensure your home minimizes environmental impact.
+              </p>
+              <span className="inline-block text-xs font-bold text-amber-400 pt-1 cursor-pointer hover:underline">
+                Learn more ↗
+              </span>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-white/10 flex flex-col justify-center items-center text-center space-y-2">
+              <div className="flex -space-x-3">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120" className="w-10 h-10 rounded-full border-2 border-slate-900 object-cover" />
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120" className="w-10 h-10 rounded-full border-2 border-slate-900 object-cover" />
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120" className="w-10 h-10 rounded-full border-2 border-slate-900 object-cover" />
+              </div>
+              <div className="text-2xl font-extrabold text-white">50+</div>
+              <p className="text-xs text-slate-400">Specialists dedicated to sustainable living</p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-white/10 text-left space-y-2">
+              <p className="text-xs text-slate-300 leading-relaxed">
+                We work with you to create a home that meets your unique needs and preferences, blending luxury with sustainability.
+              </p>
+              <span className="inline-block text-xs font-bold text-emerald-400 pt-1 cursor-pointer hover:underline">
+                Learn more ↗
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 2. Hero Archevo Luxury Editorial
+    if (variant === 'HeroArchevo') {
+      const bgImg = props.image || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=1800';
+      return (
+        <div
+          key={cmp.id}
+          onClick={() => isEditable && onSelectComponent?.(cmp.id)}
+          className={`relative min-h-screen flex flex-col justify-between overflow-hidden ${wrapperClass}`}
+          style={{ backgroundColor: '#0B0A08', color: '#F5F2EB', ...transformStyle }}
+        >
+          {CanvaSelectionOverlay}
+          <div
+            className="absolute inset-0 w-full h-full bg-cover bg-center z-0 transition-all duration-1000"
+            style={{ backgroundImage: `url(${bgImg})` }}
+          />
+          <div className="absolute inset-0 bg-black/60 z-0" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0" />
+
+          {/* Header Bar */}
+          <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto px-6 md:px-12 pt-8">
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 border border-amber-400/60 rotate-45 flex items-center justify-center">
+                <span className="text-[10px] text-amber-300 font-bold -rotate-45">A</span>
+              </div>
+              <span className="font-bold text-xl uppercase tracking-widest text-white" style={{ fontFamily: 'Bodoni Moda, serif' }}>
+                {site.name || 'ARCHEVO'}
+              </span>
+            </div>
+
+            <div className="hidden lg:flex items-center gap-10 text-xs tracking-[0.2em] font-semibold text-slate-300 uppercase">
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">Projects</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">Services</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">About</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">Journal</span>
+              <span className="hover:text-amber-400 transition-colors cursor-pointer">Contact</span>
+            </div>
+
+            <button className="px-6 py-2.5 border border-amber-400/40 text-amber-300 hover:bg-amber-400 hover:text-black font-bold text-xs uppercase tracking-[0.2em] transition-all">
+              Start a Project ↗
+            </button>
+          </div>
+
+          {/* Main Editorial Content */}
+          <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 my-auto py-16 w-full space-y-8 text-left">
+            <div className="text-xs font-mono tracking-[0.3em] uppercase text-amber-400 font-bold">
+              {props.badge || 'ARCHITECTURE • INTERIORS • DESIGN'}
+            </div>
+
+            <h1
+              className="text-5xl sm:text-7xl lg:text-8xl leading-[1.05] max-w-4xl text-amber-100 font-normal tracking-normal"
+              style={{ fontFamily: titleFont || 'Bodoni Moda, serif' }}
+            >
+              {props.title || 'Architecture that inspires. Spaces that live.'}
+            </h1>
+
+            <p className="text-base sm:text-lg text-slate-300 max-w-xl leading-relaxed" style={{ fontFamily: bodyFont }}>
+              {props.subtitle || 'We craft timeless architecture and intelligent spaces that blend beauty, function, and sustainability — built around human experience.'}
+            </p>
+
+            <div className="flex flex-wrap items-center gap-6 pt-4">
+              <a
+                href={props.ctaLink || '#'}
+                className="px-9 py-4 bg-amber-200/90 hover:bg-amber-100 text-slate-950 font-bold text-xs uppercase tracking-[0.2em] shadow-2xl transition-all"
+              >
+                {props.ctaText || 'Explore Projects ↗'}
+              </a>
+
+              <button className="flex items-center gap-3 px-6 py-4 border border-white/20 text-white hover:border-amber-400 font-bold text-xs uppercase tracking-[0.2em] transition-all">
+                <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-amber-400 text-xs">
+                  ▶
+                </div>
+                {props.secondaryCtaText || 'Watch Showreel'}
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom Metric Ribbon */}
+          <div className="relative z-10 w-full border-t border-white/10 bg-black/70 backdrop-blur-md py-6 px-6 md:px-12">
+            <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 items-center text-left">
+              <div className="space-y-1">
+                <div className="text-3xl sm:text-4xl font-normal text-amber-200" style={{ fontFamily: 'Bodoni Moda, serif' }}>120+</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">Projects Completed</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl sm:text-4xl font-normal text-amber-200" style={{ fontFamily: 'Bodoni Moda, serif' }}>15+</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">Years of Experience</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl sm:text-4xl font-normal text-amber-200" style={{ fontFamily: 'Bodoni Moda, serif' }}>80+</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">Experts & Designers</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-3xl sm:text-4xl font-normal text-amber-200" style={{ fontFamily: 'Bodoni Moda, serif' }}>12</div>
+                <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">Countries Worked</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 3. Hero Lavilla Luxury Real Estate Overlay
+    if (variant === 'HeroLavilla') {
+      const bgImg = props.image || 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1800';
+      return (
+        <div
+          key={cmp.id}
+          onClick={() => isEditable && onSelectComponent?.(cmp.id)}
+          className={`relative min-h-screen flex flex-col justify-between p-6 md:p-12 overflow-hidden ${wrapperClass}`}
+          style={{ backgroundColor: '#030A14', color: '#FFFFFF', ...transformStyle }}
+        >
+          {CanvaSelectionOverlay}
+          <div
+            className="absolute inset-0 w-full h-full bg-cover bg-center z-0 transition-all duration-1000 scale-105"
+            style={{ backgroundImage: `url(${bgImg})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-black/30 to-black/50 z-0" />
+
+          {/* Header */}
+          <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto pt-4">
+            <span className="font-extrabold text-2xl tracking-widest text-white uppercase" style={{ fontFamily: titleFont }}>
+              {site.name || 'LAVILLA'}
+            </span>
+
+            <div className="hidden md:flex items-center gap-8 text-xs font-bold tracking-widest text-slate-200 uppercase">
+              <span className="hover:text-sky-400 transition-colors cursor-pointer">ПОЧЕМУ МЫ</span>
+              <span className="hover:text-sky-400 transition-colors cursor-pointer">ВИЛЛЫ</span>
+              <span className="hover:text-sky-400 transition-colors cursor-pointer">АПАРТАМЕНТЫ</span>
+              <span className="hover:text-sky-400 transition-colors cursor-pointer">ДОХОДНОСТЬ</span>
+            </div>
+
+            <button className="px-6 py-2.5 border border-white/30 rounded bg-white/10 backdrop-blur-md text-xs font-bold uppercase tracking-wider text-white hover:bg-white hover:text-black transition-all">
+              {props.ctaText || 'СКАЧАТЬ КАТАЛОГ ↓'}
+            </button>
+          </div>
+
+          {/* Bottom Content Row */}
+          <div className="relative z-10 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-end pb-8 mt-auto">
+            <div className="lg:col-span-6 space-y-4 text-left">
+              <h1
+                className="text-6xl sm:text-8xl lg:text-9xl font-black tracking-tight leading-none uppercase text-white drop-shadow-2xl"
+                style={{ fontFamily: titleFont || 'Outfit, sans-serif' }}
+              >
+                {props.title || 'LAVILLA'}
+              </h1>
+              <p className="text-lg sm:text-xl font-light text-slate-200 tracking-wide" style={{ fontFamily: bodyFont }}>
+                {props.subtitle || 'Дизайнерская недвижимость на Бали'}
+              </p>
+            </div>
+
+            <div className="lg:col-span-6">
+              <div className="p-6 rounded-2xl bg-black/60 backdrop-blur-xl border border-white/15 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                <div className="space-y-1">
+                  <div className="text-2xl font-bold text-white">1-3</div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Спальни</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-2xl font-bold text-sky-400">10 <span className="text-xs">MИH</span></div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">До пляжа</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-2xl font-bold text-white">70 — 145 <span className="text-xs">М²</span></div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Метраж вилл</div>
+                </div>
+                <div className="space-y-1">
+                  <div className="text-2xl font-bold text-amber-400">25+25</div>
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wider">Аренда земли</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // Hero Variants
     if (variant === 'HeroFullScreen' || variant === 'HeroVideo' || variant === 'HeroLuxury' || variant === 'HeroRestaurant' || variant === 'HeroArchitecture') {
       const overlayOpacity = (props.overlayOpacity ?? 60) / 100;

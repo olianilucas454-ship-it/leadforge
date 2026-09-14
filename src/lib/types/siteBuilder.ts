@@ -91,7 +91,10 @@ export type HeroVariant =
   | 'HeroMinimal'
   | 'HeroRestaurant'
   | 'HeroArchitecture'
-  | 'HeroLuxury';
+  | 'HeroLuxury'
+  | 'HeroEcoGlass'
+  | 'HeroArchevo'
+  | 'HeroLavilla';
 
 export interface ComponentProps {
   title?: string;

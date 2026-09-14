@@ -630,6 +630,9 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                         }}
                         className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
                       >
+                        <option value="HeroEcoGlass">🌿 EcoDream Glass (Vidro Organico & Sustentavel)</option>
+                        <option value="HeroArchevo">🏛️ Archevo Luxury (Arquitetura & Metricas)</option>
+                        <option value="HeroLavilla">🌴 Lavilla Luxury Villa (Real Estate Overlay)</option>
                         <option value="HeroFullScreen">Hero FullScreen (Fundo Cheio)</option>
                         <option value="HeroVideo">Hero Video (MP4 em Autoplay)</option>
                         <option value="HeroLuxury">Hero Luxury (Bronze / Ouro)</option>
@@ -906,35 +909,78 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                   </select>
                 </div>
 
-                {/* Vertical Margins */}
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="block text-[11px] text-slate-400 mb-1 font-medium">Margem Superior</label>
-                    <select
-                      value={selectedComponent.styleOverrides?.marginTop || '0px'}
-                      onChange={(e) => handleStyleOverride('marginTop', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
-                    >
-                      <option value="0px">Sem Margem (0px)</option>
-                      <option value="16px">Pequeno (16px)</option>
-                      <option value="32px">Médio (32px)</option>
-                      <option value="64px">Grande (64px)</option>
-                    </select>
+                {/* Canva Position Controls: Translate X, Translate Y, Rotation */}
+                <div className="pt-3 border-t border-slate-800 space-y-3">
+                  <div className="flex items-center gap-1 text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+                    <MousePointer className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Ajuste de Posição Livre (Estilo Canva)</span>
                   </div>
 
+                  {/* Translate X */}
                   <div>
-                    <label className="block text-[11px] text-slate-400 mb-1 font-medium">Margem Inferior</label>
-                    <select
-                      value={selectedComponent.styleOverrides?.marginBottom || '0px'}
-                      onChange={(e) => handleStyleOverride('marginBottom', e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
-                    >
-                      <option value="0px">Sem Margem (0px)</option>
-                      <option value="16px">Pequeno (16px)</option>
-                      <option value="32px">Médio (32px)</option>
-                      <option value="64px">Grande (64px)</option>
-                    </select>
+                    <div className="flex justify-between text-[11px] text-slate-400 mb-1 font-medium">
+                      <span>Deslocamento Horizontal (Eixo X)</span>
+                      <span className="text-amber-400 font-mono">
+                        {selectedComponent.styleOverrides?.translateX || '0'}px
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="-150"
+                      max="150"
+                      value={parseInt(selectedComponent.styleOverrides?.translateX || '0', 10)}
+                      onChange={(e) => handleStyleOverride('translateX', `${e.target.value}`)}
+                      className="w-full accent-amber-500 cursor-pointer"
+                    />
                   </div>
+
+                  {/* Translate Y */}
+                  <div>
+                    <div className="flex justify-between text-[11px] text-slate-400 mb-1 font-medium">
+                      <span>Deslocamento Vertical (Eixo Y)</span>
+                      <span className="text-amber-400 font-mono">
+                        {selectedComponent.styleOverrides?.translateY || '0'}px
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="-150"
+                      max="150"
+                      value={parseInt(selectedComponent.styleOverrides?.translateY || '0', 10)}
+                      onChange={(e) => handleStyleOverride('translateY', `${e.target.value}`)}
+                      className="w-full accent-amber-500 cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Rotation */}
+                  <div>
+                    <div className="flex justify-between text-[11px] text-slate-400 mb-1 font-medium">
+                      <span>Rotação Livre (Graus)</span>
+                      <span className="text-amber-400 font-mono">
+                        {selectedComponent.styleOverrides?.rotateDeg || '0'}°
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="-15"
+                      max="15"
+                      value={parseInt(selectedComponent.styleOverrides?.rotateDeg || '0', 10)}
+                      onChange={(e) => handleStyleOverride('rotateDeg', `${e.target.value}`)}
+                      className="w-full accent-amber-500 cursor-pointer"
+                    />
+                  </div>
+
+                  {/* Reset Canva Transforms Button */}
+                  <button
+                    onClick={() => {
+                      handleStyleOverride('translateX', '0');
+                      handleStyleOverride('translateY', '0');
+                      handleStyleOverride('rotateDeg', '0');
+                    }}
+                    className="w-full py-1 text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-400 rounded border border-slate-700 font-semibold"
+                  >
+                    Resetar Posição Canva
+                  </button>
                 </div>
               </div>
             )}

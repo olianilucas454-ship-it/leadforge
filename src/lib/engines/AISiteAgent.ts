@@ -952,7 +952,98 @@ export class AISiteAgent {
     const updated = JSON.parse(JSON.stringify(site)) as SiteSchema;
     const prompt = (promptText || '').toLowerCase();
 
-    if (presetId === 'haute-barbier' || prompt.includes('barbearia') || prompt.includes('barber') || prompt.includes('ouro') || prompt.includes('haute')) {
+    if (presetId === 'ecodream-architecture' || prompt.includes('ecodream') || prompt.includes('vidro') || prompt.includes('sustentável') || prompt.includes('glass')) {
+      updated.designSystem.headingFont = 'Outfit, sans-serif';
+      updated.designSystem.bodyFont = 'Inter, sans-serif';
+      updated.designSystem.accentColor = '#10B981'; // Emerald Green
+      updated.designSystem.primaryColor = '#0F172A';
+      updated.designSystem.backgroundColor = '#090D16';
+      updated.designSystem.surfaceColor = 'rgba(15, 23, 42, 0.6)';
+      updated.designSystem.textColor = '#F8FAFC';
+      updated.designSystem.borderRadius = '1.5rem';
+
+      updated.pages.forEach((p) => {
+        p.sections.forEach((sec) => {
+          sec.components.forEach((cmp) => {
+            cmp.styleOverrides = {
+              ...cmp.styleOverrides,
+              titleFontFamily: 'Outfit, sans-serif',
+              gradient: 'emerald',
+              fontWeight: 'font-bold',
+              letterSpacing: 'tracking-tight',
+            };
+            if (cmp.category === 'hero') {
+              cmp.variant = 'HeroEcoGlass';
+              cmp.props.image = 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1800';
+              cmp.props.badge = 'SUSTAINABLE LIVING';
+              cmp.props.title = 'YOUR VISION OF SUSTAINABLE LIVING';
+              cmp.props.subtitle = 'Our commitment to eco-friendly practices ensures that every home we create is both beautiful and environmentally responsible.';
+              cmp.props.ctaText = 'LETS EXPLORE';
+            }
+          });
+        });
+      });
+    } else if (presetId === 'archevo-editorial' || prompt.includes('archevo') || prompt.includes('inspire') || prompt.includes('monumental')) {
+      updated.designSystem.headingFont = 'Bodoni Moda, serif';
+      updated.designSystem.bodyFont = 'Inter, sans-serif';
+      updated.designSystem.accentColor = '#D4AF37'; // Champagne Gold
+      updated.designSystem.primaryColor = '#12100E';
+      updated.designSystem.backgroundColor = '#0B0A08';
+      updated.designSystem.surfaceColor = '#1A1815';
+      updated.designSystem.textColor = '#F5F2EB';
+      updated.designSystem.borderRadius = '0.25rem';
+
+      updated.pages.forEach((p) => {
+        p.sections.forEach((sec) => {
+          sec.components.forEach((cmp) => {
+            cmp.styleOverrides = {
+              ...cmp.styleOverrides,
+              titleFontFamily: 'Bodoni Moda, serif',
+              gradient: 'gold',
+              fontWeight: 'font-normal',
+            };
+            if (cmp.category === 'hero') {
+              cmp.variant = 'HeroArchevo';
+              cmp.props.image = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=1800';
+              cmp.props.badge = 'ARCHITECTURE • INTERIORS • DESIGN';
+              cmp.props.title = 'Architecture that inspires. Spaces that live.';
+              cmp.props.subtitle = 'We craft timeless architecture and intelligent spaces that blend beauty, function, and sustainability — built around human experience.';
+              cmp.props.ctaText = 'EXPLORE PROJECTS ↗';
+              cmp.props.secondaryCtaText = 'WATCH SHOWREEL';
+            }
+          });
+        });
+      });
+    } else if (presetId === 'lavilla-realestate' || prompt.includes('lavilla') || prompt.includes('bali') || prompt.includes('villa') || prompt.includes('piscina')) {
+      updated.designSystem.headingFont = 'Outfit, sans-serif';
+      updated.designSystem.bodyFont = 'Plus Jakarta Sans, sans-serif';
+      updated.designSystem.accentColor = '#38BDF8'; // Sky Blue
+      updated.designSystem.primaryColor = '#061325';
+      updated.designSystem.backgroundColor = '#030A14';
+      updated.designSystem.surfaceColor = '#0B1D36';
+      updated.designSystem.textColor = '#FFFFFF';
+      updated.designSystem.borderRadius = '0.5rem';
+
+      updated.pages.forEach((p) => {
+        p.sections.forEach((sec) => {
+          sec.components.forEach((cmp) => {
+            cmp.styleOverrides = {
+              ...cmp.styleOverrides,
+              titleFontFamily: 'Outfit, sans-serif',
+              fontWeight: 'font-extrabold',
+            };
+            if (cmp.category === 'hero') {
+              cmp.variant = 'HeroLavilla';
+              cmp.props.image = 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=1800';
+              cmp.props.badge = 'LUXURY REAL ESTATE BALI';
+              cmp.props.title = 'LAVILLA';
+              cmp.props.subtitle = 'Дизайнерская недвижимость на Бали / Imóveis Exclusivos de Alta Gastronomia e Luxo';
+              cmp.props.ctaText = 'СКАЧАТЬ КАТАЛОГ ↓';
+            }
+          });
+        });
+      });
+    } else if (presetId === 'haute-barbier' || prompt.includes('barbearia') || prompt.includes('barber') || prompt.includes('ouro') || prompt.includes('haute')) {
       updated.designSystem.headingFont = 'Cinzel, serif';
       updated.designSystem.bodyFont = 'Inter, sans-serif';
       updated.designSystem.accentColor = '#C5A059'; // Imperial Gold

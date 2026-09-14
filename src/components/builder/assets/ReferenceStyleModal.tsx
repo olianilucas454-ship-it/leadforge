@@ -34,6 +34,33 @@ export const ReferenceStyleModal: React.FC<ReferenceStyleModalProps> = ({
 
   const PRESETS = [
     {
+      id: 'ecodream-architecture',
+      title: 'EcoDream Glass (Arquitetura Futurista)',
+      tag: 'Arquitetura & Vidro Organico',
+      desc: 'Cards de vidro fosco flutuantes, fundo de mansão ecológica futurista, tags de sustentabilidade e estatísticas em pill.',
+      accent: '#10B981',
+      headingFont: 'Outfit, sans-serif',
+      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=600',
+    },
+    {
+      id: 'archevo-editorial',
+      title: 'Archevo Luxury (Arquitetura Monumental)',
+      tag: 'Design de Interiores & Luxo',
+      desc: 'Títulos monumentais em Bodoni Moda, iluminação warm cinema, botão Play Showreel e fita horizontal de métricas na base.',
+      accent: '#D4AF37',
+      headingFont: 'Bodoni Moda, serif',
+      image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=600',
+    },
+    {
+      id: 'lavilla-realestate',
+      title: 'Lavilla Luxury Villa (Imobiliária Balneário)',
+      tag: 'Real Estate & Balneários',
+      desc: 'Overlay gigante no canto inferior esquerdo, fundo tropical com piscina iluminada e faixa de dados e metragens.',
+      accent: '#38BDF8',
+      headingFont: 'Outfit, sans-serif',
+      image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=600',
+    },
+    {
       id: 'haute-barbier',
       title: 'Haute Barbier Imperial (Ouro & Serifas)',
       tag: 'Alta Barbearia & Luxo',
