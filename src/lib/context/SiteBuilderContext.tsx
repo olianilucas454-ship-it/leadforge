@@ -21,6 +21,7 @@ interface SiteBuilderContextType {
   breakpoint: BreakpointMode;
   isAiProcessing: boolean;
   auditResult: QualityAuditResult | null;
+  aiActionLogs: import('../types/siteBuilder').AiActionLog[];
   
   // Navigation & Actions
   selectSite: (siteId: string) => void;
@@ -233,14 +234,17 @@ export const SiteBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
     saveSite(updated);
   };
 
+  const [aiActionLogs, setAiActionLogs] = useState<import('../types/siteBuilder').AiActionLog[]>([]);
+
   // Execute AI Natural Language Command
   const executeAiCommand = (command: string) => {
     if (!activeSite) return;
     setIsAiProcessing(true);
 
     setTimeout(() => {
-      const updated = AISiteAgent.executeCommand(activeSite, command);
-      saveSite(updated);
+      const { updatedSite, log } = AISiteAgent.executeCommandWithLog(activeSite, command);
+      saveSite(updatedSite);
+      setAiActionLogs((prev) => [log, ...prev]);
       setIsAiProcessing(false);
     }, 600);
   };
@@ -287,6 +291,7 @@ export const SiteBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
         breakpoint,
         isAiProcessing,
         auditResult,
+        aiActionLogs,
         selectSite,
         createNewSiteFromLead,
         findLeadAndCreateSite,

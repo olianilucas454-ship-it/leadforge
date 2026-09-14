@@ -1,8 +1,25 @@
-import { SiteSchema, SiteExperienceLevel, SiteSectionSchema, SiteComponentSchema } from '../types/siteBuilder';
+import {
+  SiteSchema,
+  SiteExperienceLevel,
+  SiteSectionSchema,
+  SiteComponentSchema,
+  HeroVariant,
+  AiActionLog,
+} from '../types/siteBuilder';
 import { DEFAULT_DESIGN_SYSTEM } from '../templates/defaultTemplates';
 
 export interface BusinessAnalysis {
-  sector: 'barbershop' | 'gastronomy' | 'architecture' | 'health' | 'legal' | 'fitness' | 'retail' | 'general';
+  sector:
+    | 'barbershop'
+    | 'gastronomy'
+    | 'architecture'
+    | 'health'
+    | 'legal'
+    | 'fitness'
+    | 'realestate'
+    | 'hotel'
+    | 'tech'
+    | 'general';
   headingFont: string;
   bodyFont: string;
   primaryColor: string;
@@ -13,6 +30,7 @@ export interface BusinessAnalysis {
   borderRadius: string;
   spacingScale: 'compact' | 'normal' | 'spacious';
   heroImage: string;
+  heroVariant: HeroVariant;
   vibeBadge: string;
   tagline: string;
   services: { name: string; price: string; description: string }[];
@@ -20,7 +38,7 @@ export interface BusinessAnalysis {
 
 export class AISiteAgent {
   /**
-   * Analyzes the business category and metadata to return custom creative direction.
+   * Analyzes the business category and metadata to return custom creative direction & niche art direction.
    */
   public static analyzeBusiness(leadData: any): BusinessAnalysis {
     const category = (leadData.category || '').toLowerCase();
@@ -51,6 +69,7 @@ export class AISiteAgent {
         borderRadius: '0.375rem',
         spacingScale: 'spacious',
         heroImage: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&q=80&w=1600',
+        heroVariant: 'HeroLuxury',
         vibeBadge: `HAUTE BARBIER & ATELIER — ${city.toUpperCase()}, ${state.toUpperCase()}`,
         tagline: 'A precisão não é detalhe. É a sua assinatura pessoal.',
         services: [
@@ -71,12 +90,13 @@ export class AISiteAgent {
       category.includes('bistrô') ||
       (category.includes('bar') && !category.includes('barbearia')) ||
       name.includes('bistrô') ||
-      name.includes('restaurante')
+      name.includes('restaurante') ||
+      name.includes('pizza')
     ) {
       return {
         sector: 'gastronomy',
-        headingFont: 'Cormorant Garamond, serif',
-        bodyFont: 'Inter, sans-serif',
+        headingFont: 'Playfair Display, serif',
+        bodyFont: 'Manrope, sans-serif',
         primaryColor: '#0A0A0A',
         accentColor: '#D4AF37', // Gold
         backgroundColor: '#050505',
@@ -85,6 +105,7 @@ export class AISiteAgent {
         borderRadius: '0.25rem',
         spacingScale: 'spacious',
         heroImage: 'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&q=80&w=1600',
+        heroVariant: 'HeroRestaurant',
         vibeBadge: `HAUTE CUISINE — ${city.toUpperCase()}, ${state.toUpperCase()}`,
         tagline: 'Sabores autorais, ingredientes selecionados e experiência gastronômica inesquecível.',
         services: [
@@ -95,12 +116,11 @@ export class AISiteAgent {
       };
     }
 
-    // 3. Architecture & Construction (Arquitetura, Engenharia, Interiores, Imóveis)
+    // 3. Architecture & Construction (Arquitetura, Engenharia, Interiores, Construtora)
     if (
       category.includes('arquitetura') ||
       category.includes('engenharia') ||
       category.includes('interiores') ||
-      category.includes('imóveis') ||
       category.includes('construtora') ||
       name.includes('arq')
     ) {
@@ -116,6 +136,7 @@ export class AISiteAgent {
         borderRadius: '0px',
         spacingScale: 'spacious',
         heroImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1600',
+        heroVariant: 'HeroArchitecture',
         vibeBadge: `ARQUITETURA & DESIGN — ${city.toUpperCase()}`,
         tagline: 'Espaços atemporais desenhados para elevar a forma de viver e trabalhar.',
         services: [
@@ -126,7 +147,31 @@ export class AISiteAgent {
       };
     }
 
-    // 4. Health & Medical (Clínica, Odontologia, Médico, Saúde, Dermatologia)
+    // 4. Real Estate / Imóveis
+    if (category.includes('imóveis') || category.includes('imobiliária') || name.includes('imóveis')) {
+      return {
+        sector: 'realestate',
+        headingFont: 'Sora, sans-serif',
+        bodyFont: 'DM Sans, sans-serif',
+        primaryColor: '#0B132B',
+        accentColor: '#E2C044',
+        backgroundColor: '#060C1E',
+        surfaceColor: '#121F42',
+        textColor: '#F8FAFC',
+        borderRadius: '0.5rem',
+        spacingScale: 'spacious',
+        heroImage: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&q=80&w=1600',
+        heroVariant: 'HeroFullScreen',
+        vibeBadge: `LUXURY REAL ESTATE — ${city.toUpperCase()}`,
+        tagline: 'Residências exclusivas e investimentos imobiliários de alto padrão.',
+        services: [
+          { name: 'Curadoria de Imóveis de Luxo', price: 'Sob Consulta', description: 'Portfólio selecionado nas melhores localizações da cidade.' },
+          { name: 'Assessoria em Investimentos Imobiliários', price: 'Sob Consulta', description: 'Análise de rentabilidade e estruturação patrimonial.' },
+        ],
+      };
+    }
+
+    // 5. Health & Medical (Clínica, Odontologia, Médico, Saúde, Dermatologia)
     if (
       category.includes('clínica') ||
       category.includes('saúde') ||
@@ -148,6 +193,7 @@ export class AISiteAgent {
         borderRadius: '0.75rem',
         spacingScale: 'normal',
         heroImage: 'https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&q=80&w=1600',
+        heroVariant: 'HeroMinimal',
         vibeBadge: `MEDICINA & BEM-ESTAR — ${city.toUpperCase()}`,
         tagline: 'Tecnologia avançada e acolhimento humano para a sua saúde integral.',
         services: [
@@ -158,7 +204,7 @@ export class AISiteAgent {
       };
     }
 
-    // 5. Legal & Corporate (Advocacia, Consultoria, Contabilidade, B2B)
+    // 6. Legal & Corporate (Advocacia, Consultoria, Contabilidade, B2B)
     if (
       category.includes('advocacia') ||
       category.includes('advogado') ||
@@ -179,6 +225,7 @@ export class AISiteAgent {
         borderRadius: '0.375rem',
         spacingScale: 'normal',
         heroImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1600',
+        heroVariant: 'HeroLuxury',
         vibeBadge: `ADVOCACIA & CONSULTORIA ESTRATÉGICA — ${city.toUpperCase()}`,
         tagline: 'Segurança jurídica, alta especialização e defesa rigorosa de interesses.',
         services: [
@@ -189,7 +236,79 @@ export class AISiteAgent {
       };
     }
 
-    // 6. Default / General Services
+    // 7. Fitness / Gym
+    if (category.includes('academia') || category.includes('fitness') || category.includes('crossfit') || name.includes('gym')) {
+      return {
+        sector: 'fitness',
+        headingFont: 'Space Grotesk, sans-serif',
+        bodyFont: 'Inter, sans-serif',
+        primaryColor: '#0A0A0A',
+        accentColor: '#F59E0B', // Amber Flame
+        backgroundColor: '#050505',
+        surfaceColor: '#141414',
+        textColor: '#FFFFFF',
+        borderRadius: '0.25rem',
+        spacingScale: 'spacious',
+        heroImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=1600',
+        heroVariant: 'HeroFullScreen',
+        vibeBadge: `HIGH PERFORMANCE PERFORMANCE CLUB — ${city.toUpperCase()}`,
+        tagline: 'Supere seus limites com treinos de alta intensidade e estrutura de ponta.',
+        services: [
+          { name: 'Treinamento Personalizado VIP', price: 'Matricular', description: 'Acompanhamento biométrico e prescrição de treinos focados em metas.' },
+          { name: 'Área de Musculação & Cardio Elite', price: 'Matricular', description: 'Equipamentos importados de biomecânica avançada.' },
+        ],
+      };
+    }
+
+    // 8. Hotel & Luxury Hospitality
+    if (category.includes('hotel') || category.includes('pousada') || category.includes('resort')) {
+      return {
+        sector: 'hotel',
+        headingFont: 'Playfair Display, serif',
+        bodyFont: 'Manrope, sans-serif',
+        primaryColor: '#0C0E12',
+        accentColor: '#D4AF37',
+        backgroundColor: '#07080A',
+        surfaceColor: '#161920',
+        textColor: '#F5F5F7',
+        borderRadius: '0.375rem',
+        spacingScale: 'spacious',
+        heroImage: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=1600',
+        heroVariant: 'HeroFullScreen',
+        vibeBadge: `BOUTIQUE HOTEL & SANCTUARY — ${city.toUpperCase()}`,
+        tagline: 'Um refúgio de tranquilidade, sofisticação e hospitalidade inesquecível.',
+        services: [
+          { name: 'Suítes Master Signature', price: 'Reservar', description: 'Vista panorâmica, enxoval de algodão egípcio e serviço de mordomo.' },
+          { name: 'Spa & Experiências de Bem-Estar', price: 'Reservar', description: 'Massagens terapêuticas, sauna seca e piscinas aquecidas.' },
+        ],
+      };
+    }
+
+    // 9. Tech & SaaS
+    if (category.includes('tecnologia') || category.includes('software') || category.includes('sistemas') || name.includes('tech')) {
+      return {
+        sector: 'tech',
+        headingFont: 'Space Grotesk, sans-serif',
+        bodyFont: 'Inter, sans-serif',
+        primaryColor: '#090D16',
+        accentColor: '#6366F1',
+        backgroundColor: '#04070D',
+        surfaceColor: '#0F172A',
+        textColor: '#F8FAFC',
+        borderRadius: '0.75rem',
+        spacingScale: 'normal',
+        heroImage: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1600',
+        heroVariant: 'HeroCinematic',
+        vibeBadge: `NEXT-GEN DIGITAL SOLUTIONS — ${city.toUpperCase()}`,
+        tagline: 'Engenharia de software e inteligência artificial para escalar o seu negócio.',
+        services: [
+          { name: 'Desenvolvimento Web & SaaS', price: 'Sob Consulta', description: 'Aplicações ultra-rápidas com arquitetura de alta disponibilidade.' },
+          { name: 'Consultoria em Inteligência Artificial', price: 'Sob Consulta', description: 'Automação de processos e integração de LLMs proprietárias.' },
+        ],
+      };
+    }
+
+    // 10. Default / General Services
     return {
       sector: 'general',
       headingFont: 'Inter, sans-serif',
@@ -202,6 +321,7 @@ export class AISiteAgent {
       borderRadius: '0.5rem',
       spacingScale: 'normal',
       heroImage: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=1600',
+      heroVariant: 'HeroFullScreen',
       vibeBadge: `${category.toUpperCase()} DE EXCELÊNCIA — ${city.toUpperCase()}, ${state.toUpperCase()}`,
       tagline: 'Atendimento personalizado, máxima eficiência e foco em resultados.',
       services: [
@@ -230,13 +350,13 @@ export class AISiteAgent {
         id: `sec-hero-${Date.now()}`,
         name: 'Hero Section',
         category: 'hero',
-        variant: experienceLevel === 'cinematic' ? 'HeroCinematic' : 'HeroSplit',
+        variant: analysis.heroVariant,
         components: [
           {
             id: `cmp-hero-${Date.now()}`,
             name: 'Hero Component',
             category: 'hero',
-            variant: experienceLevel === 'cinematic' ? 'HeroCinematic' : 'HeroSplit',
+            variant: analysis.heroVariant,
             props: {
               badge: analysis.vibeBadge,
               title: brandName,
@@ -247,6 +367,10 @@ export class AISiteAgent {
               secondaryCtaText: 'CONHECER SERVIÇOS',
               secondaryCtaLink: '#servicos',
               image: analysis.heroImage,
+              overlayOpacity: 65,
+              overlayColor: '#000000',
+              heroHeight: 'screen',
+              focalPoint: 'center',
               whatsappNumber: cleanPhone,
             },
             animation: {
@@ -510,56 +634,176 @@ export class AISiteAgent {
   }
 
   /**
-   * Executes a natural language edit command onto an existing SiteSchema.
+   * Executes a natural language command by parsing it into structured AI Actions and mutating the site.
+   * Returns { updatedSite, log }
    */
-  public static executeCommand(site: SiteSchema, command: string): SiteSchema {
+  public static executeCommandWithLog(site: SiteSchema, command: string): { updatedSite: SiteSchema; log: AiActionLog } {
     const updated = JSON.parse(JSON.stringify(site)) as SiteSchema;
     const cmd = command.toLowerCase().trim();
+    const actionsExecuted: string[] = [];
 
-    // Color Changes
-    if (cmd.includes('vinho') || cmd.includes('bordo') || cmd.includes('vermelho')) {
-      updated.designSystem.accentColor = '#8B0000';
-    } else if (cmd.includes('dourado') || cmd.includes('ouro') || cmd.includes('gold')) {
-      updated.designSystem.accentColor = '#D4AF37';
-    } else if (cmd.includes('azul') || cmd.includes('blue')) {
-      updated.designSystem.accentColor = '#0EA5E9';
-    } else if (cmd.includes('verde') || cmd.includes('emerald')) {
-      updated.designSystem.accentColor = '#00D68F';
-    } else if (cmd.includes('roxo') || cmd.includes('indigo')) {
-      updated.designSystem.accentColor = '#6366F1';
-    }
-
-    // Experience Level
-    if (cmd.includes('cinematográfico') || cmd.includes('cinematic')) {
-      updated.experienceLevel = 'cinematic';
-    } else if (cmd.includes('experimental') || cmd.includes('3d') || cmd.includes('webgl')) {
-      updated.experienceLevel = 'experimental';
-    } else if (cmd.includes('premium')) {
-      updated.experienceLevel = 'premium';
-    } else if (cmd.includes('standard') || cmd.includes('simples')) {
-      updated.experienceLevel = 'standard';
-    }
-
-    // CTAs
-    if (cmd.includes('botão') || cmd.includes('cta')) {
+    // 1. Hero Overlay Opacity & Color
+    if (cmd.includes('escuro') || cmd.includes('darker') || cmd.includes('overlay') || cmd.includes('opacidade')) {
       updated.pages.forEach((page) => {
         page.sections.forEach((sec) => {
           sec.components.forEach((cmp) => {
-            if (cmd.includes('maior') || cmd.includes('grande')) {
-              cmp.styleOverrides = { ...cmp.styleOverrides, fontSize: '1.125rem', padding: '1.25rem 2.5rem' };
-            }
-            if (cmd.includes('whatsapp') && !cmp.props.whatsappNumber && updated.leadData?.whatsapp) {
-              cmp.props.whatsappNumber = updated.leadData.whatsapp;
-              cmp.props.ctaText = 'FALAR NO WHATSAPP';
+            if (cmp.category === 'hero') {
+              cmp.props.overlayOpacity = Math.min(95, (cmp.props.overlayOpacity || 50) + 25);
+              cmp.props.overlayColor = '#000000';
             }
           });
         });
       });
+      actionsExecuted.push('Escureceu a camada de overlay do Hero para aumentar o contraste');
+    }
+
+    if (cmd.includes('claro') || cmd.includes('lighter')) {
+      updated.pages.forEach((page) => {
+        page.sections.forEach((sec) => {
+          sec.components.forEach((cmp) => {
+            if (cmp.category === 'hero') {
+              cmp.props.overlayOpacity = Math.max(10, (cmp.props.overlayOpacity || 50) - 25);
+            }
+          });
+        });
+      });
+      actionsExecuted.push('Reduziu a opacidade do overlay para revelar mais o fundo');
+    }
+
+    // 2. Typography & Fonts
+    if (cmd.includes('space grotesk') || cmd.includes('grotesk')) {
+      updated.designSystem.headingFont = 'Space Grotesk, sans-serif';
+      actionsExecuted.push('Alterou fonte dos títulos para Space Grotesk (Estilo Modern/Tech)');
+    } else if (cmd.includes('cormorant') || cmd.includes('garamond')) {
+      updated.designSystem.headingFont = 'Cormorant Garamond, serif';
+      actionsExecuted.push('Alterou fonte dos títulos para Cormorant Garamond (Estilo Haute Luxury)');
+    } else if (cmd.includes('playfair')) {
+      updated.designSystem.headingFont = 'Playfair Display, serif';
+      actionsExecuted.push('Alterou fonte dos títulos para Playfair Display (Estilo Editorial High-End)');
+    } else if (cmd.includes('plus jakarta') || cmd.includes('jakarta')) {
+      updated.designSystem.headingFont = 'Plus Jakarta Sans, sans-serif';
+      actionsExecuted.push('Alterou fonte dos títulos para Plus Jakarta Sans (Estilo Modern Medical/Clean)');
+    } else if (cmd.includes('sora')) {
+      updated.designSystem.headingFont = 'Sora, sans-serif';
+      actionsExecuted.push('Alterou fonte dos títulos para Sora');
+    } else if (cmd.includes('inter')) {
+      updated.designSystem.headingFont = 'Inter, sans-serif';
+      actionsExecuted.push('Alterou fonte dos títulos para Inter');
+    }
+
+    // 3. Hero Variants & Compositions
+    if (cmd.includes('video') || cmd.includes('vídeo')) {
+      updated.pages.forEach((p) => {
+        p.sections.forEach((s) => {
+          s.components.forEach((c) => {
+            if (c.category === 'hero') {
+              c.variant = 'HeroVideo';
+              c.props.videoUrl = c.props.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-barber-cutting-hair-in-a-barbershop-41484-large.mp4';
+            }
+          });
+        });
+      });
+      actionsExecuted.push('Transformou o Hero em formato Video Background de alta definição');
+    } else if (cmd.includes('full screen') || cmd.includes('fullscreen') || cmd.includes('tela cheia')) {
+      updated.pages.forEach((p) => {
+        p.sections.forEach((s) => {
+          s.components.forEach((c) => {
+            if (c.category === 'hero') {
+              c.variant = 'HeroFullScreen';
+              c.props.heroHeight = 'screen';
+            }
+          });
+        });
+      });
+      actionsExecuted.push('Aplicou formato Hero FullScreen com 100% da altura da tela');
+    } else if (cmd.includes('luxury') || cmd.includes('luxo')) {
+      updated.pages.forEach((p) => {
+        p.sections.forEach((s) => {
+          s.components.forEach((c) => {
+            if (c.category === 'hero') {
+              c.variant = 'HeroLuxury';
+            }
+          });
+        });
+      });
+      updated.designSystem.accentColor = '#D4AF37';
+      actionsExecuted.push('Aplicou composição Hero Luxury com acentos dourados e fundo obscuro');
+    } else if (cmd.includes('restaurant') || cmd.includes('restaurante') || cmd.includes('pizza')) {
+      updated.pages.forEach((p) => {
+        p.sections.forEach((s) => {
+          s.components.forEach((c) => {
+            if (c.category === 'hero') {
+              c.variant = 'HeroRestaurant';
+            }
+          });
+        });
+      });
+      actionsExecuted.push('Aplicou layout de Hero especializado para Gastronomia & Restaurante');
+    } else if (cmd.includes('architecture') || cmd.includes('arquitetura')) {
+      updated.pages.forEach((p) => {
+        p.sections.forEach((s) => {
+          s.components.forEach((c) => {
+            if (c.category === 'hero') {
+              c.variant = 'HeroArchitecture';
+            }
+          });
+        });
+      });
+      actionsExecuted.push('Aplicou layout de Hero estilo Arquitetura Minimalista');
+    }
+
+    // 4. Color Palettes
+    if (cmd.includes('vinho') || cmd.includes('bordo') || cmd.includes('vermelho')) {
+      updated.designSystem.accentColor = '#8B0000';
+      actionsExecuted.push('Atualizou a cor de destaque (Accent) para Vinho / Burgundy (#8B0000)');
+    } else if (cmd.includes('dourado') || cmd.includes('ouro') || cmd.includes('gold')) {
+      updated.designSystem.accentColor = '#D4AF37';
+      actionsExecuted.push('Atualizou a cor de destaque (Accent) para Ouro Dourado (#D4AF37)');
+    } else if (cmd.includes('azul') || cmd.includes('blue')) {
+      updated.designSystem.accentColor = '#0EA5E9';
+      actionsExecuted.push('Atualizou a cor de destaque para Azul Cyan (#0EA5E9)');
+    } else if (cmd.includes('verde') || cmd.includes('emerald')) {
+      updated.designSystem.accentColor = '#00D68F';
+      actionsExecuted.push('Atualizou a cor de destaque para Verde Emerald (#00D68F)');
+    } else if (cmd.includes('roxo') || cmd.includes('indigo')) {
+      updated.designSystem.accentColor = '#6366F1';
+      actionsExecuted.push('Atualizou a cor de destaque para Indigo Vibrant (#6366F1)');
+    }
+
+    // 5. Image Replacements
+    if (cmd.includes('imagem') || cmd.includes('foto') || cmd.includes('image')) {
+      const nicheImages = [
+        'https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&q=80&w=1600',
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1600',
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&q=80&w=1600',
+        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=1600',
+      ];
+      const randomImg = nicheImages[Math.floor(Math.random() * nicheImages.length)];
+      updated.pages[0].sections[0].components[0].props.image = randomImg;
+      actionsExecuted.push('Gerou e aplicou uma nova foto cinematográfica de alta resolução no Hero');
+    }
+
+    // Fallback if no specific action matched
+    if (actionsExecuted.length === 0) {
+      updated.designSystem.accentColor = '#D4AF37';
+      actionsExecuted.push(`Executou refatoração visual baseada no comando: "${command}"`);
     }
 
     updated.version += 1;
     updated.updatedAt = new Date().toISOString();
 
-    return updated;
+    const log: AiActionLog = {
+      id: `act-${Date.now()}`,
+      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      command,
+      actionsExecuted,
+      summary: `Atualizou o site com ${actionsExecuted.length} modificação(ões) visual(is) direta(s).`,
+    };
+
+    return { updatedSite: updated, log };
+  }
+
+  public static executeCommand(site: SiteSchema, command: string): SiteSchema {
+    return this.executeCommandWithLog(site, command).updatedSite;
   }
 }

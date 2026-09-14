@@ -74,6 +74,115 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       );
     }
 
+    // Hero Variants
+    if (variant === 'HeroFullScreen' || variant === 'HeroVideo' || variant === 'HeroLuxury' || variant === 'HeroRestaurant' || variant === 'HeroArchitecture') {
+      const overlayOpacity = (props.overlayOpacity ?? 60) / 100;
+      const overlayBg = props.overlayColor || '#000000';
+      const isVideo = variant === 'HeroVideo' || !!props.videoUrl;
+
+      return (
+        <div
+          key={cmp.id}
+          onClick={() => isEditable && onSelectComponent?.(cmp.id)}
+          className={`relative min-h-screen flex items-center justify-center py-24 px-6 md:px-12 overflow-hidden ${wrapperClass}`}
+          style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor }}
+        >
+          {/* Background Image or Video */}
+          {isVideo && props.videoUrl ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              src={props.videoUrl}
+              className="absolute inset-0 w-full h-full object-cover z-0"
+            />
+          ) : props.image ? (
+            <div
+              className="absolute inset-0 w-full h-full bg-cover bg-no-repeat z-0 transition-all duration-700"
+              style={{
+                backgroundImage: `url(${props.image})`,
+                backgroundPosition: props.focalPoint || 'center',
+              }}
+            />
+          ) : null}
+
+          {/* Color/Gradient Overlay */}
+          <div
+            className="absolute inset-0 z-0 transition-opacity"
+            style={{
+              backgroundColor: overlayBg,
+              opacity: overlayOpacity,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0 pointer-events-none" />
+
+          {/* Content Container */}
+          <div className="relative z-10 max-w-5xl mx-auto w-full text-center flex flex-col items-center space-y-6">
+            {props.badge && (
+              <span
+                className="inline-block px-4 py-1.5 rounded-full text-xs font-mono font-bold uppercase tracking-[0.25em] border backdrop-blur-md"
+                style={{
+                  backgroundColor: `${designSystem.accentColor}20`,
+                  borderColor: `${designSystem.accentColor}50`,
+                  color: designSystem.accentColor,
+                }}
+              >
+                {props.badge}
+              </span>
+            )}
+
+            <h1
+              className={`font-bold tracking-tight leading-[1.08] italic ${fontSizeClass || 'text-4xl sm:text-6xl lg:text-7xl xl:text-8xl'}`}
+              style={{ fontFamily: designSystem.headingFont }}
+            >
+              {props.title}
+            </h1>
+
+            <p
+              className={`text-base sm:text-xl leading-relaxed text-slate-300 ${widthClass}`}
+              style={{ fontFamily: designSystem.bodyFont }}
+            >
+              {props.subtitle || props.description}
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 items-center justify-center">
+              {props.ctaText && (
+                <a
+                  href={props.ctaLink || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center px-9 py-4 font-bold text-xs uppercase tracking-[0.2em] shadow-2xl transition-transform hover:scale-105"
+                  style={{
+                    backgroundColor: designSystem.accentColor,
+                    color: designSystem.backgroundColor,
+                    borderRadius: designSystem.borderRadius,
+                  }}
+                >
+                  {props.ctaText}
+                  <ArrowRight className="ml-2 w-4 h-4" />
+                </a>
+              )}
+
+              {props.secondaryCtaText && (
+                <a
+                  href={props.secondaryCtaLink || '#'}
+                  className="inline-flex items-center justify-center px-9 py-4 font-bold text-xs uppercase tracking-[0.2em] border backdrop-blur-md transition-colors hover:border-accent"
+                  style={{
+                    borderColor: `${designSystem.textColor}40`,
+                    color: designSystem.textColor,
+                    borderRadius: designSystem.borderRadius,
+                  }}
+                >
+                  {props.secondaryCtaText}
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (variant === 'HeroSplit' || variant === 'HeroMinimal') {
       return (
         <div

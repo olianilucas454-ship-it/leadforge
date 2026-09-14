@@ -82,6 +82,17 @@ export interface FrameSequenceConfig {
   mobileSource?: string;
 }
 
+export type HeroVariant =
+  | 'HeroFullScreen'
+  | 'HeroSplit'
+  | 'HeroEditorial'
+  | 'HeroVideo'
+  | 'HeroCinematic'
+  | 'HeroMinimal'
+  | 'HeroRestaurant'
+  | 'HeroArchitecture'
+  | 'HeroLuxury';
+
 export interface ComponentProps {
   title?: string;
   subtitle?: string;
@@ -93,11 +104,23 @@ export interface ComponentProps {
   secondaryCtaLink?: string;
   image?: string;
   videoUrl?: string;
+  overlayOpacity?: number; // 0 to 100
+  overlayColor?: string; // hex or rgba
+  focalPoint?: 'center' | 'top' | 'bottom' | 'left' | 'right';
+  heroHeight?: 'screen' | 'large' | 'medium';
   items?: Record<string, any>[];
   stats?: { number: string; label: string }[];
   whatsappNumber?: string;
   whatsappMessage?: string;
   customCss?: string;
+}
+
+export interface AiActionLog {
+  id: string;
+  timestamp: string;
+  command: string;
+  actionsExecuted: string[];
+  summary: string;
 }
 
 export interface SiteComponentSchema {

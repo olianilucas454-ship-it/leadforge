@@ -254,6 +254,89 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
             )}
           </div>
 
+            {/* Section: HERO BACKGROUND & MEDIA */}
+            {selectedComponent.category === 'hero' && (
+              <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-950/50">
+                <button
+                  onClick={() => toggleSection('heroMedia')}
+                  className="w-full px-3 py-2.5 bg-slate-950 hover:bg-slate-900 flex items-center justify-between text-xs font-semibold text-white transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <Film className="w-3.5 h-3.5 text-amber-400" /> Mídia & Fundo do Hero
+                  </span>
+                  {openSections.heroMedia ? <ChevronDown className="w-3.5 h-3.5 text-slate-400" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-400" />}
+                </button>
+
+                {openSections.heroMedia && (
+                  <div className="p-3 space-y-3 text-xs border-t border-slate-800/80">
+                    {/* Hero Variant Selector */}
+                    <div>
+                      <label className="block text-[11px] text-slate-400 mb-1 font-medium">Layout do Hero</label>
+                      <select
+                        value={selectedComponent.variant || 'HeroFullScreen'}
+                        onChange={(e) => {
+                          if (selectedComponentId) {
+                            updateComponentProps(selectedComponentId, { variant: e.target.value });
+                          }
+                        }}
+                        className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                      >
+                        <option value="HeroFullScreen">Hero FullScreen (Fundo Cheio)</option>
+                        <option value="HeroVideo">Hero Video (MP4 em Autoplay)</option>
+                        <option value="HeroLuxury">Hero Luxury (Bronze / Ouro)</option>
+                        <option value="HeroRestaurant">Hero Gastronomia (Restaurante)</option>
+                        <option value="HeroArchitecture">Hero Arquitetura (Minimal)</option>
+                        <option value="HeroSplit">Hero Split (Texto + Foto)</option>
+                        <option value="HeroMinimal">Hero Minimalista (Clean)</option>
+                      </select>
+                    </div>
+
+                    {/* Video URL Input */}
+                    <div>
+                      <label className="block text-[11px] text-slate-400 mb-1 font-medium">URL do Vídeo de Fundo (MP4)</label>
+                      <input
+                        type="text"
+                        placeholder="https://assets.mixkit.co/.../video.mp4"
+                        value={selectedComponent.props.videoUrl || ''}
+                        onChange={(e) => handlePropChange('videoUrl', e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white font-mono focus:border-amber-500 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Overlay Opacity Slider */}
+                    <div>
+                      <div className="flex justify-between text-[11px] text-slate-400 mb-1 font-medium">
+                        <span>Opacidade do Overlay Escuro</span>
+                        <span className="text-amber-400 font-mono">{selectedComponent.props.overlayOpacity ?? 60}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="95"
+                        value={selectedComponent.props.overlayOpacity ?? 60}
+                        onChange={(e) => handlePropChange('overlayOpacity', parseInt(e.target.value))}
+                        className="w-full accent-amber-500 cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Focal Point */}
+                    <div>
+                      <label className="block text-[11px] text-slate-400 mb-1 font-medium">Posição / Foco do Fundo</label>
+                      <select
+                        value={selectedComponent.props.focalPoint || 'center'}
+                        onChange={(e) => handlePropChange('focalPoint', e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                      >
+                        <option value="center">Centralizado (Center)</option>
+                        <option value="top">Topo (Top)</option>
+                        <option value="bottom">Base (Bottom)</option>
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
           {/* Section: POSITIONING & ALIGNMENT */}
           <div className="border border-slate-800 rounded-lg overflow-hidden bg-slate-950/50">
             <button

@@ -28,6 +28,7 @@ import {
   PanelRight,
   Check
 } from 'lucide-react';
+import { GenerationProgressModal } from './GenerationProgressModal';
 import Link from 'next/link';
 
 export const BuilderLayout: React.FC = () => {
@@ -50,6 +51,7 @@ export const BuilderLayout: React.FC = () => {
   const [isRightOpen, setIsRightOpen] = useState(true);
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
   const [isNicheModalOpen, setIsNicheModalOpen] = useState(false);
+  const [isGeneratingModalOpen, setIsGeneratingModalOpen] = useState(false);
   const [publishedToast, setPublishedToast] = useState(false);
   const [assetCallback, setAssetCallback] = useState<((url: string) => void) | null>(null);
 
@@ -354,6 +356,13 @@ export const BuilderLayout: React.FC = () => {
       <NicheRecommendationModal
         isOpen={isNicheModalOpen}
         onClose={() => setIsNicheModalOpen(false)}
+      />
+
+      <GenerationProgressModal
+        isOpen={isGeneratingModalOpen}
+        clientName={activeSite?.clientName}
+        category={activeSite?.leadData?.category}
+        onComplete={() => setIsGeneratingModalOpen(false)}
       />
     </div>
   );

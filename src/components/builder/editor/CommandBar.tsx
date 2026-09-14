@@ -5,7 +5,7 @@ import { useSiteBuilder } from '@/lib/context/SiteBuilderContext';
 import { Sparkles, Send, Command, Zap, Palette, Layout, ShieldCheck } from 'lucide-react';
 
 export const CommandBar: React.FC = () => {
-  const { executeAiCommand, isAiProcessing } = useSiteBuilder();
+  const { executeAiCommand, isAiProcessing, aiActionLogs } = useSiteBuilder();
   const [isOpen, setIsOpen] = useState(false);
   const [commandText, setCommandText] = useState('');
 
@@ -75,6 +75,31 @@ export const CommandBar: React.FC = () => {
               </button>
             </form>
 
+            {/* Action Execution History */}
+            {aiActionLogs && aiActionLogs.length > 0 && (
+              <div className="p-4 bg-slate-950/80 border-b border-slate-800 space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                <div className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider font-mono">
+                  Histórico Recente de Ações da IA
+                </div>
+                {aiActionLogs.map((log) => (
+                  <div key={log.id} className="p-2.5 rounded bg-slate-900/80 border border-slate-800 space-y-1">
+                    <div className="flex items-center justify-between text-xs font-semibold text-white">
+                      <span className="text-amber-300">"{log.command}"</span>
+                      <span className="text-[10px] text-slate-500 font-mono">{log.timestamp}</span>
+                    </div>
+                    <ul className="space-y-0.5 text-[11px] text-slate-300">
+                      {log.actionsExecuted.map((act, idx) => (
+                        <li key={idx} className="flex items-center gap-1.5 text-slate-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
+                          <span>{act}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* Quick Suggestions / Shortcuts */}
             <div className="p-4 space-y-3 bg-slate-900/60">
               <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
@@ -84,47 +109,47 @@ export const CommandBar: React.FC = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
-                  onClick={() => handleQuickCommand('Eleve o nível do hero para Cinematic Luxury com bronze e parallax')}
+                  onClick={() => handleQuickCommand('Tornar hero mais escuro com overlay de alto contraste')}
                   className="p-2.5 rounded border border-slate-800 bg-slate-950/40 hover:bg-amber-500/10 hover:border-amber-500/40 text-left transition-all group"
                 >
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-200 group-hover:text-amber-400">
                     <Zap className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Experiência Cinematic Luxe</span>
+                    <span>Hero Escuro & Contraste</span>
                   </div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">Aplica hero cinematográfico, parallax e badge premium.</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Aumenta opacidade do overlay e legibilidade do texto.</div>
                 </button>
 
                 <button
-                  onClick={() => handleQuickCommand('Aplique paleta Dark Bronze Elegance com tipografia Cormorant')}
+                  onClick={() => handleQuickCommand('Mudar fonte dos títulos para Space Grotesk modern tech')}
                   className="p-2.5 rounded border border-slate-800 bg-slate-950/40 hover:bg-amber-500/10 hover:border-amber-500/40 text-left transition-all group"
                 >
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-200 group-hover:text-amber-400">
                     <Palette className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Refinar Design System & Cores</span>
+                    <span>Fonte Space Grotesk</span>
                   </div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">Harmoniza cores, fontes editoriais e espaçamentos.</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Aplica tipografia técnica de alto impacto visual.</div>
                 </button>
 
                 <button
-                  onClick={() => handleQuickCommand('Adicione seção de prova social com avaliações de clientes')}
+                  onClick={() => handleQuickCommand('Transformar hero em formato video em autoplay')}
                   className="p-2.5 rounded border border-slate-800 bg-slate-950/40 hover:bg-amber-500/10 hover:border-amber-500/40 text-left transition-all group"
                 >
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-200 group-hover:text-amber-400">
                     <Layout className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Adicionar Seção de Depoimentos</span>
+                    <span>Hero Video Background</span>
                   </div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">Insere bloco de prova social de alta conversão.</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Insere vídeo de alta definição com fundo dinâmico.</div>
                 </button>
 
                 <button
-                  onClick={() => handleQuickCommand('Executar verificação e otimização total de qualidade UX/Mobile')}
+                  onClick={() => handleQuickCommand('Aplicar paleta de destaque dourado luxury com fonte Cormorant')}
                   className="p-2.5 rounded border border-slate-800 bg-slate-950/40 hover:bg-amber-500/10 hover:border-amber-500/40 text-left transition-all group"
                 >
                   <div className="flex items-center gap-2 text-xs font-medium text-slate-200 group-hover:text-amber-400">
                     <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Auditoria & Auto-Fix Comercial</span>
+                    <span>Estética Dark Gold Luxury</span>
                   </div>
-                  <div className="text-[10px] text-slate-500 mt-0.5">Garante conformidade para venda por R$5.000+.</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">Aplica acentos dourados e fonte serifada de luxo.</div>
                 </button>
               </div>
             </div>
