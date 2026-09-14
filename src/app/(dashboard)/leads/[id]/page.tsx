@@ -183,7 +183,7 @@ export default function LeadDetailPage() {
                 onClick={() => router.push(`/sites/builder?leadId=${lead.id}`)}
                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs"
               >
-                ✨ Criar Site Premium (R$5k+)
+                ✨ Criar Site
               </Button>
             </div>
             {!showApproach ? (

@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { ScoreBadge } from '@/components/ui/ScoreBadge';
 import { cn } from '@/lib/utils/cn';
-import { MapPin, Star, MessageSquare, Globe, Smartphone, Instagram, Eye, MessageCircle, Copy, Plus } from 'lucide-react';
+import { MapPin, Star, MessageSquare, Globe, Smartphone, Instagram, Eye, MessageCircle, Copy, Plus, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -123,14 +123,27 @@ export function LeadCard({ lead, onFavoriteToggle, onAddToCRM }: LeadCardProps) 
         {lead.opportunitySuggestion || "Sem sugestão de oportunidade."}
       </p>
 
+      <Button
+        variant="primary"
+        size="sm"
+        className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/10 mb-2 flex items-center justify-center gap-1.5"
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(`/sites/builder?leadId=${lead.id}`);
+        }}
+      >
+        <Sparkles className="w-4 h-4" />
+        <span>✨ Criar Site</span>
+      </Button>
+
       <div className="flex flex-wrap gap-2 mt-auto">
         <Button 
           variant="secondary" 
           size="sm" 
-          className="flex-1"
+          className="flex-1 text-xs"
           onClick={(e) => { e.stopPropagation(); router.push(`/leads/${lead.id}`); }}
         >
-          <Eye className="h-4 w-4 mr-2" />
+          <Eye className="h-3.5 w-3.5 mr-1.5" />
           Ver Lead
         </Button>
         
@@ -138,24 +151,24 @@ export function LeadCard({ lead, onFavoriteToggle, onAddToCRM }: LeadCardProps) 
           <Button 
             variant="primary" 
             size="sm" 
-            className="flex-1 bg-[#25D366] hover:bg-[#25D366]/90 text-black font-semibold"
+            className="flex-1 bg-[#25D366] hover:bg-[#25D366]/90 text-black font-semibold text-xs"
             onClick={(e) => {
               e.stopPropagation();
               window.open(`https://wa.me/55${lead.whatsapp?.replace(/\D/g, '')}`, '_blank');
             }}
           >
-            <MessageCircle className="h-4 w-4 mr-2" />
+            <MessageCircle className="h-3.5 w-3.5 mr-1.5" />
             WhatsApp
           </Button>
         ) : (
           <Button 
             variant="secondary" 
             size="sm" 
-            className="flex-1"
+            className="flex-1 text-xs"
             disabled={!lead.phone}
             onClick={copyPhone}
           >
-            <Copy className="h-4 w-4 mr-2" />
+            <Copy className="h-3.5 w-3.5 mr-1.5" />
             Copiar
           </Button>
         )}

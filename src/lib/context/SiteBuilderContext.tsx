@@ -25,6 +25,7 @@ interface SiteBuilderContextType {
   // Navigation & Actions
   selectSite: (siteId: string) => void;
   createNewSiteFromLead: (leadData: any, experienceLevel?: SiteExperienceLevel) => SiteSchema;
+  findLeadAndCreateSite: (leadId: string) => SiteSchema;
   saveSite: (site: SiteSchema) => void;
   deleteSite: (siteId: string) => void;
   
@@ -131,6 +132,53 @@ export const SiteBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return newSite;
   };
 
+  // Find Lead in Storage & Create Site
+  const findLeadAndCreateSite = (leadId: string): SiteSchema => {
+    const existing = sites.find((s) => s.leadId === leadId);
+    if (existing) {
+      selectSite(existing.id);
+      return existing;
+    }
+
+    let foundLead: any = null;
+    const storageKeys = [
+      'leadforge_search_results',
+      'leadforge_crm_leads',
+      'leadforge_saved_leads',
+      'leadforge_history',
+    ];
+
+    for (const key of storageKeys) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) {
+          const list = JSON.parse(raw);
+          if (Array.isArray(list)) {
+            const match = list.find((item: any) => item.id === leadId);
+            if (match) {
+              foundLead = match;
+              break;
+            }
+          }
+        }
+      } catch (e) {
+        console.error(`Failed to parse key ${key}`, e);
+      }
+    }
+
+    if (!foundLead) {
+      foundLead = {
+        id: leadId,
+        name: 'Empresa Selecionada',
+        category: 'Serviços de Alto Padrão',
+        city: 'São Paulo',
+        state: 'SP',
+      };
+    }
+
+    return createNewSiteFromLead(foundLead, 'cinematic');
+  };
+
   // Update Component Props Granually
   const updateComponentProps = (componentId: string, newProps: Record<string, any>) => {
     if (!activeSite) return;
@@ -223,6 +271,7 @@ export const SiteBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ c
         auditResult,
         selectSite,
         createNewSiteFromLead,
+        findLeadAndCreateSite,
         saveSite,
         deleteSite,
         setSelectedComponentId,
