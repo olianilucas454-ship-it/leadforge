@@ -229,6 +229,63 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
                   </div>
                 )}
 
+                {/* GOOGLE MAPS & LOCATION FIELDS */}
+                {(selectedComponent.category === 'map' || selectedComponent.props.address !== undefined) && (
+                  <div className="pt-3 border-t border-slate-800 space-y-3">
+                    <label className="block text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+                      🗺️ Configuração do Google Maps & Localização
+                    </label>
+                    <div>
+                      <label className="block text-[11px] text-slate-400 mb-1 font-medium">Endereço Completo</label>
+                      <input
+                        type="text"
+                        value={selectedComponent.props.address || ''}
+                        onChange={(e) => {
+                          const addr = e.target.value;
+                          const query = encodeURIComponent(addr);
+                          handlePropChange('address', addr);
+                          handlePropChange('googleMapsEmbedUrl', `https://maps.google.com/maps?q=${query}&t=&z=15&ie=UTF8&iwloc=&output=embed`);
+                          handlePropChange('googleMapsUrl', `https://www.google.com/maps/search/?api=1&query=${query}`);
+                        }}
+                        placeholder="Ex: Av. Paulista, 1500 - Jardins, São Paulo"
+                        className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[11px] text-slate-400 mb-1 font-medium">Telefone / Whats</label>
+                        <input
+                          type="text"
+                          value={selectedComponent.props.phone || ''}
+                          onChange={(e) => handlePropChange('phone', e.target.value)}
+                          className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-slate-400 mb-1 font-medium">Horário</label>
+                        <input
+                          type="text"
+                          value={selectedComponent.props.openingHours || ''}
+                          onChange={(e) => handlePropChange('openingHours', e.target.value)}
+                          className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] text-slate-400 mb-1 font-medium">Link Personalizado do Google Maps (Embed)</label>
+                      <input
+                        type="text"
+                        value={selectedComponent.props.googleMapsEmbedUrl || ''}
+                        onChange={(e) => handlePropChange('googleMapsEmbedUrl', e.target.value)}
+                        placeholder="https://maps.google.com/maps?q=..."
+                        className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs font-mono text-slate-300 focus:border-amber-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 {selectedComponent.props.ctaText !== undefined && (
                   <div className="grid grid-cols-2 gap-2">
                     <div>
@@ -1173,30 +1230,76 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({
           {openSections.animation && (
             <div className="p-3 space-y-3 text-xs border-t border-slate-800/80">
               {selectedComponent ? (
-                <div>
-                  <label className="block text-[11px] text-slate-400 mb-1 font-medium">Efeito no Scroll</label>
-                  <select
-                    value={selectedComponent.animation?.type || 'fade-up'}
-                    onChange={(e) => {
-                      const updatedAnim = {
-                        enabled: true,
-                        type: e.target.value as any,
-                        scrub: true,
-                        start: 'top 85%',
-                        end: 'bottom 15%',
-                      };
-                      handlePropChange('animation', updatedAnim);
-                    }}
-                    className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
-                  >
-                    <option value="fade-up">Fade Up Smooth</option>
-                    <option value="scale-in">Scale In Cinematic</option>
-                    <option value="parallax">Parallax Scroll Depth</option>
-                    <option value="sticky-pin">Sticky Pin Section</option>
-                    <option value="frame-sequence">Scroll Frame Sequence (Video Scrub)</option>
-                    <option value="horizontal-scroll">Horizontal Scroll Progression</option>
-                  </select>
-                </div>
+                <>
+                  {/* Typography Animation */}
+                  <div>
+                    <label className="block text-[11px] text-amber-400 font-bold mb-1">✨ Animação de Letras / Tipografia</label>
+                    <select
+                      value={selectedComponent.animation?.textAnimation || 'kinetic'}
+                      onChange={(e) => {
+                        const currentAnim = selectedComponent.animation || { enabled: true, type: 'fade-up', scrub: false, start: 'top 80%', end: 'bottom 20%' };
+                        handlePropChange('animation', {
+                          ...currentAnim,
+                          textAnimation: e.target.value,
+                        });
+                      }}
+                      className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    >
+                      <option value="kinetic">⚡ Kinetic Kinetic Split (Letras Individuais)</option>
+                      <option value="stagger">🌊 Stagger Wave (Onda de Letras Subindo)</option>
+                      <option value="glow">✨ Glow Pulse (Pulso de Brilho Neon)</option>
+                      <option value="typing">⌨️ Typing Effect (Efeito Máquina de Escrever)</option>
+                      <option value="blur-type">🌫️ Blur Reveal (Revelação de Névoa)</option>
+                      <option value="none">Nenhum (Texto Estático)</option>
+                    </select>
+                  </div>
+
+                  {/* Entrance Animation */}
+                  <div>
+                    <label className="block text-[11px] text-slate-400 mb-1 font-medium">Animação de Entrada do Bloco</label>
+                    <select
+                      value={selectedComponent.animation?.entranceAnimation || 'fade-up'}
+                      onChange={(e) => {
+                        const currentAnim = selectedComponent.animation || { enabled: true, type: 'fade-up', scrub: false, start: 'top 80%', end: 'bottom 20%' };
+                        handlePropChange('animation', {
+                          ...currentAnim,
+                          entranceAnimation: e.target.value,
+                        });
+                      }}
+                      className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    >
+                      <option value="fade-up">Fade Up Smooth (Subida Suave)</option>
+                      <option value="blur-in">Blur In Focus (Foco com Desfoque)</option>
+                      <option value="scale-in">Scale In Zoom (Zoom Cinematográfico)</option>
+                      <option value="slide-right">Slide Right (Entrada da Esquerda)</option>
+                      <option value="parallax-float">Parallax Float (Flutuação Tridimensional)</option>
+                      <option value="none">Sem Animação de Bloco</option>
+                    </select>
+                  </div>
+
+                  {/* Scroll Driven Animation Type */}
+                  <div>
+                    <label className="block text-[11px] text-slate-400 mb-1 font-medium">Efeito no Scroll (Scroll-Trigger)</label>
+                    <select
+                      value={selectedComponent.animation?.type || 'fade-up'}
+                      onChange={(e) => {
+                        const currentAnim = selectedComponent.animation || { enabled: true, type: 'fade-up', scrub: false, start: 'top 80%', end: 'bottom 20%' };
+                        handlePropChange('animation', {
+                          ...currentAnim,
+                          type: e.target.value as any,
+                        });
+                      }}
+                      className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+                    >
+                      <option value="fade-up">Fade Up Smooth</option>
+                      <option value="scale-in">Scale In Cinematic</option>
+                      <option value="parallax">Parallax Scroll Depth</option>
+                      <option value="sticky-pin">Sticky Pin Section</option>
+                      <option value="frame-sequence">Scroll Frame Sequence (Video Scrub)</option>
+                      <option value="horizontal-scroll">Horizontal Scroll Progression</option>
+                    </select>
+                  </div>
+                </>
               ) : (
                 <p className="text-[11px] text-slate-500 text-center py-2">
                   Selecione um componente para ajustar animações individuais.

@@ -363,7 +363,42 @@ export class CompositionEngine {
       components: [testimonialComponent],
     };
 
-    // Section 6: Premium CTA & Booking
+    // Section 6: Location & Google Maps Section
+    const mapAddress = leadData.address || `Av. Paulista, 1500 - Jardins, ${city} - SP`;
+    const searchQuery = encodeURIComponent(`${name} ${city}`);
+    const mapComponent: SiteComponentSchema = {
+      id: 'cmp-map-1',
+      name: 'Localização & Google Maps',
+      category: 'map',
+      variant: 'LocationMap',
+      props: {
+        badge: '05 / COMO CHEGAR',
+        title: 'Encontre o nosso espaço com facilidade.',
+        subtitle: `Localização privilegiada com estacionamento privativo e acesso acessível em ${city}.`,
+        address: mapAddress,
+        city: city,
+        phone: leadData.phone || '(11) 99876-5432',
+        openingHours: 'Seg - Sáb: 09:00 - 20:00',
+        mapLabel: 'VER NO GOOGLE MAPS',
+        googleMapsEmbedUrl: `https://maps.google.com/maps?q=${searchQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`,
+        googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${searchQuery}`,
+      },
+      styleOverrides: {
+        titleFontFamily: concept.typography.headingFont,
+        bodyFontFamily: concept.typography.bodyFont,
+        gradient: concept.colorPalette.gradient,
+      },
+    };
+
+    const mapSection: SiteSectionSchema = {
+      id: 'sec-map',
+      name: 'Localização & Mapa',
+      category: 'map',
+      variant: 'LocationMap',
+      components: [mapComponent],
+    };
+
+    // Section 7: Premium CTA & Booking
     const ctaComponent: SiteComponentSchema = {
       id: 'cmp-cta-1',
       name: 'Chamada para Ação',
@@ -396,6 +431,7 @@ export class CompositionEngine {
       servicesSection,
       gallerySection,
       testimonialSection,
+      mapSection,
       ctaSection,
     ];
   }

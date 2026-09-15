@@ -55,6 +55,10 @@ export interface KeyframeConfig {
 export interface ScrollAnimationConfig {
   enabled: boolean;
   type: 'fade-up' | 'scale-in' | 'parallax' | 'sticky-pin' | 'frame-sequence' | 'horizontal-scroll' | 'reveal' | 'custom-timeline';
+  textAnimation?: 'none' | 'kinetic' | 'stagger' | 'typing' | 'glow' | 'wave' | 'blur-type';
+  entranceAnimation?: 'none' | 'fade-up' | 'blur-in' | 'scale-in' | 'slide-right' | 'parallax-float';
+  duration?: number;
+  delay?: number;
   scrub: boolean | number;
   start: string; // e.g. 'top 80%'
   end: string;   // e.g. 'bottom 20%'
@@ -120,6 +124,14 @@ export interface ComponentProps {
   stats?: { number: string; label: string }[];
   whatsappNumber?: string;
   whatsappMessage?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  phone?: string;
+  openingHours?: string;
+  googleMapsEmbedUrl?: string;
+  googleMapsUrl?: string;
+  mapLabel?: string;
   customCss?: string;
 }
 

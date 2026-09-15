@@ -744,40 +744,198 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       );
     }
 
+    // Google Maps & Location Section Renderer
+    if (variant === 'LocationMap' || cmp.category === 'map') {
+      const embedUrl = props.googleMapsEmbedUrl || `https://maps.google.com/maps?q=${encodeURIComponent(props.address || site.name || 'São Paulo')}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+      const directUrl = props.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(props.address || site.name || 'São Paulo')}`;
+
+      return (
+        <div
+          key={cmp.id}
+          data-cmp-id={cmp.id}
+          onClick={() => isEditable && onSelectComponent?.(cmp.id)}
+          className={`relative py-24 md:py-32 px-6 md:px-12 bg-slate-950 text-slate-100 overflow-hidden border-t border-slate-800 ${wrapperClass}`}
+          style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor, ...transformStyle }}
+        >
+          {CanvaSelectionOverlay}
+          <div className="max-w-7xl mx-auto space-y-12">
+            {/* Header */}
+            <div className="space-y-4 max-w-3xl">
+              <EditableText
+                text={props.badge || '05 / COMO CHEGAR'}
+                propKey="badge"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                className="text-xs font-mono text-amber-400 tracking-[0.25em] uppercase font-bold"
+              />
+              <EditableText
+                text={props.title || 'Encontre o nosso espaço'}
+                propKey="title"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                tagName="h2"
+                className={`text-3xl sm:text-5xl font-extrabold tracking-tight ${titleFont}`}
+                style={{ fontFamily: titleFont }}
+              />
+              <EditableText
+                text={props.subtitle || 'Venha nos visitar e vivenciar uma experiência única.'}
+                propKey="subtitle"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                className="text-base text-slate-400 max-w-2xl"
+                style={{ fontFamily: bodyFont }}
+                tagName="p"
+              />
+            </div>
+
+            {/* Interactive Grid: Map Frame + Location Details Card */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+              {/* Left Details Card */}
+              <div className="lg:col-span-4 bg-slate-900/90 border border-slate-800 rounded-3xl p-8 backdrop-blur-xl shadow-2xl flex flex-col justify-between space-y-8">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider block">Endereço Principal</span>
+                    <EditableText
+                      text={props.address || 'Av. Paulista, 1500 - Jardins, São Paulo - SP'}
+                      propKey="address"
+                      componentId={cmp.id}
+                      isEditable={isEditable}
+                      onUpdateProps={onUpdateComponentProps}
+                      onSelectComponent={onSelectComponent}
+                      className="text-lg font-bold text-white leading-snug"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4 pt-4 border-t border-slate-800">
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider block">Telefone & Contato</span>
+                      <EditableText
+                        text={props.phone || '(11) 99876-5432'}
+                        propKey="phone"
+                        componentId={cmp.id}
+                        isEditable={isEditable}
+                        onUpdateProps={onUpdateComponentProps}
+                        onSelectComponent={onSelectComponent}
+                        className="text-sm font-semibold text-amber-300"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider block">Horário de Atendimento</span>
+                      <EditableText
+                        text={props.openingHours || 'Segunda a Sábado: 09:00 - 20:00'}
+                        propKey="openingHours"
+                        componentId={cmp.id}
+                        isEditable={isEditable}
+                        onUpdateProps={onUpdateComponentProps}
+                        onSelectComponent={onSelectComponent}
+                        className="text-xs text-slate-300"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <a
+                    href={directUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-3.5 px-6 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition-all"
+                  >
+                    <EditableText
+                      text={props.mapLabel || 'ABRIR NO GOOGLE MAPS'}
+                      propKey="mapLabel"
+                      componentId={cmp.id}
+                      isEditable={isEditable}
+                      onUpdateProps={onUpdateComponentProps}
+                      onSelectComponent={onSelectComponent}
+                      tagName="span"
+                    />
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Right Google Maps Iframe */}
+              <div className="lg:col-span-8 relative min-h-[380px] sm:min-h-[480px] rounded-3xl overflow-hidden border border-slate-800 shadow-2xl group bg-slate-900">
+                <iframe
+                  title="Google Maps Location"
+                  width="100%"
+                  height="100%"
+                  className="w-full h-full min-h-[380px] sm:min-h-[480px] border-0 filter grayscale contrast-125 invert opacity-80 hover:opacity-100 hover:filter-none transition-all duration-700"
+                  loading="lazy"
+                  allowFullScreen
+                  src={embedUrl}
+                />
+                <div className="absolute top-4 right-4 bg-slate-950/80 backdrop-blur-md border border-slate-700 text-amber-400 text-[10px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-xl">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span>Google Maps Ao Vivo</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     // About Section
     if (cmp.category === 'about') {
       return (
         <div
           key={cmp.id}
+          data-cmp-id={cmp.id}
           onClick={() => isEditable && onSelectComponent?.(cmp.id)}
           className={`py-28 px-6 md:px-12 border-t border-white/5 relative ${wrapperClass}`}
-          style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor }}
+          style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor, ...transformStyle }}
         >
+          {CanvaSelectionOverlay}
           <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-6 space-y-6">
               {props.badge && (
-                <span className="text-xs font-mono uppercase tracking-[0.2em] font-semibold block" style={{ color: designSystem.accentColor }}>
-                  {props.badge}
-                </span>
+                <EditableText
+                  text={props.badge}
+                  propKey="badge"
+                  componentId={cmp.id}
+                  isEditable={isEditable}
+                  onUpdateProps={onUpdateComponentProps}
+                  onSelectComponent={onSelectComponent}
+                  className="text-xs font-mono uppercase tracking-[0.2em] font-semibold block text-amber-400"
+                />
               )}
-              <h2 className="text-3xl sm:text-5xl font-bold italic" style={{ fontFamily: designSystem.headingFont }}>
-                {props.title}
-              </h2>
-              <p className="text-lg leading-relaxed text-slate-300 font-sans">
-                {props.subtitle || props.description}
-              </p>
-              {props.description && props.subtitle && (
-                <p className="text-sm leading-relaxed text-slate-400 font-sans">
-                  {props.description}
-                </p>
-              )}
+              <EditableText
+                text={props.title || 'Manifesto'}
+                propKey="title"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                tagName="h2"
+                className="text-3xl sm:text-5xl font-bold italic"
+                style={{ fontFamily: titleFont }}
+              />
+              <EditableText
+                text={props.subtitle || props.description || 'Descrição do posicionamento autoral.'}
+                propKey="subtitle"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                tagName="p"
+                className="text-lg leading-relaxed text-slate-300 font-sans"
+              />
 
               {/* Stats inline */}
               {props.stats && props.stats.length > 0 && (
                 <div className="grid grid-cols-3 gap-6 pt-6 border-t border-white/10">
                   {props.stats.map((st: any, idx: number) => (
                     <div key={idx}>
-                      <div className="text-2xl sm:text-3xl font-extrabold font-mono" style={{ color: designSystem.accentColor }}>
+                      <div className="text-2xl sm:text-3xl font-extrabold font-mono text-amber-400">
                         {st.number}
                       </div>
                       <div className="text-xs text-slate-400 mt-1 uppercase tracking-wider font-mono">
@@ -817,23 +975,46 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       return (
         <div
           key={cmp.id}
+          data-cmp-id={cmp.id}
           onClick={() => isEditable && onSelectComponent?.(cmp.id)}
           className={`py-28 px-6 md:px-12 border-t border-white/5 ${wrapperClass}`}
-          style={{ backgroundColor: designSystem.surfaceColor, color: designSystem.textColor }}
+          style={{ backgroundColor: designSystem.surfaceColor, color: designSystem.textColor, ...transformStyle }}
         >
+          {CanvaSelectionOverlay}
           <div className="max-w-7xl mx-auto space-y-16">
             <div className="text-center max-w-3xl mx-auto space-y-3">
               {props.badge && (
-                <span className="text-xs font-mono uppercase tracking-[0.2em] font-semibold block" style={{ color: designSystem.accentColor }}>
-                  {props.badge}
-                </span>
+                <EditableText
+                  text={props.badge}
+                  propKey="badge"
+                  componentId={cmp.id}
+                  isEditable={isEditable}
+                  onUpdateProps={onUpdateComponentProps}
+                  onSelectComponent={onSelectComponent}
+                  className="text-xs font-mono uppercase tracking-[0.2em] font-semibold block text-amber-400"
+                />
               )}
-              <h2 className="text-3xl sm:text-5xl font-bold italic" style={{ fontFamily: designSystem.headingFont }}>
-                {props.title || 'Nossos Profissionais & Mestres'}
-              </h2>
-              <p className="text-base text-slate-400">
-                {props.subtitle || 'Especialistas renomados dedicados a entregar a sua melhor versão.'}
-              </p>
+              <EditableText
+                text={props.title || 'Nossos Profissionais & Mestres'}
+                propKey="title"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                tagName="h2"
+                className="text-3xl sm:text-5xl font-bold italic"
+                style={{ fontFamily: titleFont }}
+              />
+              <EditableText
+                text={props.subtitle || 'Especialistas renomados dedicados a entregar a sua melhor versão.'}
+                propKey="subtitle"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                tagName="p"
+                className="text-base text-slate-400"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -850,7 +1031,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
                     <div className="absolute bottom-4 left-4 right-4">
-                      <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md border border-white/20" style={{ color: designSystem.accentColor }}>
+                      <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md border border-white/20 text-amber-400">
                         {member.specialty}
                       </span>
                     </div>
@@ -858,7 +1039,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
 
                   <div className="p-6 space-y-3 flex-1 flex flex-col justify-between">
                     <div>
-                      <h3 className="text-xl font-bold" style={{ fontFamily: designSystem.headingFont }}>
+                      <h3 className="text-xl font-bold" style={{ fontFamily: titleFont }}>
                         {member.name}
                       </h3>
                       <p className="text-xs text-slate-400 font-mono mt-0.5">{member.role}</p>
@@ -868,12 +1049,7 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
                       href={member.whatsapp ? `https://wa.me/55${member.whatsapp.replace(/\D/g, '')}` : (props.ctaLink || '#')}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-2.5 px-4 rounded border text-xs font-bold font-mono uppercase tracking-wider flex items-center justify-center gap-2 transition-all hover:scale-102"
-                      style={{
-                        borderColor: `${designSystem.accentColor}50`,
-                        color: designSystem.accentColor,
-                        backgroundColor: `${designSystem.accentColor}10`,
-                      }}
+                      className="w-full py-2.5 px-4 rounded border text-xs font-bold font-mono uppercase tracking-wider flex items-center justify-center gap-2 transition-all hover:scale-102 border-amber-500/50 text-amber-400 bg-amber-500/10"
                     >
                       <Phone className="w-3.5 h-3.5" />
                       Agendar com {member.name.split(' ')[0]}
@@ -899,23 +1075,46 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       return (
         <div
           key={cmp.id}
+          data-cmp-id={cmp.id}
           onClick={() => isEditable && onSelectComponent?.(cmp.id)}
           className={`py-28 px-6 md:px-12 border-t border-white/5 ${wrapperClass}`}
-          style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor }}
+          style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor, ...transformStyle }}
         >
+          {CanvaSelectionOverlay}
           <div className="max-w-7xl mx-auto space-y-12">
             <div className="text-center max-w-2xl mx-auto space-y-3">
               {props.badge && (
-                <span className="text-xs font-mono uppercase tracking-[0.2em] font-semibold block" style={{ color: designSystem.accentColor }}>
-                  {props.badge}
-                </span>
+                <EditableText
+                  text={props.badge}
+                  propKey="badge"
+                  componentId={cmp.id}
+                  isEditable={isEditable}
+                  onUpdateProps={onUpdateComponentProps}
+                  onSelectComponent={onSelectComponent}
+                  className="text-xs font-mono uppercase tracking-[0.2em] font-semibold block text-amber-400"
+                />
               )}
-              <h2 className="text-3xl sm:text-5xl font-bold italic" style={{ fontFamily: designSystem.headingFont }}>
-                {props.title || 'Galeria de Fotos do Espaço'}
-              </h2>
-              <p className="text-base text-slate-400">
-                {props.subtitle || 'Cada m² foi projetado para elevar o conforto e a experiência.'}
-              </p>
+              <EditableText
+                text={props.title || 'Galeria de Fotos do Espaço'}
+                propKey="title"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                tagName="h2"
+                className="text-3xl sm:text-5xl font-bold italic"
+                style={{ fontFamily: titleFont }}
+              />
+              <EditableText
+                text={props.subtitle || 'Cada m² foi projetado para elevar o conforto e a experiência.'}
+                propKey="subtitle"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                tagName="p"
+                className="text-base text-slate-400"
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -952,23 +1151,46 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       return (
         <div
           key={cmp.id}
+          data-cmp-id={cmp.id}
           onClick={() => isEditable && onSelectComponent?.(cmp.id)}
           className={`py-28 px-6 md:px-12 border-t border-white/5 ${wrapperClass}`}
-          style={{ backgroundColor: designSystem.surfaceColor, color: designSystem.textColor }}
+          style={{ backgroundColor: designSystem.surfaceColor, color: designSystem.textColor, ...transformStyle }}
         >
+          {CanvaSelectionOverlay}
           <div className="max-w-7xl mx-auto space-y-16">
             <div className="text-center max-w-3xl mx-auto space-y-3">
               {props.badge && (
-                <span className="text-xs font-mono uppercase tracking-[0.2em] font-semibold block" style={{ color: designSystem.accentColor }}>
-                  {props.badge}
-                </span>
+                <EditableText
+                  text={props.badge}
+                  propKey="badge"
+                  componentId={cmp.id}
+                  isEditable={isEditable}
+                  onUpdateProps={onUpdateComponentProps}
+                  onSelectComponent={onSelectComponent}
+                  className="text-xs font-mono uppercase tracking-[0.2em] font-semibold block text-amber-400"
+                />
               )}
-              <h2 className="text-3xl sm:text-5xl font-bold italic" style={{ fontFamily: designSystem.headingFont }}>
-                {props.title || 'Depoimentos de Clientes'}
-              </h2>
-              <p className="text-base text-slate-400">
-                {props.subtitle || 'Avaliações reais de quem já vivenciou nossa experiência autoral.'}
-              </p>
+              <EditableText
+                text={props.title || 'Depoimentos de Clientes'}
+                propKey="title"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                tagName="h2"
+                className="text-3xl sm:text-5xl font-bold italic"
+                style={{ fontFamily: titleFont }}
+              />
+              <EditableText
+                text={props.subtitle || 'Avaliações reais de quem já vivenciou nossa experiência autoral.'}
+                propKey="subtitle"
+                componentId={cmp.id}
+                isEditable={isEditable}
+                onUpdateProps={onUpdateComponentProps}
+                onSelectComponent={onSelectComponent}
+                tagName="p"
+                className="text-base text-slate-400"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -978,7 +1200,6 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
                   className="bg-slate-950/70 border border-white/10 rounded-2xl p-8 space-y-6 flex flex-col justify-between shadow-xl"
                 >
                   <div className="space-y-4">
-                    {/* Stars */}
                     <div className="flex items-center gap-1">
                       {[...Array(t.rating || 5)].map((_, i) => (
                         <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
@@ -1008,167 +1229,20 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       );
     }
 
-    // Stats Section
-    if (cmp.category === 'stats') {
-      const statsList = props.stats || props.items || [
-        { number: '10.000+', label: 'Clientes Atendidos' },
-        { number: '15 Anos', label: 'Tradição & Visagismo' },
-        { number: '4.9 ★', label: 'Google Review' },
-        { number: '100%', label: 'Garantia de Satisfação' },
-      ];
-
-      return (
-        <div
-          key={cmp.id}
-          onClick={() => isEditable && onSelectComponent?.(cmp.id)}
-          className={`py-20 px-6 md:px-12 border-t border-b border-white/10 ${wrapperClass}`}
-          style={{ backgroundColor: designSystem.backgroundColor }}
-        >
-          <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {statsList.map((st: any, idx: number) => (
-              <div key={idx} className="space-y-2">
-                <div className="text-4xl sm:text-6xl font-extrabold font-mono" style={{ color: designSystem.accentColor }}>
-                  {st.number}
-                </div>
-                <div className="text-xs text-slate-300 uppercase tracking-widest font-mono">
-                  {st.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    // FAQ Section
-    if (cmp.category === 'faq') {
-      const faqList = props.items || [
-        { question: 'Como funciona o agendamento de horários?', answer: 'Você pode agendar diretamente pelo WhatsApp ou selecionar o horário desejado em nosso menu digital.' },
-        { question: 'Quais formas de pagamento são aceitas?', answer: 'Aceitamos Cartão de Crédito em até 12x, Pix com desconto e Dinheiro.' },
-        { question: 'Existe estacionamento no local?', answer: 'Sim, oferecemos serviço de valet gratuito para todos os nossos clientes.' },
-      ];
-
-      return (
-        <div
-          key={cmp.id}
-          onClick={() => isEditable && onSelectComponent?.(cmp.id)}
-          className={`py-28 px-6 md:px-12 border-t border-white/5 ${wrapperClass}`}
-          style={{ backgroundColor: designSystem.backgroundColor, color: designSystem.textColor }}
-        >
-          <div className="max-w-4xl mx-auto space-y-12">
-            <div className="text-center space-y-3">
-              {props.badge && (
-                <span className="text-xs font-mono uppercase tracking-[0.2em] font-semibold block" style={{ color: designSystem.accentColor }}>
-                  {props.badge}
-                </span>
-              )}
-              <h2 className="text-3xl sm:text-5xl font-bold italic" style={{ fontFamily: designSystem.headingFont }}>
-                {props.title || 'Perguntas Frequentes'}
-              </h2>
-            </div>
-
-            <div className="space-y-4">
-              {faqList.map((faq: any, idx: number) => (
-                <div key={idx} className="p-6 rounded-xl border border-white/10 bg-slate-950/60 space-y-2">
-                  <h3 className="text-base font-bold text-white flex items-center gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                    {faq.question}
-                  </h3>
-                  <p className="text-sm text-slate-400 pl-7">{faq.answer}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Contact Section
-    if (cmp.category === 'contact') {
-      return (
-        <div
-          key={cmp.id}
-          onClick={() => isEditable && onSelectComponent?.(cmp.id)}
-          className={`py-28 px-6 md:px-12 border-t border-white/5 ${wrapperClass}`}
-          style={{ backgroundColor: designSystem.surfaceColor, color: designSystem.textColor }}
-        >
-          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-6 space-y-6">
-              {props.badge && (
-                <span className="text-xs font-mono uppercase tracking-[0.2em] font-semibold block" style={{ color: designSystem.accentColor }}>
-                  {props.badge}
-                </span>
-              )}
-              <h2 className="text-3xl sm:text-5xl font-bold italic" style={{ fontFamily: designSystem.headingFont }}>
-                {props.title || 'Localização & Atendimento'}
-              </h2>
-              <p className="text-base text-slate-300">
-                {props.subtitle || 'Venha vivenciar a experiência presencialmente ou tire suas dúvidas via WhatsApp.'}
-              </p>
-
-              <div className="space-y-4 pt-4 border-t border-white/10 text-sm text-slate-300 font-mono">
-                <div className="flex items-center gap-3">
-                  <MessageCircle className="w-5 h-5 text-amber-400" />
-                  <span>WhatsApp: {props.whatsappNumber || '(11) 99999-9999'}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Phone className="w-5 h-5 text-amber-400" />
-                  <span>Atendimento: Segunda a Sábado das 09h às 20h</span>
-                </div>
-              </div>
-
-              {props.ctaText && (
-                <div className="pt-4">
-                  <a
-                    href={props.ctaLink || '#'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center px-8 py-4 font-bold text-xs uppercase tracking-widest transition-transform hover:scale-105 shadow-xl"
-                    style={{
-                      backgroundColor: designSystem.accentColor,
-                      color: designSystem.backgroundColor,
-                      borderRadius: designSystem.borderRadius,
-                    }}
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    {props.ctaText}
-                  </a>
-                </div>
-              )}
-            </div>
-
-            <div className="lg:col-span-6">
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 shadow-2xl relative bg-slate-900 flex items-center justify-center">
-                <img
-                  src={props.image || 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=1200'}
-                  alt="Mapa / Localização"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <span className="px-4 py-2 rounded bg-black/80 text-white font-mono text-xs border border-white/20">
-                    📍 {site.leadData?.city || 'São Paulo'} — {site.leadData?.address || 'Jardins'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     // Default Fallback Renderer
     return (
-      <div key={cmp.id} onClick={() => onSelectComponent?.(cmp.id)} className={`py-16 px-6 border-b border-white/10 ${wrapperClass}`}>
+      <div key={cmp.id} data-cmp-id={cmp.id} onClick={() => onSelectComponent?.(cmp.id)} className={`py-16 px-6 border-b border-white/10 ${wrapperClass}`} style={transformStyle}>
+        {CanvaSelectionOverlay}
         <div className="max-w-4xl mx-auto text-center space-y-4">
-          <h3 className="text-2xl font-bold font-serif">{props.title || cmp.name}</h3>
-          <p className="text-sm text-slate-400">{props.subtitle || props.description}</p>
+          <EditableText text={props.title || cmp.name} propKey="title" componentId={cmp.id} isEditable={isEditable} onUpdateProps={onUpdateComponentProps} onSelectComponent={onSelectComponent} tagName="h3" className="text-2xl font-bold font-serif" style={{ fontFamily: titleFont }} />
+          <EditableText text={props.subtitle || props.description || ''} propKey="subtitle" componentId={cmp.id} isEditable={isEditable} onUpdateProps={onUpdateComponentProps} onSelectComponent={onSelectComponent} tagName="p" className="text-sm text-slate-400" />
         </div>
       </div>
     );
   };
 
   return (
-    <div className="w-full min-h-screen overflow-x-hidden font-sans selection:bg-accent selection:text-black">
+    <div className="w-full min-h-screen overflow-x-hidden font-sans selection:bg-amber-400 selection:text-black">
       {currentPage.sections.map((section) => (
         <section key={section.id} id={section.id}>
           {section.components.map(renderComponent)}
@@ -1176,8 +1250,9 @@ export const SiteRenderer: React.FC<SiteRendererProps> = ({
       ))}
 
       {/* Footer */}
-      <footer className="py-8 px-6 border-t border-white/10 text-center text-xs text-slate-500 font-mono" style={{ backgroundColor: designSystem.backgroundColor }}>
-        © {new Date().getFullYear()} {site.name} — Criado com LeadForge Website Experience Engine.
+      <footer className="py-12 px-6 border-t border-slate-800 text-center text-xs text-slate-400 font-mono space-y-2 bg-slate-950">
+        <div>© {new Date().getFullYear()} {site.name} — Todos os direitos reservados.</div>
+        <div className="text-slate-500 text-[11px]">Gerado pelo LeadForge Premium Creative Website Engine.</div>
       </footer>
     </div>
   );
