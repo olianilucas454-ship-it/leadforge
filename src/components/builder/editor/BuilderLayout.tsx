@@ -10,6 +10,7 @@ import { FrameTimelineEditor } from './FrameTimelineEditor';
 import { AssetManagerModal } from '../assets/AssetManagerModal';
 import { NicheRecommendationModal } from './NicheRecommendationModal';
 import { ReferenceStyleModal } from '../assets/ReferenceStyleModal';
+import { SiteConfigModal } from './SiteConfigModal';
 import {
   ArrowLeft,
   Undo2,
@@ -54,6 +55,7 @@ export const BuilderLayout: React.FC = () => {
   const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
   const [isNicheModalOpen, setIsNicheModalOpen] = useState(false);
   const [isReferenceModalOpen, setIsReferenceModalOpen] = useState(false);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
   const [isGeneratingModalOpen, setIsGeneratingModalOpen] = useState(false);
   const [publishedToast, setPublishedToast] = useState(false);
   const [assetCallback, setAssetCallback] = useState<((url: string) => void) | null>(null);
@@ -272,7 +274,17 @@ export const BuilderLayout: React.FC = () => {
             title="Reconstruir por Imagem de Referência ou Prompt IA"
           >
             <Wand2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Estilo Referência IA</span>
+            <span className="hidden sm:inline">Estilo Referência</span>
+          </button>
+
+          {/* Quick Site Config Modal Trigger */}
+          <button
+            onClick={() => setIsConfigModalOpen(true)}
+            className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 text-xs font-extrabold rounded flex items-center gap-1.5 transition-all shadow-md transform hover:scale-105"
+            title="Abrir Configurações do Negócio & Gerador IA"
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>⚙️ Configurar Site</span>
           </button>
         </div>
 
@@ -374,6 +386,11 @@ export const BuilderLayout: React.FC = () => {
       <ReferenceStyleModal
         isOpen={isReferenceModalOpen}
         onClose={() => setIsReferenceModalOpen(false)}
+      />
+
+      <SiteConfigModal
+        isOpen={isConfigModalOpen}
+        onClose={() => setIsConfigModalOpen(false)}
       />
 
       <GenerationProgressModal
