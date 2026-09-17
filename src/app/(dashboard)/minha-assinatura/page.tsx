@@ -28,7 +28,7 @@ export default function MinhaAssinaturaPage() {
   const renewalDate = new Date(Date.now() + 30 * 86400 * 1000).toLocaleDateString('pt-BR');
 
   return (
-    <div className="min-h-screen bg-background text-text-primary flex flex-col">
+    <div className="min-h-screen bg-transparent text-text-primary flex flex-col">
       <Header title="Minha Assinatura" />
 
       <main className="flex-1 max-w-4xl mx-auto px-6 py-10 w-full space-y-8">

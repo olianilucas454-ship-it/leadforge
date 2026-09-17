@@ -73,7 +73,7 @@ export default function ExportPage() {
   const activeFields = fields.filter(f => f.checked);
 
   return (
-    <div className="p-6 md:p-8 min-h-screen bg-background text-text-primary">
+    <div className="p-6 md:p-8 min-h-screen bg-transparent text-text-primary">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 text-text-primary">Exportar Leads</h1>
         <p className="text-text-secondary text-sm">Exporte seus leads encontrados e analisados em múltiplos formatos</p>

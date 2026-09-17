@@ -78,7 +78,7 @@ export default function AdminCreditsPage() {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-background text-text-primary p-8 text-center space-y-4">
+      <div className="min-h-screen bg-transparent text-text-primary p-8 text-center space-y-4">
         <h1 className="text-2xl font-bold text-red-400">Acesso Negado</h1>
         <p className="text-gray-400">Apenas o Administrador da plataforma possui acesso a esta ferramenta.</p>
       </div>
@@ -86,7 +86,7 @@ export default function AdminCreditsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-text-primary flex flex-col">
+    <div className="min-h-screen bg-transparent text-text-primary flex flex-col">
       <Header title="Gestão de Créditos Admin Master" />
 
       <main className="flex-1 max-w-5xl mx-auto px-6 py-10 w-full space-y-8">

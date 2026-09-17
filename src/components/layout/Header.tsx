@@ -31,7 +31,7 @@ export function Header({ title, subtitle }: HeaderProps) {
   const initial = isAdmin ? 'ADM' : (user?.name || user?.email || 'U')[0].toUpperCase();
 
   return (
-    <header className="h-16 flex items-center justify-between px-6 bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-10 w-full">
+    <header className="h-16 flex items-center justify-between px-6 bg-surface/60 backdrop-blur-md border-b border-border/80 sticky top-0 z-10 w-full">
       <div className="flex flex-col">
         <h1 className="text-lg font-bold text-text-primary leading-tight flex items-center gap-2">
           <span>{pageTitle}</span>

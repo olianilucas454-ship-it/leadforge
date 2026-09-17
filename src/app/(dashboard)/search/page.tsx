@@ -66,14 +66,14 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="min-h-full flex flex-col bg-background">
+    <div className="min-h-full flex flex-col bg-transparent">
       <Header title="Nova Busca de Leads" />
       
       <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 max-w-4xl mx-auto w-full">
         
         {/* Banner Quota for Free Users */}
         {!isPaidUser && !isAdmin && (
-          <div className="w-full mb-6 p-4 rounded-2xl bg-accent/10 border border-accent/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="w-full mb-6 p-4 rounded-2xl bg-accent/10 border border-accent/30 backdrop-blur-sm flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent shrink-0">
                 <Zap className="w-5 h-5" />
@@ -97,7 +97,7 @@ export default function SearchPage() {
 
         {/* Admin Master Banner */}
         {isAdmin && (
-          <div className="w-full mb-6 p-4 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-between gap-4">
+          <div className="w-full mb-6 p-4 rounded-2xl bg-amber-500/20 border border-amber-500/40 backdrop-blur-sm flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <Crown className="w-6 h-6 text-amber-400" />
               <div>
@@ -125,7 +125,7 @@ export default function SearchPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSearch} className="w-full space-y-8 bg-surface p-6 md:p-8 rounded-2xl border border-border shadow-xl">
+        <form onSubmit={handleSearch} className="w-full space-y-8 bg-surface/70 backdrop-blur-md p-6 md:p-8 rounded-2xl border border-border/80 shadow-2xl">
           <div className="space-y-3">
             <label className="text-sm font-medium text-text-secondary block">
               Qual tipo de empresa você quer encontrar?

@@ -67,7 +67,7 @@ export default function PlanosPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text-primary flex flex-col">
+    <div className="min-h-screen bg-transparent text-text-primary flex flex-col">
       <Header title="Planos & Assinatura" />
 
       <main className="flex-1 max-w-7xl mx-auto px-6 py-12 w-full space-y-12">
