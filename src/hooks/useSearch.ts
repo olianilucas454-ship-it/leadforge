@@ -3,9 +3,11 @@ import { useState, useEffect } from 'react';
 import { Lead } from './useLeads';
 
 export interface SearchParams {
-  query: string;
-  location?: string;
-  category?: string;
+  query?: string;
+  niche?: string;
+  city?: string;
+  state?: string;
+  neighborhood?: string;
 }
 
 export interface SearchResult {
@@ -17,9 +19,14 @@ export interface SearchResult {
 
 export interface SavedSearch {
   id: string;
-  name: string;
-  params: SearchParams;
-  result: SearchResult;
+  name?: string;
+  query?: string;
+  params?: SearchParams;
+  result?: SearchResult;
+  totalFound?: number;
+  withoutWebsite?: number;
+  hotCount?: number;
+  warmCount?: number;
   date: string;
 }
 
@@ -48,11 +55,17 @@ export function useSearch() {
   }, []);
 
   const saveSearch = (params: SearchParams, result: SearchResult) => {
+    const queryName = params.query || `${params.niche || ''} em ${params.city || ''} - ${params.state || ''}`;
     const newSearch: SavedSearch = {
       id: Date.now().toString(),
-      name: params.query || 'Pesquisa sem nome',
+      name: queryName,
+      query: queryName,
       params,
       result,
+      totalFound: result.total,
+      withoutWebsite: result.noWebsite,
+      hotCount: result.hot,
+      warmCount: result.warm,
       date: new Date().toISOString(),
     };
 
@@ -63,6 +76,11 @@ export function useSearch() {
     });
   };
 
+  const clearHistory = () => {
+    localStorage.removeItem('leadforge_search_history');
+    setSearchHistory([]);
+  };
+
   const saveResults = (leads: Lead[]) => {
     setLastResults(leads);
     localStorage.setItem('leadforge_last_results', JSON.stringify(leads));
@@ -71,5 +89,5 @@ export function useSearch() {
   const getSearchHistory = () => searchHistory;
   const getLastResults = () => lastResults;
 
-  return { saveSearch, searchHistory, getSearchHistory, lastResults, getLastResults, saveResults };
+  return { saveSearch, searchHistory, getSearchHistory, lastResults, getLastResults, saveResults, clearHistory };
 }

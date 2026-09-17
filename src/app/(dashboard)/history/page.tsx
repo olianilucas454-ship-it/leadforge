@@ -1,74 +1,167 @@
 'use client';
 
-import React from 'react';
-import { Search, Clock, RotateCcw } from 'lucide-react';
-import { useSearch } from '@/hooks/useSearch';
+import React, { useState, useEffect } from 'react';
+import { Search, Clock, RotateCcw, Trash2, ArrowRight } from 'lucide-react';
+import { Header } from '@/components/layout/Header';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+
+export interface HistoryItem {
+  id: string;
+  name?: string;
+  query?: string;
+  date: string;
+  totalFound?: number;
+  withoutWebsite?: number;
+  hotCount?: number;
+  warmCount?: number;
+  result?: {
+    total: number;
+    noWebsite: number;
+    hot: number;
+    warm: number;
+  };
+  params?: {
+    niche?: string;
+    city?: string;
+    state?: string;
+    neighborhood?: string;
+    radius?: number;
+    quantity?: number;
+    query?: string;
+  };
+}
 
 export default function HistoryPage() {
-  const { searchHistory } = useSearch();
   const router = useRouter();
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
 
-  const handleSearchAgain = (query: string) => {
-    // Navigates to search page with the query
-    router.push(`/search?q=${encodeURIComponent(query)}`);
+  useEffect(() => {
+    const raw = localStorage.getItem('leadforge_search_history');
+    if (raw) {
+      try {
+        setHistoryItems(JSON.parse(raw));
+      } catch (e) {
+        console.error('Failed to parse search history', e);
+      }
+    }
+  }, []);
+
+  const handleClearHistory = () => {
+    if (confirm('Tem certeza de que deseja apagar todo o histórico de pesquisas?')) {
+      localStorage.removeItem('leadforge_search_history');
+      setHistoryItems([]);
+    }
+  };
+
+  const handleSearchAgain = (item: HistoryItem) => {
+    const params = item.params;
+    if (params && params.niche) {
+      router.push(`/search`);
+    } else {
+      router.push('/search');
+    }
   };
 
   return (
-    <div className="p-6 md:p-8 min-h-screen bg-[#0a0a0f] text-[#f0f0f5]">
-      <div className="mb-8 flex items-center space-x-3">
-        <Clock className="text-[#00d68f]" size={28} />
-        <div>
-          <h1 className="text-3xl font-bold mb-1">Pesquisas Salvas</h1>
-          <p className="text-gray-400">Histórico de buscas realizadas e resultados salvos</p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-transparent text-text-primary flex flex-col">
+      <Header title="Histórico de Buscas" />
 
-      {searchHistory.length > 0 ? (
-        <div className="space-y-4">
-          {searchHistory.map((item) => (
-            <div key={item.id} className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors hover:border-gray-600">
-              <div className="flex items-start space-x-4">
-                <div className="bg-[#2a2a3e] p-3 rounded-lg text-gray-300 mt-1">
-                  <Search size={20} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-[#f0f0f5]">{item.name}</h3>
-                  <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-gray-400">
-                    <span>{new Date(item.date).toLocaleString('pt-BR')}</span>
-                    <span>•</span>
-                    <span className="text-[#f0f0f5] font-medium">{item.result.total} encontrados</span>
-                    <span>•</span>
-                    <span className="text-red-400">{item.result.noWebsite} sem site</span>
-                    <span>•</span>
-                    <span className="text-orange-500 font-medium">{item.result.hot} HOT</span>
-                    <span>•</span>
-                    <span className="text-yellow-500 font-medium">{item.result.warm} WARM</span>
-                  </div>
-                </div>
-              </div>
-              
-              <button 
-                onClick={() => handleSearchAgain(item.params.query)}
-                className="flex items-center space-x-2 px-4 py-2 bg-[#2a2a3e] hover:bg-gray-700 text-[#f0f0f5] rounded-lg transition-colors whitespace-nowrap self-start md:self-auto"
-              >
-                <RotateCcw size={16} />
-                <span>Pesquisar novamente</span>
-              </button>
+      <main className="flex-1 max-w-6xl mx-auto px-6 py-10 w-full space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+          <div className="flex items-center space-x-3">
+            <div className="p-3 rounded-2xl bg-accent/10 border border-accent/30 text-accent">
+              <Clock size={28} />
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="bg-[#12121a] border border-[#2a2a3e] rounded-xl p-16 text-center flex flex-col items-center justify-center">
-          <div className="text-gray-500 mb-4 bg-[#2a2a3e] p-6 rounded-full">
-            <Search size={40} />
+            <div>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-white">Pesquisas Recentes</h1>
+              <p className="text-text-secondary text-sm">Histórico de varreduras de mercado e parâmetros de busca salvos</p>
+            </div>
           </div>
-          <h3 className="text-xl font-medium text-gray-200 mb-2">Nenhuma pesquisa realizada ainda.</h3>
-          <p className="text-gray-400 max-w-md text-center">
-            Suas pesquisas recentes e parâmetros de busca aparecerão aqui para fácil acesso.
-          </p>
+
+          {historyItems.length > 0 && (
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={handleClearHistory}
+              className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border-red-500/20"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Limpar Histórico
+            </Button>
+          )}
         </div>
-      )}
+
+        {historyItems.length > 0 ? (
+          <div className="space-y-4">
+            {historyItems.map((item) => {
+              const title = item.name || item.query || (item.params?.niche ? `${item.params.niche} em ${item.params.city || ''} - ${item.params.state || ''}` : 'Pesquisa de Leads');
+              const total = item.result?.total ?? item.totalFound ?? 0;
+              const noWebsite = item.result?.noWebsite ?? item.withoutWebsite ?? 0;
+              const hot = item.result?.hot ?? item.hotCount ?? 0;
+              const warm = item.result?.warm ?? item.warmCount ?? 0;
+
+              let formattedDate = 'Data recente';
+              try {
+                if (item.date) formattedDate = new Date(item.date).toLocaleString('pt-BR');
+              } catch {
+                formattedDate = item.date;
+              }
+
+              return (
+                <div 
+                  key={item.id} 
+                  className="bg-surface/80 backdrop-blur-md border border-border/80 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:border-accent/40 shadow-lg"
+                >
+                  <div className="flex items-start space-x-4">
+                    <div className="bg-accent/10 p-3 rounded-xl text-accent border border-accent/20 mt-0.5 shrink-0">
+                      <Search size={22} />
+                    </div>
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-bold text-white">{title}</h3>
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary">
+                        <span className="font-mono text-text-muted">{formattedDate}</span>
+                        <span>•</span>
+                        <span className="text-white font-bold">{total} encontrados</span>
+                        <span>•</span>
+                        <span className="text-rose-400 font-semibold">{noWebsite} sem site</span>
+                        <span>•</span>
+                        <span className="text-amber-400 font-extrabold">{hot} HOT</span>
+                        <span>•</span>
+                        <span className="text-emerald-400 font-extrabold">{warm} WARM</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => handleSearchAgain(item)}
+                    variant="secondary"
+                    size="sm"
+                    className="self-start md:self-auto hover:border-accent hover:text-accent shrink-0"
+                  >
+                    <RotateCcw className="w-4 h-4 mr-2" />
+                    <span>Refazer Busca</span>
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="bg-surface/60 border border-border rounded-3xl p-16 text-center flex flex-col items-center justify-center space-y-4">
+            <div className="text-text-muted bg-accent/10 p-6 rounded-full border border-accent/20">
+              <Search size={40} className="text-accent" />
+            </div>
+            <h3 className="text-xl font-bold text-white">Nenhuma pesquisa registrada ainda</h3>
+            <p className="text-text-secondary max-w-md text-sm">
+              Suas pesquisas recentes e parâmetros de busca aparecerão aqui automaticamente após a primeira varredura.
+            </p>
+            <Button onClick={() => router.push('/search')} className="mt-2">
+              <span>Realizar Primeira Busca</span>
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

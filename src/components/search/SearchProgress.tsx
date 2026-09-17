@@ -101,14 +101,22 @@ export function SearchProgress({ isOpen, searchParams, onComplete, onViewResults
           try {
             const rawHistory = localStorage.getItem('leadforge_search_history');
             const history = rawHistory ? JSON.parse(rawHistory) : [];
+            const queryName = `${searchParams.niche} em ${searchParams.city} - ${searchParams.state}`;
             const historyItem = {
               id: `search-${Date.now()}`,
-              query: `${searchParams.niche} em ${searchParams.city} - ${searchParams.state}`,
+              name: queryName,
+              query: queryName,
               date: new Date().toISOString(),
               totalFound: result.totalFound,
               withoutWebsite: result.withoutWebsite,
               hotCount: result.hotCount,
               warmCount: result.warmCount,
+              result: {
+                total: result.totalFound,
+                noWebsite: result.withoutWebsite,
+                hot: result.hotCount,
+                warm: result.warmCount,
+              },
               params: searchParams,
             };
             history.unshift(historyItem);

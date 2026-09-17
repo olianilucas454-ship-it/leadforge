@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { PLAN_CONFIG, getPlanBySlug } from '@/lib/config/plans';
+import { getPlanBySlug } from '@/lib/config/plans';
 
 export type UserPlan = 'free' | 'starter' | 'pro' | 'agency' | 'vip';
 export type UserRole = 'admin' | 'user';
@@ -14,6 +14,10 @@ export interface UserSession {
   isPaidUser: boolean;
   createdAt: string;
   searchesUsed?: number;
+}
+
+export interface RegisteredUserRecord extends UserSession {
+  passwordHash: string;
 }
 
 interface AuthContextType {
@@ -38,22 +42,47 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const ADMIN_EMAIL = 'olianilucas454@gmail.com';
 const ADMIN_PASS = 'lucas007';
+const FREE_TRIAL_LIMIT = 3;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserSession | null>(null);
   const [searchedNiches, setSearchedNiches] = useState<string[]>([]);
   const [searchesUsed, setSearchesUsed] = useState<number>(0);
 
+  // Helper to load user DB
+  const getUsersDb = (): Record<string, RegisteredUserRecord> => {
+    if (typeof window === 'undefined') return {};
+    try {
+      const raw = localStorage.getItem('leadforge_registered_users_db');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  };
+
+  const saveUsersDb = (db: Record<string, RegisteredUserRecord>) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('leadforge_registered_users_db', JSON.stringify(db));
+    }
+  };
+
   useEffect(() => {
     // Load auth session from localStorage
     const savedSession = localStorage.getItem('leadforge_auth_session');
     if (savedSession) {
       try {
-        const parsed = JSON.parse(savedSession);
-        setUser(parsed);
-        if (typeof parsed.searchesUsed === 'number') {
-          setSearchesUsed(parsed.searchesUsed);
+        const parsed: UserSession = JSON.parse(savedSession);
+        
+        // Sync with DB
+        const db = getUsersDb();
+        const dbRecord = db[parsed.email.toLowerCase()];
+        if (dbRecord) {
+          parsed.plan = dbRecord.plan;
+          parsed.isPaidUser = dbRecord.isPaidUser;
         }
+
+        setUser(parsed);
+        setSearchesUsed(parsed.searchesUsed || 0);
       } catch (e) {
         console.error('Failed to parse saved auth session', e);
       }
@@ -68,9 +97,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    const savedCount = localStorage.getItem('leadforge_searches_used_count');
-    if (savedCount) {
-      setSearchesUsed(Number(savedCount) || 0);
+    // Load device searches count
+    const deviceSearches = localStorage.getItem('leadforge_device_searches_count');
+    if (deviceSearches) {
+      const count = Number(deviceSearches) || 0;
+      setSearchesUsed(count);
     }
   }, []);
 
@@ -85,6 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = (email: string, pass: string) => {
     const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !pass) {
+      return { success: false, message: 'Por favor, informe seu e-mail e sua senha.' };
+    }
 
     // Check Admin Master Credentials
     if (cleanEmail === ADMIN_EMAIL.toLowerCase() && pass === ADMIN_PASS) {
@@ -97,44 +131,78 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: new Date().toISOString(),
         searchesUsed: 0,
       };
+
+      const db = getUsersDb();
+      db[cleanEmail] = { ...adminSession, passwordHash: ADMIN_PASS };
+      saveUsersDb(db);
+
       saveUserSession(adminSession);
       return { success: true };
     }
 
-    // Generic / Demo User Login
-    if (cleanEmail && pass.length >= 4) {
-      const existingPlan = (user?.email === cleanEmail && user?.plan) || 'free';
-      const existingPaid = (user?.email === cleanEmail && user?.isPaidUser) || false;
+    // Check registered user accounts DB
+    const db = getUsersDb();
+    const existing = db[cleanEmail];
 
-      const userSession: UserSession = {
-        email: cleanEmail,
-        name: cleanEmail.split('@')[0],
-        role: 'user',
-        plan: existingPlan as UserPlan,
-        isPaidUser: existingPaid,
-        createdAt: new Date().toISOString(),
-        searchesUsed: searchesUsed || 0,
+    if (!existing) {
+      return { 
+        success: false, 
+        message: 'Conta não encontrada com este e-mail. Por favor, clique em "Criar Conta Grátis" para se cadastrar.' 
       };
-      saveUserSession(userSession);
-      return { success: true };
     }
 
-    return { success: false, message: 'E-mail ou senha incorretos. Tente novamente.' };
+    if (existing.passwordHash !== pass) {
+      return { success: false, message: 'Senha incorreta. Verifique sua senha e tente novamente.' };
+    }
+
+    const userSession: UserSession = {
+      email: existing.email,
+      name: existing.name,
+      role: existing.role,
+      plan: existing.plan,
+      isPaidUser: existing.isPaidUser,
+      createdAt: existing.createdAt,
+      searchesUsed: existing.searchesUsed || 0,
+    };
+
+    saveUserSession(userSession);
+    return { success: true };
   };
 
   const register = (name: string, email: string, pass: string) => {
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || pass.length < 4) {
-      return { success: false, message: 'Preencha um e-mail válido e senha de no mínimo 4 caracteres.' };
+      return { success: false, message: 'Informe um e-mail válido e uma senha com pelo menos 4 caracteres.' };
     }
 
-    const newSession: UserSession = {
+    const db = getUsersDb();
+    if (db[cleanEmail]) {
+      return { success: false, message: 'Este e-mail já está cadastrado. Faça login para acessar sua conta.' };
+    }
+
+    const isAdminEmail = cleanEmail === ADMIN_EMAIL.toLowerCase();
+
+    const newRecord: RegisteredUserRecord = {
       email: cleanEmail,
       name: name.trim() || cleanEmail.split('@')[0],
-      role: cleanEmail === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user',
-      plan: cleanEmail === ADMIN_EMAIL.toLowerCase() ? 'agency' : 'free',
-      isPaidUser: cleanEmail === ADMIN_EMAIL.toLowerCase(),
+      passwordHash: pass,
+      role: isAdminEmail ? 'admin' : 'user',
+      plan: isAdminEmail ? 'agency' : 'free',
+      isPaidUser: isAdminEmail,
       createdAt: new Date().toISOString(),
+      searchesUsed: 0,
+    };
+
+    db[cleanEmail] = newRecord;
+    saveUsersDb(db);
+
+    const newSession: UserSession = {
+      email: newRecord.email,
+      name: newRecord.name,
+      role: newRecord.role,
+      plan: newRecord.plan,
+      isPaidUser: newRecord.isPaidUser,
+      createdAt: newRecord.createdAt,
       searchesUsed: 0,
     };
 
@@ -151,6 +219,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (plan === 'free') {
       const updated = { ...user, plan: 'free' as UserPlan, isPaidUser: false };
       saveUserSession(updated);
+
+      const db = getUsersDb();
+      if (db[user.email.toLowerCase()]) {
+        db[user.email.toLowerCase()].plan = 'free';
+        db[user.email.toLowerCase()].isPaidUser = false;
+        saveUsersDb(db);
+      }
     }
   };
 
@@ -162,6 +237,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isPaidUser: true,
     };
     saveUserSession(updated);
+
+    const db = getUsersDb();
+    if (db[user.email.toLowerCase()]) {
+      db[user.email.toLowerCase()].plan = plan;
+      db[user.email.toLowerCase()].isPaidUser = true;
+      saveUsersDb(db);
+    }
   };
 
   const recordSearch = (niche?: string): boolean => {
@@ -169,24 +251,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const isAdmin = user.role === 'admin' || user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
-    // Admin has UNLIMITED access for administrative features
+    // Admin has UNLIMITED access
     if (isAdmin) {
       return true;
     }
 
-    // Determine credit allowance (Rule 11 & 13)
     const isPaid = user.isPaidUser && user.plan !== 'free';
     const planDef = getPlanBySlug(user.plan);
-    const allowance = isPaid ? planDef.researchCredits : 5; // Free tier = 5 total searches
+    const allowance = isPaid ? planDef.researchCredits : FREE_TRIAL_LIMIT; // Free trial = 3 searches MAX
 
-    // Check if limit reached
-    if (searchesUsed >= allowance) {
-      return false; // Quota exceeded!
+    // Check device-level global searches to prevent creating new free emails to bypass quota
+    const deviceSearches = Number(localStorage.getItem('leadforge_device_searches_count') || '0');
+    const effectiveSearchesUsed = Math.max(searchesUsed, isPaid ? searchesUsed : deviceSearches);
+
+    if (effectiveSearchesUsed >= allowance) {
+      return false; // Quota / Trial limit reached! Must upgrade!
     }
 
-    const newUsed = searchesUsed + 1;
+    const newUsed = effectiveSearchesUsed + 1;
     setSearchesUsed(newUsed);
+
+    localStorage.setItem('leadforge_device_searches_count', String(newUsed));
     localStorage.setItem('leadforge_searches_used_count', String(newUsed));
+
+    // Update in user DB
+    const db = getUsersDb();
+    if (db[user.email.toLowerCase()]) {
+      db[user.email.toLowerCase()].searchesUsed = newUsed;
+      saveUsersDb(db);
+    }
 
     if (niche) {
       const cleanNiche = niche.trim().toLowerCase();
@@ -202,8 +295,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const currentPlanSlug = (user?.plan as UserPlan) || 'free';
   const planDef = getPlanBySlug(currentPlanSlug);
   const isPaidUser = user?.isPaidUser === true || isAdmin;
-  const monthlyAllowance = isPaidUser ? planDef.researchCredits : 5;
-  const creditsRemaining = isAdmin ? 999999 : Math.max(0, monthlyAllowance - searchesUsed);
+
+  const monthlyAllowance = isPaidUser ? planDef.researchCredits : FREE_TRIAL_LIMIT;
+  
+  // Calculate remaining searches accurately
+  const deviceSearches = typeof window !== 'undefined' ? Number(localStorage.getItem('leadforge_device_searches_count') || '0') : 0;
+  const effectiveUsed = isPaidUser ? searchesUsed : Math.max(searchesUsed, deviceSearches);
+  const creditsRemaining = isAdmin ? 999999 : Math.max(0, monthlyAllowance - effectiveUsed);
 
   return (
     <AuthContext.Provider
@@ -214,7 +312,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isPaidUser,
         creditsRemaining,
         monthlyAllowance,
-        searchesUsed,
+        searchesUsed: effectiveUsed,
         searchedNiches,
         currentPlanSlug,
         login,
