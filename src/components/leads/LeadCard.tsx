@@ -123,18 +123,7 @@ export function LeadCard({ lead, onFavoriteToggle, onAddToCRM }: LeadCardProps) 
         {lead.opportunitySuggestion || "Sem sugestão de oportunidade."}
       </p>
 
-      <Button
-        variant="primary"
-        size="sm"
-        className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs shadow-md shadow-amber-500/10 mb-2 flex items-center justify-center gap-1.5"
-        onClick={(e) => {
-          e.stopPropagation();
-          router.push(`/sites/builder?leadId=${lead.id}`);
-        }}
-      >
-        <Sparkles className="w-4 h-4" />
-        <span>✨ Criar Site</span>
-      </Button>
+
 
       <div className="flex flex-wrap gap-2 mt-auto">
         <Button 

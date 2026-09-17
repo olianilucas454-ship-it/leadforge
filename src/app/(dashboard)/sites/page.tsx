@@ -69,15 +69,7 @@ function SitesDashboardContent() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleCreateDemo}
-            className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-bold text-xs rounded-lg shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all transform hover:scale-105"
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>✨ Criar Novo Site com IA</span>
-          </button>
-        </div>
+
       </div>
 
       {/* Tabs & Stats Bar */}
