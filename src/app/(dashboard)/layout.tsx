@@ -18,9 +18,9 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen bg-background overflow-hidden text-text-primary relative">
-      {/* Ambient background glow & texture */}
+      {/* Ambient background texture with leadforge-bg.jpg */}
       <div
-        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center opacity-[0.08] mix-blend-screen"
+        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center opacity-15"
         style={{ backgroundImage: "url('/leadforge-bg.jpg')" }}
       />
       <div className="fixed inset-0 pointer-events-none z-0 bg-gradient-to-tr from-background via-transparent to-background/60" />
