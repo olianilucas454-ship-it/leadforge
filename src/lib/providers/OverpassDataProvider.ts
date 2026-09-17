@@ -205,7 +205,8 @@ export class OverpassDataProvider implements BusinessDataProvider {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2500);
 
-        const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(kw)}&lat=${lat}&lon=${lon}&limit=${limit * 2}`;
+        const searchQuery = `${kw} ${params.city} ${params.state}`;
+        const photonUrl = `https://photon.komoot.io/api/?q=${encodeURIComponent(searchQuery)}&lat=${lat}&lon=${lon}&limit=${limit * 2}`;
         
         const res = await fetch(photonUrl, {
           headers: {
@@ -245,9 +246,10 @@ export class OverpassDataProvider implements BusinessDataProvider {
             const itemLon = coords[0];
             const itemLat = coords[1];
 
-            // Check distance
+            // Check distance against exact requested radius
             const dist = this.getDistanceKm(lat, lon, itemLat, itemLon);
-            if (dist > maxRadius) continue;
+            const radiusLimit = params.radiusKm && params.radiusKm > 0 ? params.radiusKm : 25;
+            if (dist > radiusLimit) continue;
 
             seen.add(norm);
 

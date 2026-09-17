@@ -5,6 +5,7 @@ import { NicheRelevanceEngine } from './NicheRelevanceEngine';
 import { WebsiteAnalyzer } from './WebsiteAnalyzer';
 import { WebsiteOpportunityScoreEngine } from './WebsiteOpportunityScore';
 import { DuplicateDetectionService } from './DuplicateDetectionService';
+import { getWhatsAppUrl } from '@/lib/utils/phone';
 
 export class LeadDiscoveryEngine {
   private provider: BusinessDataProvider;
@@ -118,14 +119,25 @@ export class LeadDiscoveryEngine {
       const targetState = biz.state || params.state;
       
       const phone = biz.phone || getRegionalPhone(targetCity, targetState, biz.id);
-      const whatsapp = biz.whatsapp || phone;
-      const instaData = biz.instagram
-        ? { handle: biz.instagram, url: biz.instagram.startsWith('http') ? biz.instagram : `https://instagram.com/${biz.instagram.replace('@', '')}` }
-        : getInstagramProfile(biz.name, targetCity);
+      
+      // Real WhatsApp validation
+      const realWhatsApp = getWhatsAppUrl(biz.whatsapp || biz.phone) ? (biz.whatsapp || biz.phone) : null;
 
-      const fbData = biz.facebook
-        ? { handle: biz.facebook, url: biz.facebook.startsWith('http') ? biz.facebook : `https://${biz.facebook}` }
-        : getFacebookProfile(biz.name);
+      // Real Instagram validation (no fake handles)
+      let instaHandle: string | null = null;
+      let instaUrl: string | null = null;
+      if (biz.instagram) {
+        instaHandle = biz.instagram.startsWith('@') ? biz.instagram : `@${biz.instagram.split('/').filter(Boolean).pop()}`;
+        instaUrl = biz.instagram.startsWith('http') ? biz.instagram : `https://instagram.com/${instaHandle.replace('@', '')}`;
+      }
+
+      // Real Facebook validation (no fake handles)
+      let fbHandle: string | null = null;
+      let fbUrl: string | null = null;
+      if (biz.facebook) {
+        fbHandle = biz.facebook.replace(/^https?:\/\/(www\.)?facebook\.com\//, '');
+        fbUrl = biz.facebook.startsWith('http') ? biz.facebook : `https://facebook.com/${biz.facebook}`;
+      }
 
       const googleMapsUrl = biz.googleMapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${biz.name} ${biz.address || ''} ${targetCity} ${targetState}`)}`;
 
@@ -135,10 +147,10 @@ export class LeadDiscoveryEngine {
 
       const leadData = {
         hasWebsite: !!biz.website,
-        hasInstagram: true,
-        hasFacebook: true,
-        phone,
-        whatsapp,
+        hasInstagram: !!instaUrl,
+        hasFacebook: !!fbUrl,
+        phone: phone || null,
+        whatsapp: realWhatsApp || null,
         rating,
         reviewCount,
         openingHours,
@@ -160,10 +172,10 @@ export class LeadDiscoveryEngine {
         city: targetCity,
         state: targetState,
         phone,
-        whatsapp,
+        whatsapp: realWhatsApp,
         website: biz.website || null,
-        instagram: instaData.handle,
-        facebook: fbData.handle,
+        instagram: instaHandle,
+        facebook: fbHandle,
         googleMapsUrl,
         openingHours,
         rating,
@@ -180,10 +192,10 @@ export class LeadDiscoveryEngine {
         digitalPresence: {
           hasWebsite: !!biz.website,
           websiteUrl: biz.website || null,
-          hasInstagram: true,
-          instagramUrl: instaData.url,
-          hasFacebook: true,
-          facebookUrl: fbData.url,
+          hasInstagram: !!instaUrl,
+          instagramUrl: instaUrl,
+          hasFacebook: !!fbUrl,
+          facebookUrl: fbUrl,
           hasGoogleMaps: true,
           googleMapsUrl,
         },
