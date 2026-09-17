@@ -16,7 +16,7 @@ export function MobileNav() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 w-full h-16 bg-surface border-t border-border flex items-center justify-around z-50">
+    <div className="md:hidden fixed bottom-0 left-0 w-full h-16 bg-surface/90 backdrop-blur-md border-t border-border flex items-center justify-around z-50">
       {navItems.map((item) => {
         const isActive = pathname === item.href || (item.href !== '/pricing' && pathname.startsWith(item.href));
         return (
