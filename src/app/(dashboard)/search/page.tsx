@@ -113,8 +113,8 @@ export default function SearchPage() {
 
         <div className="text-center mb-10 w-full">
           <h2 className="text-3xl md:text-5xl font-bold text-text-primary mb-4 tracking-tight">
-            Encontre empresas que <span className="text-accent relative inline-block">
-              precisam de vendas
+            Encontre negócios que <span className="text-accent relative inline-block">
+              precisam de sites
               <svg className="absolute w-full h-3 -bottom-1 left-0 text-accent/30" viewBox="0 0 100 10" preserveAspectRatio="none">
                 <path d="M0,5 Q50,10 100,0" stroke="currentColor" strokeWidth="4" fill="none" />
               </svg>

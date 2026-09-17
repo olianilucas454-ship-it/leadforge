@@ -95,7 +95,7 @@ export default function LoginPage() {
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-[1.08]">
-              Encontre clientes que <span className="text-amber-400">precisam de vendas</span> hoje.
+              Encontre negócios que <span className="text-amber-400">precisam de sites</span> hoje.
             </h1>
 
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-sans">
