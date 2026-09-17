@@ -17,9 +17,16 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden text-text-primary">
+    <div className="flex h-screen bg-background overflow-hidden text-text-primary relative">
+      {/* Ambient background glow & texture */}
+      <div
+        className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center opacity-[0.08] mix-blend-screen"
+        style={{ backgroundImage: "url('/leadforge-bg.jpg')" }}
+      />
+      <div className="fixed inset-0 pointer-events-none z-0 bg-gradient-to-tr from-background via-transparent to-background/60" />
+
       <Sidebar />
-      <div className="flex-1 flex flex-col md:ml-64 relative min-w-0">
+      <div className="flex-1 flex flex-col md:ml-64 relative min-w-0 z-10">
         <main className="flex-1 overflow-y-auto pb-16 md:pb-0 relative scroll-smooth">
           {children}
         </main>

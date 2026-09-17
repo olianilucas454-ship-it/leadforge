@@ -59,9 +59,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-text-primary flex flex-col justify-between selection:bg-accent selection:text-black">
+    <div className="min-h-screen bg-background text-text-primary flex flex-col justify-between selection:bg-accent selection:text-black relative overflow-hidden">
+      {/* Hero Ambient Background Layer */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center opacity-25 mix-blend-screen scale-105"
+        style={{ backgroundImage: "url('/leadforge-bg.jpg')" }}
+      />
+      <div className="absolute inset-0 pointer-events-none z-0 bg-gradient-to-b from-background/90 via-background/75 to-background" />
+      <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-accent/10 via-transparent to-transparent" />
+
       {/* Header Bar */}
-      <header className="border-b border-border bg-surface/80 backdrop-blur-md px-6 md:px-12 h-16 flex items-center justify-between">
+      <header className="relative z-10 border-b border-border/80 bg-surface/70 backdrop-blur-md px-6 md:px-12 h-16 flex items-center justify-between">
         <Logo size="md" />
 
         <div className="flex items-center gap-4">
@@ -75,7 +83,7 @@ export default function LoginPage() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 flex items-center justify-center p-6 md:p-12 relative">
+      <main className="relative z-10 flex-1 flex items-center justify-center p-6 md:p-12">
         <div className="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           {/* Left Column: SaaS Value Proposition */}
           <div className="lg:col-span-6 space-y-6 text-left">
@@ -127,7 +135,7 @@ export default function LoginPage() {
             <div className="bg-surface border border-border rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
               <div className="space-y-1 text-center">
                 <h2 className="text-2xl font-extrabold text-text-primary">
-                  {isRegisterMode ? 'Criar Nova Conta no LeadForge' : 'Acessar o LeadForge SaaS'}
+                  {isRegisterMode ? 'Criar Nova Conta no LeadForge' : 'Acessar o LeadForge'}
                 </h2>
                 <p className="text-xs text-text-secondary">
                   {isRegisterMode
@@ -207,8 +215,8 @@ export default function LoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border py-6 px-6 text-center text-xs text-text-muted font-mono">
-        © {new Date().getFullYear()} LeadForge Prospecting SaaS Engine. Todos os direitos reservados.
+      <footer className="relative z-10 border-t border-border/80 bg-surface/50 backdrop-blur-md py-6 px-6 text-center text-xs text-text-muted font-mono">
+        © {new Date().getFullYear()} LeadForge. Todos os direitos reservados.
       </footer>
     </div>
   );
