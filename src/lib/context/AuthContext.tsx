@@ -148,9 +148,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const selectPlan = (plan: UserPlan) => {
     if (!user) return;
-    const isPaid = plan === 'starter' || plan === 'pro' || plan === 'agency' || plan === 'vip' || user.role === 'admin';
-    const updated = { ...user, plan, isPaidUser: isPaid };
-    saveUserSession(updated);
+    if (plan === 'free') {
+      const updated = { ...user, plan: 'free' as UserPlan, isPaidUser: false };
+      saveUserSession(updated);
+    }
   };
 
   const confirmPayment = (plan: UserPlan) => {
@@ -168,14 +169,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const isAdmin = user.role === 'admin' || user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
-    // Admin has UNLIMITED access
+    // Admin has UNLIMITED access for administrative features
     if (isAdmin) {
       return true;
     }
 
-    // Determine current plan definition & monthly allowance
+    // Determine credit allowance (Rule 11 & 13)
+    const isPaid = user.isPaidUser && user.plan !== 'free';
     const planDef = getPlanBySlug(user.plan);
-    const allowance = planDef.researchCredits;
+    const allowance = isPaid ? planDef.researchCredits : 5; // Free tier = 5 total searches
 
     // Check if limit reached
     if (searchesUsed >= allowance) {
@@ -199,9 +201,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = user?.role === 'admin' || user?.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
   const currentPlanSlug = (user?.plan as UserPlan) || 'free';
   const planDef = getPlanBySlug(currentPlanSlug);
-  const monthlyAllowance = planDef.researchCredits;
-  
-  const isPaidUser = user?.isPaidUser || isAdmin || currentPlanSlug === 'starter' || currentPlanSlug === 'pro' || currentPlanSlug === 'agency' || currentPlanSlug === 'vip';
+  const isPaidUser = user?.isPaidUser === true || isAdmin;
+  const monthlyAllowance = isPaidUser ? planDef.researchCredits : 5;
   const creditsRemaining = isAdmin ? 999999 : Math.max(0, monthlyAllowance - searchesUsed);
 
   return (

@@ -53,14 +53,13 @@ export default function PlanosPage() {
       const data = await response.json();
       if (data.success && data.checkoutUrl) {
         setCheckoutUrl(data.checkoutUrl);
-        confirmPayment(selectedPlan.slug as any);
-        // Redirect user directly to Asaas official payment checkout page
+        // Rule 4: Redirect directly to the REAL Asaas hosted checkout URL
         window.location.href = data.checkoutUrl;
       } else {
-        alert(data.error || 'Falha ao gerar link de pagamento no Asaas');
+        alert(data.error || 'Não foi possível criar o checkout de pagamento.');
       }
     } catch (e: any) {
-      alert('Erro de conexão ao processar pagamento.');
+      alert('Não foi possível criar o checkout de pagamento.');
     } finally {
       setLoading(false);
     }

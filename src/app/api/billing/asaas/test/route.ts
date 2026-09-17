@@ -5,8 +5,8 @@ export async function GET(request: NextRequest) {
   const environment = process.env.ASAAS_ENVIRONMENT || 'sandbox';
 
   const baseUrl = environment === 'production'
-    ? 'https://www.asaas.com/api/v3'
-    : 'https://sandbox.asaas.com/api/v3';
+    ? 'https://api.asaas.com/v3'
+    : 'https://api-sandbox.asaas.com/v3';
 
   if (!apiKey) {
     return NextResponse.json({
@@ -33,9 +33,10 @@ export async function GET(request: NextRequest) {
         success: true,
         provider: 'asaas',
         environment,
+        baseUrl,
         configured: true,
         connected: true,
-        message: 'Conexão com a API do Asaas estabelecida com sucesso!',
+        message: `Conexão com a API do Asaas ${environment.toUpperCase()} estabelecida com sucesso!`,
       });
     }
 
@@ -44,6 +45,7 @@ export async function GET(request: NextRequest) {
         success: false,
         provider: 'asaas',
         environment,
+        baseUrl,
         configured: true,
         connected: false,
         message: 'Falha na autenticação do Asaas. Verifique se a ASAAS_API_KEY é válida para o ambiente configurado.',
@@ -54,6 +56,7 @@ export async function GET(request: NextRequest) {
       success: false,
       provider: 'asaas',
       environment,
+      baseUrl,
       configured: true,
       connected: false,
       message: `API do Asaas retornou status HTTP ${response.status}.`,
@@ -63,6 +66,7 @@ export async function GET(request: NextRequest) {
       success: false,
       provider: 'asaas',
       environment,
+      baseUrl,
       configured: true,
       connected: false,
       message: 'Serviço da API do Asaas indisponível ou erro de rede.',

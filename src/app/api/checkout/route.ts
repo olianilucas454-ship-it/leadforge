@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AsaasService } from '@/lib/services/asaas';
 import { getPlanBySlug } from '@/lib/config/plans';
+import { BillingStore } from '@/lib/services/billingStore';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,26 +25,61 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Create hosted Asaas payment link (Credit Card / PIX / Boleto)
-    const paymentLink = await AsaasService.createPaymentLink({
-      name: `LeadForge SaaS — Plano ${plan.name}`,
-      description: `Assinatura mensal do LeadForge SaaS (${plan.researchCredits} pesquisas/mês).`,
+    // Determine host origin for dynamic callback URLs (Rule 8)
+    const host = request.headers.get('host') || 'localhost:3000';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    const baseUrl = `${protocol}://${host}`;
+
+    const externalRef = `order_${Date.now()}_${userEmail.trim().toLowerCase().replace(/[^a-z0-9]/g, '_')}_${plan.slug}`;
+
+    // Create Checkout in Asaas V3 (POST /checkouts - Rule 3)
+    const checkout = await AsaasService.createCheckout({
+      name: `Plano ${plan.name} — LeadForge SaaS`,
+      description: `Assinatura mensal do LeadForge (${plan.researchCredits} pesquisas/mês).`,
       price: plan.price,
-      externalReference: `user_${encodeURIComponent(userEmail)}_${plan.slug}`,
+      externalReference: externalRef,
+      successUrl: `${baseUrl}/billing/success`,
+      cancelUrl: `${baseUrl}/billing/cancelled`,
+      expiredUrl: `${baseUrl}/billing/expired`,
+    });
+
+    // Rule 4 & 5: Server-side Link & Status Validation
+    if (!checkout?.link || typeof checkout.link !== 'string' || !checkout.link.startsWith('http')) {
+      console.error('[API /api/checkout] Asaas returned an invalid checkout link:', checkout);
+      return NextResponse.json(
+        { error: 'Não foi possível gerar o pagamento agora. Tente novamente.' },
+        { status: 502 }
+      );
+    }
+
+    // Save internal order record (Rule 3)
+    BillingStore.saveOrder({
+      checkoutId: checkout.id,
+      checkoutLink: checkout.link,
+      checkoutStatus: checkout.status,
+      externalReference: externalRef,
+      userEmail: userEmail.trim().toLowerCase(),
+      planSlug: plan.slug,
+      amount: plan.price,
+      status: 'PENDING',
+      createdAt: new Date().toISOString(),
     });
 
     return NextResponse.json({
       success: true,
+      checkoutId: checkout.id,
+      checkoutUrl: checkout.link,
+      checkoutStatus: checkout.status,
+      externalReference: externalRef,
       planSlug: plan.slug,
       planName: plan.name,
       price: plan.price,
       researchCredits: plan.researchCredits,
-      checkoutUrl: paymentLink.url,
     });
   } catch (error: any) {
-    console.error('[API /api/checkout] Failed:', error);
+    console.error('[API /api/checkout] Failed to create checkout:', error?.message || error);
     return NextResponse.json(
-      { error: 'Falha ao processar checkout no gateway', message: error?.message || String(error) },
+      { error: 'Não foi possível criar o checkout de pagamento.', message: error?.message || 'Erro de comunicação com o gateway' },
       { status: 500 }
     );
   }
