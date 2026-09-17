@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AsaasService } from '@/lib/services/asaas';
-import { PLAN_CONFIG, getPlanBySlug } from '@/lib/config/plans';
+import { getPlanBySlug } from '@/lib/config/plans';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { planSlug, userEmail, userName, cpfCnpj, phone } = body;
+    const { planSlug, userEmail } = body;
 
     if (!planSlug || !userEmail) {
       return NextResponse.json(
@@ -24,20 +24,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 1. Create or get customer in Asaas Gateway
-    const customer = await AsaasService.getOrCreateCustomer({
-      email: userEmail,
-      name: userName || userEmail.split('@')[0],
-      cpfCnpj: cpfCnpj || undefined,
-      phone: phone || undefined,
-    });
-
-    // 2. Create Asaas subscription
-    const subscription = await AsaasService.createSubscription({
-      customerId: customer.id,
-      planSlug: plan.slug as 'starter' | 'pro' | 'agency',
+    // Create hosted Asaas payment link (Credit Card / PIX / Boleto)
+    const paymentLink = await AsaasService.createPaymentLink({
+      name: `LeadForge SaaS — Plano ${plan.name}`,
+      description: `Assinatura mensal do LeadForge SaaS (${plan.researchCredits} pesquisas/mês).`,
       price: plan.price,
-      description: `LeadForge SaaS — Plano ${plan.name} (${plan.researchCredits} pesquisas/mês)`,
       externalReference: `user_${encodeURIComponent(userEmail)}_${plan.slug}`,
     });
 
@@ -47,9 +38,7 @@ export async function POST(request: NextRequest) {
       planName: plan.name,
       price: plan.price,
       researchCredits: plan.researchCredits,
-      asaasCustomerId: customer.id,
-      asaasSubscriptionId: subscription.id,
-      checkoutUrl: subscription.invoiceUrl || `https://sandbox.asaas.com/i/${subscription.id}`,
+      checkoutUrl: paymentLink.url,
     });
   } catch (error: any) {
     console.error('[API /api/checkout] Failed:', error);

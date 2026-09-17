@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, Crown, Zap, Shield, Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { Check, Crown, Zap, Shield, Sparkles, ArrowRight, Loader2, ExternalLink } from 'lucide-react';
 import { Header } from '@/components/layout/Header';
 import { useAuth } from '@/lib/context/AuthContext';
 import { PLAN_CONFIG, PlanDefinition } from '@/lib/config/plans';
@@ -13,9 +13,9 @@ export default function PlanosPage() {
   
   const [selectedPlan, setSelectedPlan] = useState<PlanDefinition | null>(null);
   const [loading, setLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'card'>('pix');
+  const [paymentMethod, setPaymentMethod] = useState<'pix' | 'card'>('card');
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [checkoutUrl, setCheckoutUrl] = useState<string | null>(null);
 
   const plans = [
     PLAN_CONFIG.free,
@@ -32,8 +32,8 @@ export default function PlanosPage() {
     }
 
     setSelectedPlan(plan);
+    setCheckoutUrl(null);
     setShowCheckoutModal(true);
-    setPaymentSuccess(false);
   };
 
   const handleProcessPayment = async () => {
@@ -47,29 +47,20 @@ export default function PlanosPage() {
         body: JSON.stringify({
           planSlug: selectedPlan.slug,
           userEmail: user.email,
-          userName: user.name,
         }),
       });
 
       const data = await response.json();
-      if (data.success) {
+      if (data.success && data.checkoutUrl) {
+        setCheckoutUrl(data.checkoutUrl);
         confirmPayment(selectedPlan.slug as any);
-        setPaymentSuccess(true);
-        setTimeout(() => {
-          setShowCheckoutModal(false);
-          router.push('/search');
-        }, 1800);
+        // Redirect user directly to Asaas official payment checkout page
+        window.location.href = data.checkoutUrl;
       } else {
-        alert(data.error || 'Falha ao processar pagamento');
+        alert(data.error || 'Falha ao gerar link de pagamento no Asaas');
       }
-    } catch (e) {
-      // Fallback preview
-      confirmPayment(selectedPlan.slug as any);
-      setPaymentSuccess(true);
-      setTimeout(() => {
-        setShowCheckoutModal(false);
-        router.push('/search');
-      }, 1500);
+    } catch (e: any) {
+      alert('Erro de conexão ao processar pagamento.');
     } finally {
       setLoading(false);
     }
@@ -88,7 +79,7 @@ export default function PlanosPage() {
           </div>
 
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
-            Encontre empresas que podem se tornar seus <span className="text-accent">próximos clientes</span>
+            Encontre negócios que <span className="text-accent">precisam de sites</span>
           </h1>
 
           <p className="text-text-secondary text-lg md:text-xl">
@@ -179,8 +170,8 @@ export default function PlanosPage() {
           <div className="bg-[#12121a] border border-accent/40 p-6 md:p-8 rounded-3xl max-w-lg w-full space-y-6 shadow-2xl relative">
             <div className="flex justify-between items-start border-b border-border pb-4">
               <div>
-                <h3 className="text-2xl font-extrabold text-white">Checkout Asaas Gateway</h3>
-                <p className="text-xs text-gray-400">Resumo da sua assinatura comercial</p>
+                <h3 className="text-2xl font-extrabold text-white">Checkout Oficial Asaas Gateway</h3>
+                <p className="text-xs text-gray-400">Cartão de Crédito ou PIX Instantâneo</p>
               </div>
               <button
                 onClick={() => setShowCheckoutModal(false)}
@@ -190,74 +181,58 @@ export default function PlanosPage() {
               </button>
             </div>
 
-            {paymentSuccess ? (
-              <div className="py-8 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto animate-bounce">
-                  <Check className="w-8 h-8" />
-                </div>
-                <h4 className="text-2xl font-extrabold text-white">Pagamento Confirmado!</h4>
-                <p className="text-sm text-gray-300">
-                  Seus <strong className="text-accent">{selectedPlan.researchCredits} créditos de pesquisa</strong> foram liberados com sucesso.
-                </p>
+            <div className="p-4 rounded-2xl bg-background border border-border space-y-2">
+              <div className="flex justify-between text-sm font-bold text-white">
+                <span>Plano {selectedPlan.name}</span>
+                <span className="text-accent">R$ {selectedPlan.price.toFixed(2).replace('.', ',')}/mês</span>
               </div>
-            ) : (
-              <>
-                <div className="p-4 rounded-2xl bg-background border border-border space-y-2">
-                  <div className="flex justify-between text-sm font-bold text-white">
-                    <span>Plano {selectedPlan.name}</span>
-                    <span className="text-accent">R$ {selectedPlan.price.toFixed(2).replace('.', ',')}/mês</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-400 font-mono">
-                    <span>Franquia Mensal:</span>
-                    <span>{selectedPlan.researchCredits} pesquisas/mês</span>
-                  </div>
-                </div>
+              <div className="flex justify-between text-xs text-gray-400 font-mono">
+                <span>Franquia Mensal:</span>
+                <span>{selectedPlan.researchCredits} pesquisas/mês</span>
+              </div>
+            </div>
 
-                <div className="space-y-3">
-                  <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">
-                    Forma de Pagamento
-                  </label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('pix')}
-                      className={`p-3 rounded-xl border text-xs font-bold transition-all ${
-                        paymentMethod === 'pix'
-                          ? 'border-accent bg-accent/10 text-accent'
-                          : 'border-border bg-background text-gray-400'
-                      }`}
-                    >
-                      ⚡ PIX Instantâneo
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod('card')}
-                      className={`p-3 rounded-xl border text-xs font-bold transition-all ${
-                        paymentMethod === 'card'
-                          ? 'border-accent bg-accent/10 text-accent'
-                          : 'border-border bg-background text-gray-400'
-                      }`}
-                    >
-                      💳 Cartão de Crédito
-                    </button>
-                  </div>
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-gray-400 uppercase tracking-wider block">
+                Forma de Pagamento Aceita
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-xl border border-accent bg-accent/10 text-accent text-xs font-bold text-center">
+                  💳 Cartão de Crédito
                 </div>
+                <div className="p-3 rounded-xl border border-accent bg-accent/10 text-accent text-xs font-bold text-center">
+                  ⚡ PIX QR Code
+                </div>
+              </div>
+            </div>
 
-                <button
-                  onClick={handleProcessPayment}
-                  disabled={loading}
+            {checkoutUrl ? (
+              <div className="space-y-3 pt-2">
+                <a
+                  href={checkoutUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-full py-4 px-6 rounded-xl bg-accent hover:bg-accent-hover text-black font-extrabold text-sm uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2"
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>Processando no Asaas...</span>
-                    </>
-                  ) : (
-                    <span>Continuar para Pagamento (R$ {selectedPlan.price.toFixed(2).replace('.', ',')}) →</span>
-                  )}
-                </button>
-              </>
+                  <span>Abrir Tela de Pagamento Asaas</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            ) : (
+              <button
+                onClick={handleProcessPayment}
+                disabled={loading}
+                className="w-full py-4 px-6 rounded-xl bg-accent hover:bg-accent-hover text-black font-extrabold text-sm uppercase tracking-wider shadow-lg transition-all flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Gerando Checkout Asaas...</span>
+                  </>
+                ) : (
+                  <span>Ir para o Checkout de Pagamento (R$ {selectedPlan.price.toFixed(2).replace('.', ',')}) →</span>
+                )}
+              </button>
             )}
           </div>
         </div>
