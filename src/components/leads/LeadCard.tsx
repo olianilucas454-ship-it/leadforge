@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { ScoreBadge } from '@/components/ui/ScoreBadge';
 import { cn } from '@/lib/utils/cn';
+import { getWhatsAppUrl, formatPhoneBr } from '@/lib/utils/phone';
 import { MapPin, Star, MessageSquare, Globe, Smartphone, Instagram, Eye, MessageCircle, Copy, Plus, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -98,7 +99,7 @@ export function LeadCard({ lead, onFavoriteToggle, onAddToCRM }: LeadCardProps) 
 
         <div className="flex items-center text-text-secondary">
           <Smartphone className="h-4 w-4 mr-2 shrink-0" />
-          <span>{lead.whatsapp || lead.phone || 'Não informado'}</span>
+          <span>{formatPhoneBr(lead.whatsapp || lead.phone) || 'Não informado'}</span>
         </div>
 
         {lead.digitalPresence.instagramUrl && (
@@ -136,14 +137,15 @@ export function LeadCard({ lead, onFavoriteToggle, onAddToCRM }: LeadCardProps) 
           Ver Lead
         </Button>
         
-        {lead.whatsapp ? (
+        {getWhatsAppUrl(lead.whatsapp || lead.phone) ? (
           <Button 
             variant="primary" 
             size="sm" 
             className="flex-1 bg-[#25D366] hover:bg-[#25D366]/90 text-black font-semibold text-xs"
             onClick={(e) => {
               e.stopPropagation();
-              window.open(`https://wa.me/55${lead.whatsapp?.replace(/\D/g, '')}`, '_blank');
+              const url = getWhatsAppUrl(lead.whatsapp || lead.phone);
+              if (url) window.open(url, '_blank');
             }}
           >
             <MessageCircle className="h-3.5 w-3.5 mr-1.5" />
@@ -154,7 +156,7 @@ export function LeadCard({ lead, onFavoriteToggle, onAddToCRM }: LeadCardProps) 
             variant="secondary" 
             size="sm" 
             className="flex-1 text-xs"
-            disabled={!lead.phone}
+            disabled={!lead.phone && !lead.whatsapp}
             onClick={copyPhone}
           >
             <Copy className="h-3.5 w-3.5 mr-1.5" />

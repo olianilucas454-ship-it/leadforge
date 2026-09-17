@@ -13,6 +13,7 @@ import { ApproachGenerator } from '@/components/leads/ApproachGenerator';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ArrowLeft, Star, MapPin, Phone, MessageCircle, Clock, Copy, CheckCircle2, ChevronRight, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { getWhatsAppUrl, formatPhoneBr } from '@/lib/utils/phone';
 
 export default function LeadDetailPage() {
   const params = useParams();
@@ -121,19 +122,24 @@ export default function LeadDetailPage() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-text-secondary" />
-                    <span>{lead.phone || 'Não informado'}</span>
-                    {lead.phone && (
+                    <span>{formatPhoneBr(lead.phone || lead.whatsapp) || 'Não informado'}</span>
+                    {(lead.phone || lead.whatsapp) && (
                       <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-1" onClick={handleCopyPhone}>
                         <Copy className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
-                  {lead.whatsapp && (
+                  {getWhatsAppUrl(lead.whatsapp || lead.phone) && (
                     <div className="flex items-center gap-2">
                       <MessageCircle className="h-4 w-4 text-[#25D366]" />
-                      <span>{lead.whatsapp}</span>
-                      <a href={`https://wa.me/55${lead.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-xs text-accent hover:underline ml-1">
-                        Abrir
+                      <span>{formatPhoneBr(lead.whatsapp || lead.phone)}</span>
+                      <a 
+                        href={getWhatsAppUrl(lead.whatsapp || lead.phone)!} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-xs text-accent hover:underline ml-1 font-medium"
+                      >
+                        Abrir WhatsApp
                       </a>
                     </div>
                   )}
@@ -233,18 +239,21 @@ export default function LeadDetailPage() {
 
       {/* Action Bar (Mobile Sticky) */}
       <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-md border-t border-border p-4 md:hidden flex gap-2 z-50">
-        {lead.whatsapp ? (
+        {getWhatsAppUrl(lead.whatsapp || lead.phone) ? (
           <Button 
-            className="flex-1 bg-[#25D366] hover:bg-[#25D366]/90 text-white font-semibold"
-            onClick={() => window.open(`https://wa.me/55${lead.whatsapp?.replace(/\D/g, '')}`, '_blank')}
+            className="flex-1 bg-[#25D366] hover:bg-[#25D366]/90 text-black font-semibold"
+            onClick={() => {
+              const url = getWhatsAppUrl(lead.whatsapp || lead.phone);
+              if (url) window.open(url, '_blank');
+            }}
           >
             <MessageCircle className="h-4 w-4 mr-2" />
             WhatsApp
           </Button>
         ) : (
-          <Button className="flex-1" onClick={handleCopyPhone} disabled={!lead.phone}>
+          <Button className="flex-1" onClick={handleCopyPhone} disabled={!lead.phone && !lead.whatsapp}>
             <Phone className="h-4 w-4 mr-2" />
-            Ligar
+            Copiar Telefone
           </Button>
         )}
         <Button variant="secondary" size="sm" className="shrink-0 px-3" title="Adicionar ao CRM">

@@ -1,4 +1,5 @@
 import { BusinessDataProvider, RawBusinessData, SearchParams } from './types';
+import { isMobileNumber } from '@/lib/utils/phone';
 
 // Instant in-memory cache and coordinates dictionary for Brazilian cities
 const CITY_COORDS_CACHE: Record<string, { lat: number; lon: number }> = {
@@ -244,7 +245,7 @@ export class OverpassDataProvider implements BusinessDataProvider {
               lat: itemLat,
               lon: itemLon,
               phone: phone || undefined,
-              whatsapp: phone || undefined,
+              whatsapp: isMobileNumber(phone) ? phone : undefined,
               website: website ? (website.startsWith('http') ? website : `https://${website}`) : undefined,
               googleMapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${name} ${street} ${city} ${state}`)}`,
               address: fullAddress,

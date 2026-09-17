@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Copy, MessageCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { getWhatsAppUrl } from '@/lib/utils/phone';
 
 interface ApproachGeneratorProps {
   lead: Lead;
@@ -25,12 +26,13 @@ export function ApproachGenerator({ lead, isOpen = true }: ApproachGeneratorProp
   };
 
   const handleWhatsApp = () => {
-    const phone = lead.whatsapp || lead.phone;
-    if (!phone) return;
-    const cleanPhone = phone.replace(/\D/g, '');
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/55${cleanPhone}?text=${encodedMessage}`, '_blank');
+    const url = getWhatsAppUrl(lead.whatsapp || lead.phone, message);
+    if (url) {
+      window.open(url, '_blank');
+    }
   };
+
+  const hasWhatsApp = Boolean(getWhatsAppUrl(lead.whatsapp || lead.phone));
 
   return (
     <Card className="p-4 bg-surface-hover border-border mt-4">
@@ -48,8 +50,8 @@ export function ApproachGenerator({ lead, isOpen = true }: ApproachGeneratorProp
           variant="primary" 
           size="sm" 
           onClick={handleWhatsApp} 
-          disabled={!lead.whatsapp && !lead.phone}
-          className="flex-1 bg-[#25D366] hover:bg-[#25D366]/90 text-black font-semibold"
+          disabled={!hasWhatsApp}
+          className="flex-1 bg-[#25D366] hover:bg-[#25D366]/90 text-black font-semibold disabled:opacity-50"
         >
           <MessageCircle className="h-4 w-4 mr-2" />
           ABRIR WHATSAPP
