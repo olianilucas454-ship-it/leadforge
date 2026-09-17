@@ -37,7 +37,11 @@ export class HybridBusinessDataProvider implements BusinessDataProvider {
         const key = item.name.toLowerCase().trim();
         if (!seenNames.has(key)) {
           seenNames.add(key);
-          merged.push(item);
+          merged.push({
+            ...item,
+            city: item.city || params.city,
+            state: item.state || params.state,
+          });
         }
       };
 

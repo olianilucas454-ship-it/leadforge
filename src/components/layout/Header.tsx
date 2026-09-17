@@ -67,9 +67,13 @@ export function Header({ title, subtitle }: HeaderProps) {
           </Link>
         )}
 
-        <div className="w-8 h-8 rounded-full bg-accent text-black flex items-center justify-center font-extrabold text-xs shadow-md">
+        <Link
+          href="/minha-assinatura"
+          className="w-8 h-8 rounded-full bg-accent hover:bg-accent-hover text-black flex items-center justify-center font-extrabold text-xs shadow-md hover:scale-110 transition-all cursor-pointer"
+          title="Ver Meu Perfil & Assinatura"
+        >
           {initial}
-        </div>
+        </Link>
       </div>
     </header>
   );

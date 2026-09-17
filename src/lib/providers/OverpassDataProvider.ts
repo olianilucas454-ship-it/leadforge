@@ -59,6 +59,36 @@ const CITY_COORDS_CACHE: Record<string, { lat: number; lon: number }> = {
   'palmas': { lat: -10.1844, lon: -48.3336 },
 };
 
+const STATE_CAPITAL_COORDS: Record<string, { lat: number; lon: number }> = {
+  'AC': { lat: -9.9749, lon: -67.8243 },
+  'AL': { lat: -9.6658, lon: -35.7353 },
+  'AP': { lat: 0.0349, lon: -51.0694 },
+  'AM': { lat: -3.1190, lon: -60.0217 },
+  'BA': { lat: -12.9777, lon: -38.5016 },
+  'CE': { lat: -3.7172, lon: -38.5434 },
+  'DF': { lat: -15.7975, lon: -47.8919 },
+  'ES': { lat: -20.3155, lon: -40.3128 },
+  'GO': { lat: -16.6869, lon: -49.2648 },
+  'MA': { lat: -2.5391, lon: -44.2828 },
+  'MT': { lat: -15.6014, lon: -56.0979 },
+  'MS': { lat: -20.4697, lon: -54.6201 },
+  'MG': { lat: -19.9167, lon: -43.9345 },
+  'PA': { lat: -1.4558, lon: -48.4902 },
+  'PB': { lat: -7.1195, lon: -34.8450 },
+  'PR': { lat: -25.4284, lon: -49.2733 },
+  'PE': { lat: -8.0476, lon: -34.8770 },
+  'PI': { lat: -5.0919, lon: -42.8034 },
+  'RJ': { lat: -22.9068, lon: -43.1729 },
+  'RN': { lat: -5.7945, lon: -35.2110 },
+  'RS': { lat: -30.0346, lon: -51.2177 },
+  'RO': { lat: -8.7619, lon: -63.9039 },
+  'RR': { lat: 2.8235, lon: -60.6758 },
+  'SC': { lat: -27.5954, lon: -48.5480 },
+  'SP': { lat: -23.5505, lon: -46.6333 },
+  'SE': { lat: -10.9472, lon: -37.0731 },
+  'TO': { lat: -10.1844, lon: -48.3336 },
+};
+
 export class OverpassDataProvider implements BusinessDataProvider {
   public name = 'OpenStreetMap & Photon (Leads Reais)';
 
@@ -76,7 +106,7 @@ export class OverpassDataProvider implements BusinessDataProvider {
   }
 
   /**
-   * Instant geocoding with in-memory dictionary and fast fallback
+   * Geocoding with dictionary, Nominatim (3.5s timeout) and state capital fallback
    */
   private async geocodeCity(city: string, state: string): Promise<{ lat: number; lon: number }> {
     const key = city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
@@ -86,10 +116,10 @@ export class OverpassDataProvider implements BusinessDataProvider {
       return CITY_COORDS_CACHE[key];
     }
 
-    // 2. Fetch Nominatim with fast 1500ms timeout
+    // 2. Fetch Nominatim with 3500ms timeout
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
 
       const query = encodeURIComponent(`${city}, ${state}, Brasil`);
       const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`;
@@ -116,11 +146,12 @@ export class OverpassDataProvider implements BusinessDataProvider {
         }
       }
     } catch {
-      // Ignore and use fallback
+      // Ignore and use state capital fallback
     }
 
-    // Fallback default coordinates (Goiânia center)
-    return { lat: -16.6869, lon: -49.2648 };
+    // Fallback: Return capital of requested state (e.g. MT -> Cuiabá, SP -> São Paulo)
+    const stUpper = (state || 'SP').toUpperCase().trim();
+    return STATE_CAPITAL_COORDS[stUpper] || { lat: -23.5505, lon: -46.6333 };
   }
 
   public async isAvailable(): Promise<boolean> {

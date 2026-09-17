@@ -95,18 +95,20 @@ export function Sidebar() {
 
       {/* User Footer Profile & Admin Badge */}
       <div className="p-4 border-t border-border/50 space-y-2">
-        <div className="flex items-center gap-3 p-2 rounded-lg bg-background border border-border">
-          <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center border border-accent/30 text-accent shrink-0">
-            <User className="w-4 h-4" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-text-primary truncate">
-              {user?.name || user?.email || 'Usuário'}
-            </p>
-            <p className="text-[10px] text-text-muted truncate font-mono">
-              {user?.email || 'visitante@leadforge.com'}
-            </p>
-          </div>
+        <div className="flex items-center gap-3 p-2 rounded-lg bg-background border border-border group hover:border-accent/50 transition-colors">
+          <Link href="/minha-assinatura" className="flex items-center gap-3 flex-1 min-w-0" title="Ver Meu Perfil & Assinatura">
+            <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center border border-accent/30 text-accent shrink-0 group-hover:scale-105 transition-transform">
+              <User className="w-4 h-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-text-primary truncate group-hover:text-accent transition-colors">
+                {user?.name || user?.email || 'Usuário'}
+              </p>
+              <p className="text-[10px] text-text-muted truncate font-mono">
+                {user?.email || 'visitante@leadforge.com'}
+              </p>
+            </div>
+          </Link>
           <button
             onClick={handleLogout}
             className="p-1.5 text-text-muted hover:text-red-400 transition-colors"
