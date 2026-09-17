@@ -3,68 +3,102 @@
 import React from 'react';
 import Link from 'next/link';
 
-export function AnvilHammerIcon({ className = 'w-9 h-9' }: { className?: string }) {
+export function AnvilHammerIcon({ className = 'w-10 h-10' }: { className?: string }) {
   return (
     <svg
       className={className}
-      viewBox="0 0 48 48"
+      viewBox="0 0 100 100"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        {/* Badge Background Shading */}
-        <radialGradient id="badgeBg" cx="50%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#1a4738" />
-          <stop offset="60%" stopColor="#0d281f" />
-          <stop offset="100%" stopColor="#051510" />
+        {/* Outer Ring & Inner Dark Emerald Gradient */}
+        <radialGradient id="badgeBg" cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="#1c4e3f" />
+          <stop offset="50%" stopColor="#0a261d" />
+          <stop offset="100%" stopColor="#04120e" />
         </radialGradient>
 
-        {/* Anvil Silver Metallic Shading */}
+        <linearGradient id="ringGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00ffaa" />
+          <stop offset="50%" stopColor="#00d68f" />
+          <stop offset="100%" stopColor="#005538" />
+        </linearGradient>
+
+        {/* 3D Anvil Metallic Gradients */}
+        <linearGradient id="anvilTop" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#f8fafc" />
+          <stop offset="40%" stopColor="#cbd5e1" />
+          <stop offset="70%" stopColor="#94a3b8" />
+          <stop offset="100%" stopColor="#475569" />
+        </linearGradient>
+
         <linearGradient id="anvilBody" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#cbd5e1" />
-          <stop offset="35%" stopColor="#64748b" />
+          <stop offset="0%" stopColor="#475569" />
+          <stop offset="50%" stopColor="#334155" />
+          <stop offset="100%" stopColor="#0f172a" />
+        </linearGradient>
+
+        <linearGradient id="anvilBase" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#64748b" />
           <stop offset="100%" stopColor="#1e293b" />
         </linearGradient>
 
-        <linearGradient id="anvilHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#f8fafc" />
-          <stop offset="50%" stopColor="#94a3b8" />
+        {/* Hammer Metallic & Wood Gradients */}
+        <linearGradient id="hammerSteel" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#ffffff" />
+          <stop offset="50%" stopColor="#cbd5e1" />
           <stop offset="100%" stopColor="#334155" />
         </linearGradient>
 
-        {/* Hammer Metallic & Wood */}
-        <linearGradient id="hammerHead" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#f1f5f9" />
-          <stop offset="50%" stopColor="#94a3b8" />
-          <stop offset="100%" stopColor="#334155" />
-        </linearGradient>
-
-        <linearGradient id="hammerHandle" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#d97706" />
+        <linearGradient id="hammerWood" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#f59e0b" />
+          <stop offset="50%" stopColor="#d97706" />
           <stop offset="100%" stopColor="#78350f" />
         </linearGradient>
+
+        {/* Drop Shadow */}
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="3" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.7" />
+        </filter>
       </defs>
 
-      {/* Circular Emblem Container */}
-      <circle cx="24" cy="24" r="22" fill="url(#badgeBg)" stroke="#00d68f" strokeWidth="1.5" strokeOpacity="0.5" />
+      {/* Circle Badge background with Green Rim */}
+      <circle cx="50" cy="50" r="46" fill="url(#badgeBg)" stroke="url(#ringGlow)" strokeWidth="2.5" />
+      <circle cx="50" cy="50" r="44.5" fill="none" stroke="#00ffaa" strokeWidth="0.5" strokeOpacity="0.4" />
 
-      {/* ANVIL (BIGORNA) */}
-      {/* Base */}
-      <path d="M 12 34 h 24 l -2.5 -5 h -19 z" fill="url(#anvilBody)" />
-      {/* Waisted Body */}
-      <path d="M 16.5 29 h 15 l -2 -5 h -11 z" fill="#334155" />
-      {/* Table & Horn */}
-      <path d="M 6 20 C 10 20 14 24 16 24 L 38 24 c 1.5 0 2.5 -1 2.5 -2 c 0 -1 -1 -2 -2.5 -2 H 6 Z" fill="url(#anvilHighlight)" />
-      {/* Top face shine */}
-      <path d="M 15 20 H 38 V 21 H 16 Z" fill="#ffffff" opacity="0.4" />
+      {/* ANVIL 3D GRAPHIC */}
+      <g filter="url(#shadow)">
+        {/* Base Floor Shadow */}
+        <ellipse cx="50" cy="74" rx="28" ry="5" fill="#000000" opacity="0.5" />
 
-      {/* HAMMER (MARTELO) */}
-      <g transform="rotate(-30 24 16)">
+        {/* Anvil Base Block */}
+        <path d="M 24 71 L 76 71 L 70 60 L 30 60 Z" fill="url(#anvilBase)" />
+        <path d="M 30 60 L 70 60 L 65 52 L 35 52 Z" fill="#334155" />
+
+        {/* Anvil Body (Waist) */}
+        <path d="M 35 52 L 65 52 L 60 42 L 40 42 Z" fill="url(#anvilBody)" />
+
+        {/* Anvil Top Surface (Table) & Curved Horn (Left) */}
+        <path d="M 12 42 C 20 42 28 42 34 42 L 82 42 C 86 42 88 39 88 37 C 88 35 86 34 82 34 L 12 34 C 18 36 14 40 12 42 Z" fill="url(#anvilBody)" />
+        {/* Metallic Top Flat Bevel */}
+        <path d="M 30 34 H 82 C 85 34 87 35.5 87 37 C 87 38.5 85 40 82 40 H 32 L 30 34 Z" fill="url(#anvilTop)" />
+        {/* Rim Highlight */}
+        <path d="M 30 34 H 82 C 85 34 87 34.8 87 35.5 H 31 Z" fill="#ffffff" opacity="0.8" />
+      </g>
+
+      {/* HAMMER (MARTELO DE FORJA) */}
+      <g filter="url(#shadow)" transform="rotate(-32 50 36)">
         {/* Handle */}
-        <rect x="22" y="5" width="4" height="18" rx="2" fill="url(#hammerHandle)" />
-        {/* Head */}
-        <rect x="15" y="6" width="18" height="7" rx="1.5" fill="url(#hammerHead)" stroke="#1e293b" strokeWidth="0.8" />
-        <rect x="15" y="7" width="3" height="5" fill="#f8fafc" opacity="0.8" />
+        <rect x="46" y="8" width="8" height="42" rx="3.5" fill="url(#hammerWood)" stroke="#451a03" strokeWidth="0.8" />
+        <rect x="48" y="10" width="2" height="38" rx="1" fill="#ffffff" opacity="0.25" />
+        
+        {/* Metal Head */}
+        <rect x="32" y="12" width="36" height="15" rx="3" fill="url(#hammerSteel)" stroke="#1e293b" strokeWidth="1" />
+        {/* Bevel Highlight */}
+        <rect x="32" y="13" width="6" height="13" rx="1" fill="#ffffff" opacity="0.7" />
+        {/* Pin Center */}
+        <circle cx="50" cy="19.5" r="2.5" fill="#334155" stroke="#94a3b8" strokeWidth="0.5" />
       </g>
     </svg>
   );
@@ -90,8 +124,8 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
 
   return (
     <Link href="/" className="flex items-center gap-3 hover:opacity-95 transition-opacity group shrink-0">
-      <div className={`flex items-center justify-center rounded-full shadow-lg ${sizeClasses[size]}`}>
-        <AnvilHammerIcon className="w-full h-full drop-shadow-md" />
+      <div className={`flex items-center justify-center rounded-full shadow-xl ${sizeClasses[size]}`}>
+        <AnvilHammerIcon className="w-full h-full drop-shadow-lg" />
       </div>
       {showText && (
         <span className={`tracking-tight ${textClasses[size]}`}>
