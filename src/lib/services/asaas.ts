@@ -7,7 +7,7 @@
  * 1. Environment endpoints:
  *    - sandbox: https://api-sandbox.asaas.com/v3
  *    - production: https://api.asaas.com/v3
- * 2. Primary resource: POST /checkouts
+ * 2. Primary hosted checkout resource: POST /paymentLinks & POST /checkouts
  * 3. Returns { id, link, status, externalReference }
  * 4. Server-side link & status validation.
  */
@@ -58,7 +58,7 @@ export class AsaasService {
   }
 
   /**
-   * Create a Checkout in Asaas V3 (POST /checkouts)
+   * Create a Hosted Payment Checkout Link in Asaas V3
    */
   static async createCheckout(input: CreateCheckoutInput): Promise<AsaasCheckoutResponse> {
     const activeApiKey = input.apiKey || ASAAS_API_KEY;
@@ -70,9 +70,10 @@ export class AsaasService {
       name: input.name,
       description: input.description,
       value: input.price,
-      billingTypes: ['CREDIT_CARD', 'PIX', 'BOLETO'],
-      chargeTypes: ['RECURRENT'],
+      billingType: 'UNDEFINED', // Supports Credit Card, PIX, and Boleto in the hosted checkout
+      chargeType: 'RECURRENT',
       subscriptionCycle: 'MONTHLY',
+      dueDateLimitDays: 5,
       externalReference: input.externalReference,
     };
 
@@ -85,8 +86,8 @@ export class AsaasService {
     }
 
     try {
-      // 1. Try POST /checkouts
-      let response = await fetch(`${BASE_URL}/checkouts`, {
+      // 1. Primary endpoint: POST /paymentLinks (Returns hosted checkout page supporting CC and PIX)
+      let response = await fetch(`${BASE_URL}/paymentLinks`, {
         method: 'POST',
         headers: this.getHeaders(activeApiKey),
         body: JSON.stringify(payload),
@@ -94,36 +95,41 @@ export class AsaasService {
 
       let data = await response.json();
 
-      // If /checkouts returned 404 or specific error, fallback to /paymentLinks
-      if (!response.ok && (response.status === 404 || response.status === 405)) {
-        console.warn('[AsaasService] /checkouts endpoint unavailable, falling back to /paymentLinks');
-        response = await fetch(`${BASE_URL}/paymentLinks`, {
+      // If /paymentLinks returned error, try fallback to /checkouts
+      if (!response.ok) {
+        console.warn('[AsaasService] /paymentLinks error, trying /checkouts fallback:', data);
+        response = await fetch(`${BASE_URL}/checkouts`, {
           method: 'POST',
           headers: this.getHeaders(activeApiKey),
           body: JSON.stringify({
             name: input.name,
             description: input.description,
             value: input.price,
-            billingType: 'UNDEFINED',
-            chargeType: 'RECURRENT',
+            billingTypes: ['CREDIT_CARD', 'PIX'],
+            chargeTypes: ['RECURRENT'],
+            items: [{ name: input.name, value: input.price, quantity: 1 }],
             subscriptionCycle: 'MONTHLY',
+            dueDateLimitDays: 5,
             externalReference: input.externalReference,
             callback: payload.callback,
           }),
         });
-        data = await response.json();
+        const fallbackData = await response.json();
+        if (response.ok) {
+          data = fallbackData;
+        }
       }
 
-      if (!response.ok) {
+      if (!response.ok && !data?.id) {
         const errorDesc = data?.errors?.[0]?.description || `Asaas API Error (HTTP ${response.status})`;
         console.error('[AsaasService] Failed to create checkout:', errorDesc);
         throw new Error(errorDesc);
       }
 
-      // Extract link/url and status
+      // Extract real hosted checkout link and status
       const checkoutId = data.id;
-      const checkoutLink = data.link || data.url || data.shortUrl;
-      const checkoutStatus = data.status || (checkoutLink ? 'ACTIVE' : 'INACTIVE');
+      const checkoutLink = data.url || data.link || data.shortUrl;
+      const checkoutStatus = data.active === false ? 'INACTIVE' : 'ACTIVE';
 
       // Server-side Validation (Requirement 5)
       if (!checkoutId || !checkoutLink || typeof checkoutLink !== 'string' || !checkoutLink.startsWith('http')) {
