@@ -102,7 +102,7 @@ export default function SearchPage() {
               <Crown className="w-6 h-6 text-amber-400" />
               <div>
                 <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">Administrador Master Logado</div>
-                <div className="text-xs text-slate-300 font-mono">olianilucas454@gmail.com — Pesquisas Ilimitadas</div>
+                <div className="text-xs text-slate-300 font-mono">Conta Administrador — Pesquisas Ilimitadas</div>
               </div>
             </div>
             <span className="px-3 py-1 bg-amber-500 text-black font-black text-[10px] rounded-full uppercase tracking-wider">

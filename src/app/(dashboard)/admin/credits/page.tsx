@@ -80,7 +80,7 @@ export default function AdminCreditsPage() {
     return (
       <div className="min-h-screen bg-background text-text-primary p-8 text-center space-y-4">
         <h1 className="text-2xl font-bold text-red-400">Acesso Negado</h1>
-        <p className="text-gray-400">Apenas o Administrador Master (`olianilucas454@gmail.com`) possui acesso a esta ferramenta.</p>
+        <p className="text-gray-400">Apenas o Administrador da plataforma possui acesso a esta ferramenta.</p>
       </div>
     );
   }

@@ -5,18 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
 import {
   Zap,
-  Lock,
   Mail,
   KeyRound,
   ArrowRight,
   ShieldCheck,
-  CheckCircle2,
-  Sparkles,
-  UserCheck,
-  Building,
   Search,
-  Kanban,
-  Star
+  Kanban
 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -54,24 +48,10 @@ export default function LoginPage() {
     } else {
       const res = login(email, password);
       if (res.success) {
-        const isMaster = email.trim().toLowerCase() === 'olianilucas454@gmail.com';
-        if (isMaster) {
-          router.push('/search');
-        } else {
-          router.push('/pricing');
-        }
+        router.push('/search');
       } else {
         setErrorMsg(res.message || 'Falha no acesso. Verifique suas credenciais.');
       }
-    }
-  };
-
-  const handleAdminQuickLogin = () => {
-    setEmail('olianilucas454@gmail.com');
-    setPassword('lucas007');
-    const res = login('olianilucas454@gmail.com', 'lucas007');
-    if (res.success) {
-      router.push('/search');
     }
   };
 
@@ -151,7 +131,7 @@ export default function LoginPage() {
                 <p className="text-xs text-slate-400">
                   {isRegisterMode
                     ? 'Preencha seus dados para iniciar seu teste com 5 pesquisas grátis'
-                    : 'Entre com suas credenciais de acesso ou conta master de administrador'}
+                    : 'Entre com suas credenciais de acesso para entrar na plataforma'}
                 </p>
               </div>
 
@@ -173,7 +153,7 @@ export default function LoginPage() {
                         required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Ex: Lucas Oliani"
+                        placeholder="Ex: Seu Nome"
                         className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-xs text-white focus:border-amber-500 focus:outline-none"
                       />
                     </div>
@@ -191,7 +171,7 @@ export default function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="usuario@leadforge.com ou olianilucas454@gmail.com"
+                      placeholder="seuemail@empresa.com"
                       className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-xs text-white focus:border-amber-500 focus:outline-none"
                     />
                   </div>
@@ -222,20 +202,6 @@ export default function LoginPage() {
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
-
-              {/* Quick Admin Master Button */}
-              <div className="pt-4 border-t border-slate-800 space-y-2">
-                <div className="text-[10px] text-slate-500 text-center font-mono uppercase tracking-wider">
-                  👑 Atalho de Administrador Master (Acesso Ilimitado)
-                </div>
-                <button
-                  onClick={handleAdminQuickLogin}
-                  className="w-full py-2.5 px-4 rounded-xl bg-slate-950 hover:bg-slate-800 border border-amber-500/40 text-amber-300 font-bold text-xs flex items-center justify-center gap-2 transition-all"
-                >
-                  <UserCheck className="w-4 h-4 text-amber-400" />
-                  <span>Entrar como Administrador Master (olianilucas454@gmail.com)</span>
-                </button>
-              </div>
             </div>
           </div>
         </div>
