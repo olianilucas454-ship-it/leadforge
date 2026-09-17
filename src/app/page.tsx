@@ -1,5 +1,6 @@
 'use client';
 
+// LeadForge SaaS Official Portal - Updated 2026
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
