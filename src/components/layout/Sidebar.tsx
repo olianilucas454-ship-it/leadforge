@@ -11,7 +11,9 @@ import {
   Download,
   User,
   LogOut,
-  ShieldCheck
+  ShieldCheck,
+  CreditCard,
+  Zap
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -21,18 +23,23 @@ import { useAuth } from '@/lib/context/AuthContext';
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isAdmin, logout, freeSearchesRemaining } = useAuth();
+  const { user, isAdmin, logout, creditsRemaining, monthlyAllowance, currentPlanSlug } = useAuth();
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: Search, label: 'Buscar Leads', href: '/search' },
     { icon: Users, label: 'Resultados', href: '/results' },
     { icon: Kanban, label: 'CRM de Vendas', href: '/crm' },
-    { icon: Crown, label: 'Planos & Assinatura', href: '/pricing' },
+    { icon: Crown, label: 'Planos & Preços', href: '/planos' },
+    { icon: CreditCard, label: 'Minha Assinatura', href: '/minha-assinatura' },
     { icon: Star, label: 'Favoritos', href: '/favorites' },
     { icon: History, label: 'Histórico', href: '/history' },
     { icon: Download, label: 'Exportar', href: '/export' },
   ];
+
+  if (isAdmin) {
+    navItems.push({ icon: ShieldCheck, label: 'Gestão Créditos Admin', href: '/admin/credits' });
+  }
 
   const handleLogout = () => {
     logout();
@@ -45,24 +52,25 @@ export function Sidebar() {
         <Logo />
       </div>
 
-      {/* Quota Counter for Free Users */}
-      {user && !user.isPaidUser && !isAdmin && (
-        <div className="mx-3 mt-3 p-3 rounded-xl bg-accent/10 border border-accent/20 space-y-1">
-          <div className="flex items-center justify-between text-[11px] font-bold text-accent">
-            <span>Quota Grátis:</span>
-            <span className="font-mono">{freeSearchesRemaining}/5 buscas</span>
-          </div>
-          <p className="text-[10px] text-text-muted">5 nichos em qualquer cidade</p>
-          <Link
-            href="/pricing"
-            className="block text-[10px] font-extrabold text-black bg-accent hover:bg-accent-hover text-center py-1 rounded mt-1.5 transition-all uppercase tracking-wider"
-          >
-            Fazer Upgrade →
-          </Link>
+      {/* Credit Counter Widget */}
+      <div className="mx-3 mt-3 p-3 rounded-xl bg-accent/10 border border-accent/20 space-y-1">
+        <div className="flex items-center justify-between text-[11px] font-bold text-accent">
+          <span className="flex items-center gap-1">
+            <Zap className="w-3 h-3" />
+            <span>Pesquisas:</span>
+          </span>
+          <span className="font-mono">{isAdmin ? 'Ilimitadas' : `${creditsRemaining} / ${monthlyAllowance}`}</span>
         </div>
-      )}
+        <p className="text-[10px] text-text-muted">1 pesquisa = 1 crédito consumido</p>
+        <Link
+          href="/planos"
+          className="block text-[10px] font-extrabold text-black bg-accent hover:bg-accent-hover text-center py-1.5 rounded-lg mt-1.5 transition-all uppercase tracking-wider shadow-sm"
+        >
+          {isAdmin ? 'Ver Todos os Planos' : 'Adquirir Mais Pesquisas →'}
+        </Link>
+      </div>
 
-      <nav className="flex-1 overflow-y-auto py-4">
+      <nav className="flex-1 overflow-y-auto py-3">
         <ul className="space-y-1 px-3">
           {navItems.map((item) => {
             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
@@ -115,8 +123,8 @@ export function Sidebar() {
           </div>
         ) : (
           <div className="flex items-center justify-between px-2 text-[10px] font-mono text-text-muted">
-            <span>Plano: {user?.plan === 'pro' ? 'R$ 59,90' : user?.plan === 'vip' ? 'R$ 99,99' : 'Grátis'}</span>
-            <Link href="/pricing" className="text-accent hover:underline font-bold">
+            <span>Plano: {currentPlanSlug.toUpperCase()}</span>
+            <Link href="/planos" className="text-accent hover:underline font-bold">
               Alterar
             </Link>
           </div>

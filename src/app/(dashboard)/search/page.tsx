@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, MapPin, Target, ChevronRight, Lock, Crown, Sparkles, X } from 'lucide-react';
+import { Search, MapPin, Target, ChevronRight, Lock, Crown, Sparkles, Zap } from 'lucide-react';
 import { SearchProgress } from '@/components/search/SearchProgress';
+import { CreditExhaustedModal } from '@/components/search/CreditExhaustedModal';
 import { Header } from '@/components/layout/Header';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/context/AuthContext';
@@ -17,7 +18,7 @@ const RADIUS_OPTIONS = [5, 10, 25, 50];
 
 export default function SearchPage() {
   const router = useRouter();
-  const { user, recordSearch, freeSearchesRemaining, isAdmin, isPaidUser } = useAuth();
+  const { user, recordSearch, creditsRemaining, monthlyAllowance, isAdmin, isPaidUser } = useAuth();
 
   const [niche, setNiche] = useState('');
   const [city, setCity] = useState('São Paulo');
@@ -34,9 +35,14 @@ export default function SearchPage() {
     e.preventDefault();
     if (!niche || !city || !state) return;
 
-    // Record Search & Check Quota
+    // Check credit balance & record search
+    if (!isAdmin && creditsRemaining <= 0) {
+      setShowQuotaModal(true);
+      return;
+    }
+
     const allowed = recordSearch(niche);
-    if (!allowed) {
+    if (!allowed && !isAdmin) {
       setShowQuotaModal(true);
       return;
     }
@@ -70,21 +76,21 @@ export default function SearchPage() {
           <div className="w-full mb-6 p-4 rounded-2xl bg-accent/10 border border-accent/30 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent shrink-0">
-                <Sparkles className="w-5 h-5" />
+                <Zap className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-xs font-bold text-accent uppercase tracking-wider">Plano Grátis Ativo</div>
+                <div className="text-xs font-bold text-accent uppercase tracking-wider">Plano Grátis — {creditsRemaining} de 5 pesquisas restantes</div>
                 <div className="text-xs text-text-secondary">
-                  Você possui <strong className="text-text-primary">{freeSearchesRemaining} de 5 pesquisas grátis</strong> em nichos diferentes.
+                  1 pesquisa = 1 crédito consumido. Ao chegar a 0, escolha um plano para continuar.
                 </div>
               </div>
             </div>
 
             <button
-              onClick={() => router.push('/pricing')}
+              onClick={() => router.push('/planos')}
               className="px-4 py-2 bg-accent hover:bg-accent-hover text-black font-extrabold text-xs rounded-xl shadow-lg transition-all shrink-0 uppercase tracking-wider"
             >
-              Liberar Busca Ilimitada →
+              Ver Planos →
             </button>
           </div>
         )}
@@ -96,7 +102,7 @@ export default function SearchPage() {
               <Crown className="w-6 h-6 text-amber-400" />
               <div>
                 <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">Administrador Master Logado</div>
-                <div className="text-xs text-slate-300 font-mono">olianilucas454@gmail.com — Acesso Ilimitado sem Barreiras</div>
+                <div className="text-xs text-slate-300 font-mono">olianilucas454@gmail.com — Pesquisas Ilimitadas</div>
               </div>
             </div>
             <span className="px-3 py-1 bg-amber-500 text-black font-black text-[10px] rounded-full uppercase tracking-wider">
@@ -263,54 +269,11 @@ export default function SearchPage() {
         />
       )}
 
-      {/* Quota Exceeded Modal */}
-      {showQuotaModal && (
-        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-surface border border-accent/40 rounded-3xl p-6 sm:p-8 text-center space-y-6 relative shadow-2xl">
-            <button
-              onClick={() => setShowQuotaModal(false)}
-              className="absolute top-4 right-4 text-text-muted hover:text-text-primary"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="w-14 h-14 rounded-full bg-accent/20 border border-accent/40 text-accent flex items-center justify-center mx-auto">
-              <Lock className="w-7 h-7" />
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-xl font-extrabold text-text-primary">
-                Limite de Quota Grátis Atingido
-              </h3>
-              <p className="text-xs text-text-secondary leading-relaxed">
-                Você utilizou o limite de <strong className="text-accent">5 pesquisas em 5 nichos diferentes</strong> no Plano Grátis. Para continuar buscando empresas ilimitadamente, assine um plano.
-              </p>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              <button
-                onClick={() => {
-                  setShowQuotaModal(false);
-                  router.push('/pricing');
-                }}
-                className="w-full py-3.5 px-6 rounded-xl bg-accent hover:bg-accent-hover text-black font-black text-xs uppercase tracking-wider shadow-lg transition-all"
-              >
-                ASSINAR PLANO PRO (R$ 59,90/MÊS) →
-              </button>
-
-              <button
-                onClick={() => {
-                  setShowQuotaModal(false);
-                  router.push('/pricing');
-                }}
-                className="w-full py-3.5 px-6 rounded-xl bg-background border border-border text-text-primary hover:border-accent font-bold text-xs uppercase tracking-wider transition-all"
-              >
-                ASSINAR AGÊNCIA VIP (R$ 99,99/MÊS) →
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Quota Exceeded Modal (Rule 18) */}
+      <CreditExhaustedModal
+        isOpen={showQuotaModal}
+        onClose={() => setShowQuotaModal(false)}
+      />
     </div>
   );
 }

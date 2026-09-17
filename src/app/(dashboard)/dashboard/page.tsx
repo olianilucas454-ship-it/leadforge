@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Users, Globe, Flame, Phone, UserCheck, Trophy, DollarSign } from 'lucide-react';
+import { Users, Globe, Flame, Phone, UserCheck, Trophy, DollarSign, Search, Zap, Crown, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { useAuth } from '@/lib/context/AuthContext';
 import {
   AreaChart,
   Area,
@@ -15,6 +17,10 @@ import {
 } from 'recharts';
 
 export default function DashboardPage() {
+  const { user, isAdmin, creditsRemaining, monthlyAllowance, searchesUsed, currentPlanSlug } = useAuth();
+
+  const percentageUsed = Math.min(100, Math.round((searchesUsed / monthlyAllowance) * 100));
+
   const stats = [
     { label: 'Leads encontrados', value: '1.284', icon: Users, colorClass: 'text-accent' },
     { label: 'Sem website', value: '723', icon: Globe, colorClass: 'text-hot' },
@@ -54,9 +60,72 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 md:p-8 space-y-8 bg-[#0a0a0f] min-h-screen text-[#f0f0f5]">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-gray-400">Visão geral do seu desempenho e leads.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-gray-400">Visão geral do seu desempenho e pesquisas de leads.</p>
+        </div>
+        <Link
+          href="/search"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent hover:bg-accent-hover text-black font-bold rounded-xl shadow-lg transition-all text-sm self-start md:self-auto"
+        >
+          <Search className="w-4 h-4" />
+          <span>Nova Pesquisa de Leads</span>
+        </Link>
+      </div>
+
+      {/* PROMINENT CARD: PESQUISAS DISPONÍVEIS (RULE 16) */}
+      <div className="bg-gradient-to-r from-[#12121a] via-[#1a1a28] to-[#12121a] border border-accent/30 p-6 rounded-2xl shadow-xl relative overflow-hidden">
+        <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-2 max-w-xl">
+            <div className="flex items-center gap-2 text-accent font-bold uppercase tracking-wider text-xs">
+              <Zap className="w-4 h-4" />
+              <span>PESQUISAS DISPONÍVEIS — PLANO {currentPlanSlug.toUpperCase()}</span>
+            </div>
+
+            {isAdmin ? (
+              <h2 className="text-3xl font-extrabold text-white flex items-center gap-3">
+                <span>Pesquisas Ilimitadas</span>
+                <span className="px-2.5 py-0.5 rounded text-xs bg-amber-500/20 text-amber-400 border border-amber-500/40 font-mono">
+                  👑 ADMIN MASTER
+                </span>
+              </h2>
+            ) : (
+              <h2 className="text-3xl font-extrabold text-white">
+                <span className="text-accent">{creditsRemaining}</span>
+                <span className="text-gray-400 text-xl font-normal"> de {monthlyAllowance} este mês</span>
+              </h2>
+            )}
+
+            {/* Progress Bar */}
+            {!isAdmin && (
+              <div className="space-y-1 pt-1">
+                <div className="w-full h-3 bg-[#2a2a3e] rounded-full overflow-hidden border border-border/50">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-accent rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, (creditsRemaining / monthlyAllowance) * 100)}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-gray-400 font-mono pt-1">
+                  <span>{searchesUsed} utilizadas</span>
+                  <span>Sua renovação acontece em 12 dias.</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              href="/planos"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent-hover text-black font-extrabold rounded-xl transition-all shadow-md text-sm whitespace-nowrap"
+            >
+              <Crown className="w-4 h-4" />
+              <span>Comprar mais pesquisas / Alterar plano</span>
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

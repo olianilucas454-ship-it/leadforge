@@ -1,8 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { PLAN_CONFIG, getPlanBySlug } from '@/lib/config/plans';
 
-export type UserPlan = 'free' | 'pro' | 'vip';
+export type UserPlan = 'free' | 'starter' | 'pro' | 'agency' | 'vip';
 export type UserRole = 'admin' | 'user';
 
 export interface UserSession {
@@ -12,6 +13,7 @@ export interface UserSession {
   plan: UserPlan;
   isPaidUser: boolean;
   createdAt: string;
+  searchesUsed?: number;
 }
 
 interface AuthContextType {
@@ -19,14 +21,17 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isPaidUser: boolean;
-  freeSearchesRemaining: number;
+  creditsRemaining: number;
+  monthlyAllowance: number;
+  searchesUsed: number;
   searchedNiches: string[];
+  currentPlanSlug: UserPlan;
   login: (email: string, pass: string) => { success: boolean; message?: string };
   register: (name: string, email: string, pass: string) => { success: boolean; message?: string };
   logout: () => void;
   selectPlan: (plan: UserPlan) => void;
   confirmPayment: (plan: UserPlan) => void;
-  recordSearch: (niche: string) => boolean; // Returns false if quota exceeded
+  recordSearch: (niche?: string) => boolean; // Returns false if credit quota exceeded
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,13 +42,18 @@ const ADMIN_PASS = 'lucas007';
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserSession | null>(null);
   const [searchedNiches, setSearchedNiches] = useState<string[]>([]);
+  const [searchesUsed, setSearchesUsed] = useState<number>(0);
 
   useEffect(() => {
     // Load auth session from localStorage
     const savedSession = localStorage.getItem('leadforge_auth_session');
     if (savedSession) {
       try {
-        setUser(JSON.parse(savedSession));
+        const parsed = JSON.parse(savedSession);
+        setUser(parsed);
+        if (typeof parsed.searchesUsed === 'number') {
+          setSearchesUsed(parsed.searchesUsed);
+        }
       } catch (e) {
         console.error('Failed to parse saved auth session', e);
       }
@@ -56,6 +66,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (e) {
         console.error('Failed to parse searched niches', e);
       }
+    }
+
+    const savedCount = localStorage.getItem('leadforge_searches_used_count');
+    if (savedCount) {
+      setSearchesUsed(Number(savedCount) || 0);
     }
   }, []);
 
@@ -70,16 +85,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = (email: string, pass: string) => {
     const cleanEmail = email.trim().toLowerCase();
-    
+
     // Check Admin Master Credentials
     if (cleanEmail === ADMIN_EMAIL.toLowerCase() && pass === ADMIN_PASS) {
       const adminSession: UserSession = {
         email: ADMIN_EMAIL,
         name: 'Administrador Master',
         role: 'admin',
-        plan: 'vip',
+        plan: 'agency',
         isPaidUser: true,
         createdAt: new Date().toISOString(),
+        searchesUsed: 0,
       };
       saveUserSession(adminSession);
       return { success: true };
@@ -94,9 +110,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: cleanEmail,
         name: cleanEmail.split('@')[0],
         role: 'user',
-        plan: existingPlan,
+        plan: existingPlan as UserPlan,
         isPaidUser: existingPaid,
         createdAt: new Date().toISOString(),
+        searchesUsed: searchesUsed || 0,
       };
       saveUserSession(userSession);
       return { success: true };
@@ -115,9 +132,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email: cleanEmail,
       name: name.trim() || cleanEmail.split('@')[0],
       role: cleanEmail === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'user',
-      plan: cleanEmail === ADMIN_EMAIL.toLowerCase() ? 'vip' : 'free',
+      plan: cleanEmail === ADMIN_EMAIL.toLowerCase() ? 'agency' : 'free',
       isPaidUser: cleanEmail === ADMIN_EMAIL.toLowerCase(),
       createdAt: new Date().toISOString(),
+      searchesUsed: 0,
     };
 
     saveUserSession(newSession);
@@ -130,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const selectPlan = (plan: UserPlan) => {
     if (!user) return;
-    const isPaid = plan === 'pro' || plan === 'vip' || user.role === 'admin';
+    const isPaid = plan === 'starter' || plan === 'pro' || plan === 'agency' || plan === 'vip' || user.role === 'admin';
     const updated = { ...user, plan, isPaidUser: isPaid };
     saveUserSession(updated);
   };
@@ -145,31 +163,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveUserSession(updated);
   };
 
-  const recordSearch = (niche: string): boolean => {
+  const recordSearch = (niche?: string): boolean => {
     if (!user) return false;
 
-    // Admin or Paid Users have UNLIMITED access
-    if (user.role === 'admin' || user.isPaidUser || user.plan === 'pro' || user.plan === 'vip') {
+    const isAdmin = user.role === 'admin' || user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+    // Admin has UNLIMITED access
+    if (isAdmin) {
       return true;
     }
 
-    // Free plan check: 5 searches in 5 different niches
-    const cleanNiche = niche.trim().toLowerCase();
-    const updatedNiches = Array.from(new Set([...searchedNiches, cleanNiche]));
+    // Determine current plan definition & monthly allowance
+    const planDef = getPlanBySlug(user.plan);
+    const allowance = planDef.researchCredits;
 
-    if (updatedNiches.length > 5) {
-      // Quota exceeded!
-      return false;
+    // Check if limit reached
+    if (searchesUsed >= allowance) {
+      return false; // Quota exceeded!
     }
 
-    setSearchedNiches(updatedNiches);
-    localStorage.setItem('leadforge_searched_niches', JSON.stringify(updatedNiches));
+    const newUsed = searchesUsed + 1;
+    setSearchesUsed(newUsed);
+    localStorage.setItem('leadforge_searches_used_count', String(newUsed));
+
+    if (niche) {
+      const cleanNiche = niche.trim().toLowerCase();
+      const updatedNiches = Array.from(new Set([...searchedNiches, cleanNiche]));
+      setSearchedNiches(updatedNiches);
+      localStorage.setItem('leadforge_searched_niches', JSON.stringify(updatedNiches));
+    }
+
     return true;
   };
 
   const isAdmin = user?.role === 'admin' || user?.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
-  const isPaidUser = user?.isPaidUser || isAdmin || user?.plan === 'pro' || user?.plan === 'vip';
-  const freeSearchesRemaining = Math.max(0, 5 - searchedNiches.length);
+  const currentPlanSlug = (user?.plan as UserPlan) || 'free';
+  const planDef = getPlanBySlug(currentPlanSlug);
+  const monthlyAllowance = planDef.researchCredits;
+  
+  const isPaidUser = user?.isPaidUser || isAdmin || currentPlanSlug === 'starter' || currentPlanSlug === 'pro' || currentPlanSlug === 'agency' || currentPlanSlug === 'vip';
+  const creditsRemaining = isAdmin ? 999999 : Math.max(0, monthlyAllowance - searchesUsed);
 
   return (
     <AuthContext.Provider
@@ -178,8 +211,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isAdmin,
         isPaidUser,
-        freeSearchesRemaining,
+        creditsRemaining,
+        monthlyAllowance,
+        searchesUsed,
         searchedNiches,
+        currentPlanSlug,
         login,
         register,
         logout,
