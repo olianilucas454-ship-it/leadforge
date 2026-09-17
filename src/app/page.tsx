@@ -60,6 +60,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-transparent text-text-primary flex flex-col justify-between selection:bg-accent selection:text-black relative overflow-hidden">
+      {/* Background Image Layer with leadforge-bg.jpg */}
+      <div
+        className="absolute inset-0 pointer-events-none z-0 bg-cover bg-center bg-no-repeat opacity-80"
+        style={{ backgroundImage: "url('/leadforge-bg.jpg')" }}
+      />
+      <div className="absolute inset-0 pointer-events-none z-0 bg-gradient-to-b from-background/40 via-background/20 to-background/60" />
+      <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-accent/15 via-transparent to-transparent" />
       {/* Header Bar */}
       <header className="relative z-10 border-b border-border/80 bg-surface/70 backdrop-blur-md px-6 md:px-12 h-16 flex items-center justify-between">
         <Logo size="md" />
