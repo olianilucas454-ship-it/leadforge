@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, MapPin, Target, ChevronRight } from 'lucide-react';
+import { Search, MapPin, Target, ChevronRight, Lock, Crown, Sparkles, X } from 'lucide-react';
 import { SearchProgress } from '@/components/search/SearchProgress';
 import { Header } from '@/components/layout/Header';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/context/AuthContext';
 
 const NICHES = [
   'Barbearias', 'Restaurantes', 'Clínicas', 'Academias',
@@ -16,20 +17,30 @@ const RADIUS_OPTIONS = [5, 10, 25, 50];
 
 export default function SearchPage() {
   const router = useRouter();
+  const { user, recordSearch, freeSearchesRemaining, isAdmin, isPaidUser } = useAuth();
+
   const [niche, setNiche] = useState('');
-  const [city, setCity] = useState('Goiânia');
-  const [state, setState] = useState('GO');
+  const [city, setCity] = useState('São Paulo');
+  const [state, setState] = useState('SP');
   const [neighborhood, setNeighborhood] = useState('');
   const [radius, setRadius] = useState(25);
   const [quantity, setQuantity] = useState(100);
   
-  // Default to Google Maps automatically in background
   const searchSource = 'google_maps';
   const [isSearching, setIsSearching] = useState(false);
+  const [showQuotaModal, setShowQuotaModal] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!niche || !city || !state) return;
+
+    // Record Search & Check Quota
+    const allowed = recordSearch(niche);
+    if (!allowed) {
+      setShowQuotaModal(true);
+      return;
+    }
+
     setIsSearching(true);
   };
 
@@ -50,26 +61,65 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-full flex flex-col bg-background">
-      <Header title="Nova Busca" />
+      <Header title="Nova Busca de Leads" />
       
       <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 max-w-4xl mx-auto w-full">
         
+        {/* Banner Quota for Free Users */}
+        {!isPaidUser && !isAdmin && (
+          <div className="w-full mb-6 p-4 rounded-2xl bg-accent/10 border border-accent/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-accent shrink-0">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="text-xs font-bold text-accent uppercase tracking-wider">Plano Grátis Ativo</div>
+                <div className="text-xs text-text-secondary">
+                  Você possui <strong className="text-text-primary">{freeSearchesRemaining} de 5 pesquisas grátis</strong> em nichos diferentes.
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => router.push('/pricing')}
+              className="px-4 py-2 bg-accent hover:bg-accent-hover text-black font-extrabold text-xs rounded-xl shadow-lg transition-all shrink-0 uppercase tracking-wider"
+            >
+              Liberar Busca Ilimitada →
+            </button>
+          </div>
+        )}
+
+        {/* Admin Master Banner */}
+        {isAdmin && (
+          <div className="w-full mb-6 p-4 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <Crown className="w-6 h-6 text-amber-400" />
+              <div>
+                <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">Administrador Master Logado</div>
+                <div className="text-xs text-slate-300 font-mono">olianilucas454@gmail.com — Acesso Ilimitado sem Barreiras</div>
+              </div>
+            </div>
+            <span className="px-3 py-1 bg-amber-500 text-black font-black text-[10px] rounded-full uppercase tracking-wider">
+              ADMIN VIP
+            </span>
+          </div>
+        )}
+
         <div className="text-center mb-10 w-full">
           <h2 className="text-3xl md:text-5xl font-bold text-text-primary mb-4 tracking-tight">
             Encontre empresas que <span className="text-accent relative inline-block">
-              precisam
+              precisam de vendas
               <svg className="absolute w-full h-3 -bottom-1 left-0 text-accent/30" viewBox="0 0 100 10" preserveAspectRatio="none">
                 <path d="M0,5 Q50,10 100,0" stroke="currentColor" strokeWidth="4" fill="none" />
               </svg>
-            </span> de um site
+            </span>
           </h2>
           <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto">
-            Prospecção inteligente para venda de sites e serviços digitais
+            Prospecção comercial inteligente em qualquer cidade do Brasil
           </p>
         </div>
 
         <form onSubmit={handleSearch} className="w-full space-y-8 bg-surface p-6 md:p-8 rounded-2xl border border-border shadow-xl">
-          
           <div className="space-y-3">
             <label className="text-sm font-medium text-text-secondary block">
               Qual tipo de empresa você quer encontrar?
@@ -82,7 +132,7 @@ export default function SearchPage() {
                 type="text"
                 value={niche}
                 onChange={(e) => setNiche(e.target.value)}
-                placeholder="Ex: Clínicas Odontológicas, Restaurantes..."
+                placeholder="Ex: Barbearias, Clínicas Odontológicas, Restaurantes..."
                 className="w-full pl-12 pr-4 h-14 bg-background border border-border rounded-xl text-lg text-text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all placeholder:text-text-muted"
                 required
               />
@@ -94,7 +144,9 @@ export default function SearchPage() {
                   key={item}
                   type="button"
                   onClick={() => setNiche(item)}
-                  className="px-3 py-1.5 text-sm bg-background border border-border rounded-full hover:border-accent/50 hover:text-accent transition-colors text-text-secondary"
+                  className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                    niche === item ? 'bg-accent text-black border-accent font-bold' : 'bg-background border-border text-text-secondary hover:border-accent/50 hover:text-accent'
+                  }`}
                 >
                   {item}
                 </button>
@@ -157,7 +209,7 @@ export default function SearchPage() {
                       onClick={() => setRadius(opt)}
                       className={`flex-1 py-2 text-sm font-medium rounded-lg border transition-all ${
                         radius === opt 
-                          ? 'bg-accent border-accent text-black' 
+                          ? 'bg-accent border-accent text-black font-bold' 
                           : 'bg-background border-border text-text-secondary hover:border-text-muted'
                       }`}
                     >
@@ -197,7 +249,6 @@ export default function SearchPage() {
             >
               ENCONTRAR LEADS
               <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
             </button>
           </div>
         </form>
@@ -210,6 +261,55 @@ export default function SearchPage() {
           onComplete={handleSearchComplete}
           onViewResults={handleViewResults}
         />
+      )}
+
+      {/* Quota Exceeded Modal */}
+      {showQuotaModal && (
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-surface border border-accent/40 rounded-3xl p-6 sm:p-8 text-center space-y-6 relative shadow-2xl">
+            <button
+              onClick={() => setShowQuotaModal(false)}
+              className="absolute top-4 right-4 text-text-muted hover:text-text-primary"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="w-14 h-14 rounded-full bg-accent/20 border border-accent/40 text-accent flex items-center justify-center mx-auto">
+              <Lock className="w-7 h-7" />
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-xl font-extrabold text-text-primary">
+                Limite de Quota Grátis Atingido
+              </h3>
+              <p className="text-xs text-text-secondary leading-relaxed">
+                Você utilizou o limite de <strong className="text-accent">5 pesquisas em 5 nichos diferentes</strong> no Plano Grátis. Para continuar buscando empresas ilimitadamente, assine um plano.
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <button
+                onClick={() => {
+                  setShowQuotaModal(false);
+                  router.push('/pricing');
+                }}
+                className="w-full py-3.5 px-6 rounded-xl bg-accent hover:bg-accent-hover text-black font-black text-xs uppercase tracking-wider shadow-lg transition-all"
+              >
+                ASSINAR PLANO PRO (R$ 59,90/MÊS) →
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowQuotaModal(false);
+                  router.push('/pricing');
+                }}
+                className="w-full py-3.5 px-6 rounded-xl bg-background border border-border text-text-primary hover:border-accent font-bold text-xs uppercase tracking-wider transition-all"
+              >
+                ASSINAR AGÊNCIA VIP (R$ 99,99/MÊS) →
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
