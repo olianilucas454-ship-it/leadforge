@@ -36,9 +36,13 @@ export default function PlanosPage() {
     setShowCheckoutModal(true);
   };
 
+  const [customApiKey, setCustomApiKey] = useState('');
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
+
   const handleProcessPayment = async () => {
     if (!selectedPlan || !user) return;
     setLoading(true);
+    setApiKeyError(null);
 
     try {
       const response = await fetch('/api/checkout', {
@@ -47,6 +51,7 @@ export default function PlanosPage() {
         body: JSON.stringify({
           planSlug: selectedPlan.slug,
           userEmail: user.email,
+          apiKey: customApiKey.trim() || undefined,
         }),
       });
 
@@ -55,6 +60,8 @@ export default function PlanosPage() {
         setCheckoutUrl(data.checkoutUrl);
         // Rule 4: Redirect directly to the REAL Asaas hosted checkout URL
         window.location.href = data.checkoutUrl;
+      } else if (data.error === 'MISSING_API_KEY') {
+        setApiKeyError(data.message || 'Chave do Asaas (ASAAS_API_KEY) pendente. Insira sua chave $aact_... abaixo.');
       } else {
         alert(data.error || 'Não foi possível criar o checkout de pagamento.');
       }
@@ -204,6 +211,27 @@ export default function PlanosPage() {
                 </div>
               </div>
             </div>
+
+            {apiKeyError && (
+              <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs space-y-3">
+                <div className="font-extrabold flex items-center gap-2 text-amber-400">
+                  <Shield className="w-4 h-4 shrink-0" />
+                  <span>Configuração de API Key Asaas Pendente</span>
+                </div>
+                <p className="text-[11px] text-gray-300 leading-relaxed">
+                  Para gerar faturas e pagamentos reais no Asaas Sandbox, insira sua chave de API (<code className="text-amber-300">$aact_...</code>) gerada em <a href="https://sandbox.asaas.com" target="_blank" rel="noreferrer" className="underline font-bold text-accent">sandbox.asaas.com</a> no arquivo <code className="text-white bg-black/40 px-1 py-0.5 rounded">.env.local</code> ou cole-a abaixo:
+                </p>
+                <div className="space-y-1.5">
+                  <input
+                    type="password"
+                    value={customApiKey}
+                    onChange={(e) => setCustomApiKey(e.target.value)}
+                    placeholder="Cole sua ASAAS_API_KEY ($aact_...)"
+                    className="w-full px-3 py-2 bg-black/60 border border-amber-500/40 rounded-xl text-xs text-white font-mono placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-400"
+                  />
+                </div>
+              </div>
+            )}
 
             {checkoutUrl ? (
               <div className="space-y-3 pt-2">

@@ -28,6 +28,7 @@ export interface CreateCheckoutInput {
   successUrl?: string;
   cancelUrl?: string;
   expiredUrl?: string;
+  apiKey?: string;
 }
 
 export interface AsaasCheckoutResponse {
@@ -39,10 +40,11 @@ export interface AsaasCheckoutResponse {
 }
 
 export class AsaasService {
-  private static getHeaders() {
+  private static getHeaders(customApiKey?: string) {
+    const key = customApiKey || ASAAS_API_KEY;
     return {
       'Content-Type': 'application/json',
-      'access_token': ASAAS_API_KEY,
+      'access_token': key,
       'User-Agent': 'LeadForge-SaaS/1.0',
     };
   }
@@ -59,8 +61,9 @@ export class AsaasService {
    * Create a Checkout in Asaas V3 (POST /checkouts)
    */
   static async createCheckout(input: CreateCheckoutInput): Promise<AsaasCheckoutResponse> {
-    if (!ASAAS_API_KEY) {
-      throw new Error('ASAAS_API_KEY não está configurada no servidor. Não foi possível criar o checkout de pagamento.');
+    const activeApiKey = input.apiKey || ASAAS_API_KEY;
+    if (!activeApiKey) {
+      throw new Error('MISSING_API_KEY: A chave de API do Asaas (ASAAS_API_KEY) não está configurada no servidor.');
     }
 
     const payload: any = {
@@ -85,7 +88,7 @@ export class AsaasService {
       // 1. Try POST /checkouts
       let response = await fetch(`${BASE_URL}/checkouts`, {
         method: 'POST',
-        headers: this.getHeaders(),
+        headers: this.getHeaders(activeApiKey),
         body: JSON.stringify(payload),
       });
 
@@ -96,7 +99,7 @@ export class AsaasService {
         console.warn('[AsaasService] /checkouts endpoint unavailable, falling back to /paymentLinks');
         response = await fetch(`${BASE_URL}/paymentLinks`, {
           method: 'POST',
-          headers: this.getHeaders(),
+          headers: this.getHeaders(activeApiKey),
           body: JSON.stringify({
             name: input.name,
             description: input.description,

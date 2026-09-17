@@ -6,7 +6,7 @@ import { BillingStore } from '@/lib/services/billingStore';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { planSlug, userEmail } = body;
+    const { planSlug, userEmail, apiKey } = body;
 
     if (!planSlug || !userEmail) {
       return NextResponse.json(
@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
       successUrl: `${baseUrl}/billing/success`,
       cancelUrl: `${baseUrl}/billing/cancelled`,
       expiredUrl: `${baseUrl}/billing/expired`,
+      apiKey,
     });
 
     // Rule 4 & 5: Server-side Link & Status Validation
@@ -77,9 +78,21 @@ export async function POST(request: NextRequest) {
       researchCredits: plan.researchCredits,
     });
   } catch (error: any) {
-    console.error('[API /api/checkout] Failed to create checkout:', error?.message || error);
+    const errorMsg = error?.message || String(error);
+    console.error('[API /api/checkout] Failed to create checkout:', errorMsg);
+
+    if (errorMsg.includes('MISSING_API_KEY')) {
+      return NextResponse.json(
+        {
+          error: 'MISSING_API_KEY',
+          message: 'Chave de API do Asaas (ASAAS_API_KEY) não foi configurada no servidor. Insira sua chave $aact_... do Sandbox para gerar faturas reais.',
+        },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Não foi possível criar o checkout de pagamento.', message: error?.message || 'Erro de comunicação com o gateway' },
+      { error: 'Não foi possível criar o checkout de pagamento.', message: errorMsg },
       { status: 500 }
     );
   }
