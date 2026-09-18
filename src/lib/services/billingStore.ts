@@ -80,7 +80,7 @@ class ServerBillingLedger {
   public activatePaidSubscription(userEmail: string, planSlug: string): UserSubscriptionRecord {
     const cleanEmail = userEmail.trim().toLowerCase();
     
-    let allowance = 5;
+    let allowance = 3;
     switch (planSlug.toLowerCase()) {
       case 'starter':
         allowance = 50;
@@ -92,7 +92,7 @@ class ServerBillingLedger {
         allowance = 600;
         break;
       default:
-        allowance = 5;
+        allowance = 3;
     }
 
     const record: UserSubscriptionRecord = {

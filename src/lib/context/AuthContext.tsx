@@ -12,12 +12,14 @@ export interface UserSession {
   role: UserRole;
   plan: UserPlan;
   isPaidUser: boolean;
+  isEmailVerified?: boolean;
   createdAt: string;
   searchesUsed?: number;
 }
 
 export interface RegisteredUserRecord extends UserSession {
   passwordHash: string;
+  verificationOtp?: string;
 }
 
 interface AuthContextType {
@@ -30,8 +32,10 @@ interface AuthContextType {
   searchesUsed: number;
   searchedNiches: string[];
   currentPlanSlug: UserPlan;
-  login: (email: string, pass: string) => { success: boolean; message?: string };
-  register: (name: string, email: string, pass: string) => { success: boolean; message?: string };
+  login: (email: string, pass: string) => { success: boolean; requiresVerification?: boolean; otpCode?: string; message?: string };
+  register: (name: string, email: string, pass: string) => { success: boolean; requiresVerification?: boolean; otpCode?: string; message?: string };
+  sendEmailVerificationOtp: (email: string) => { success: boolean; otpCode?: string; message?: string };
+  verifyEmailOtp: (email: string, code: string) => { success: boolean; message?: string };
   logout: () => void;
   selectPlan: (plan: UserPlan) => void;
   confirmPayment: (plan: UserPlan) => void;
@@ -79,6 +83,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (dbRecord) {
           parsed.plan = dbRecord.plan;
           parsed.isPaidUser = dbRecord.isPaidUser;
+          parsed.isEmailVerified = dbRecord.isEmailVerified;
         }
 
         setUser(parsed);
@@ -114,6 +119,81 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const sendEmailVerificationOtp = (email: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail) return { success: false, message: 'Informe um e-mail válido.' };
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const db = getUsersDb();
+    
+    if (db[cleanEmail]) {
+      db[cleanEmail].verificationOtp = otpCode;
+      saveUsersDb(db);
+    } else {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(`leadforge_otp_${cleanEmail}`, JSON.stringify({ code: otpCode, expiresAt: Date.now() + 15 * 60 * 1000 }));
+      }
+    }
+
+    console.log(`[Email Verification Service] OTP Code for ${cleanEmail}: ${otpCode}`);
+
+    return {
+      success: true,
+      otpCode,
+      message: `Código de verificação enviado para ${cleanEmail}.`
+    };
+  };
+
+  const verifyEmailOtp = (email: string, code: string) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanCode = code.trim();
+
+    const db = getUsersDb();
+    const dbRecord = db[cleanEmail];
+
+    let storedCode: string | undefined = dbRecord?.verificationOtp;
+
+    if (!storedCode && typeof window !== 'undefined') {
+      const rawOtp = localStorage.getItem(`leadforge_otp_${cleanEmail}`);
+      if (rawOtp) {
+        try {
+          const parsed = JSON.parse(rawOtp);
+          storedCode = parsed.code;
+        } catch {
+          // ignore
+        }
+      }
+    }
+
+    if (!storedCode || storedCode !== cleanCode) {
+      return { success: false, message: 'Código de verificação incorreto ou expirado. Tente novamente.' };
+    }
+
+    if (dbRecord) {
+      dbRecord.isEmailVerified = true;
+      dbRecord.verificationOtp = undefined;
+      saveUsersDb(dbRecord ? { ...db, [cleanEmail]: dbRecord } : db);
+
+      const verifiedSession: UserSession = {
+        email: dbRecord.email,
+        name: dbRecord.name,
+        role: dbRecord.role,
+        plan: dbRecord.plan,
+        isPaidUser: dbRecord.isPaidUser,
+        isEmailVerified: true,
+        createdAt: dbRecord.createdAt,
+        searchesUsed: dbRecord.searchesUsed || 0,
+      };
+
+      saveUserSession(verifiedSession);
+    } else if (user) {
+      const updated = { ...user, isEmailVerified: true };
+      saveUserSession(updated);
+    }
+
+    return { success: true, message: 'E-mail verificado com sucesso!' };
+  };
+
   const login = (email: string, pass: string) => {
     const cleanEmail = email.trim().toLowerCase();
     if (!cleanEmail || !pass) {
@@ -128,12 +208,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role: 'admin',
         plan: 'agency',
         isPaidUser: true,
+        isEmailVerified: true,
         createdAt: new Date().toISOString(),
         searchesUsed: 0,
       };
 
       const db = getUsersDb();
-      db[cleanEmail] = { ...adminSession, passwordHash: ADMIN_PASS };
+      db[cleanEmail] = { ...adminSession, passwordHash: ADMIN_PASS, isEmailVerified: true };
       saveUsersDb(db);
 
       saveUserSession(adminSession);
@@ -155,12 +236,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, message: 'Senha incorreta. Verifique sua senha e tente novamente.' };
     }
 
+    if (!existing.isEmailVerified && existing.role !== 'admin') {
+      const sendRes = sendEmailVerificationOtp(cleanEmail);
+      return { 
+        success: false, 
+        requiresVerification: true,
+        otpCode: sendRes.otpCode,
+        message: 'Por favor, confirme a verificação de e-mail enviada para concluir o acesso.' 
+      };
+    }
+
     const userSession: UserSession = {
       email: existing.email,
       name: existing.name,
       role: existing.role,
       plan: existing.plan,
       isPaidUser: existing.isPaidUser,
+      isEmailVerified: true,
       createdAt: existing.createdAt,
       searchesUsed: existing.searchesUsed || 0,
     };
@@ -181,6 +273,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const isAdminEmail = cleanEmail === ADMIN_EMAIL.toLowerCase();
+    const otpRes = sendEmailVerificationOtp(cleanEmail);
 
     const newRecord: RegisteredUserRecord = {
       email: cleanEmail,
@@ -189,6 +282,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       role: isAdminEmail ? 'admin' : 'user',
       plan: isAdminEmail ? 'agency' : 'free',
       isPaidUser: isAdminEmail,
+      isEmailVerified: isAdminEmail,
+      verificationOtp: otpRes.otpCode,
       createdAt: new Date().toISOString(),
       searchesUsed: 0,
     };
@@ -196,18 +291,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     db[cleanEmail] = newRecord;
     saveUsersDb(db);
 
-    const newSession: UserSession = {
-      email: newRecord.email,
-      name: newRecord.name,
-      role: newRecord.role,
-      plan: newRecord.plan,
-      isPaidUser: newRecord.isPaidUser,
-      createdAt: newRecord.createdAt,
-      searchesUsed: 0,
-    };
+    if (isAdminEmail) {
+      const adminSession: UserSession = {
+        email: newRecord.email,
+        name: newRecord.name,
+        role: newRecord.role,
+        plan: newRecord.plan,
+        isPaidUser: true,
+        isEmailVerified: true,
+        createdAt: newRecord.createdAt,
+        searchesUsed: 0,
+      };
+      saveUserSession(adminSession);
+      return { success: true };
+    }
 
-    saveUserSession(newSession);
-    return { success: true };
+    return { 
+      success: true, 
+      requiresVerification: true, 
+      otpCode: otpRes.otpCode,
+      message: `Código de verificação de 6 dígitos enviado para ${cleanEmail}.`
+    };
   };
 
   const logout = () => {
@@ -317,6 +421,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         currentPlanSlug,
         login,
         register,
+        sendEmailVerificationOtp,
+        verifyEmailOtp,
         logout,
         selectPlan,
         confirmPayment,

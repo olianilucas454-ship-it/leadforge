@@ -13,12 +13,14 @@ import {
   KeyRound,
   ArrowRight,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  Lock,
+  RefreshCw
 } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, login, register, isAuthenticated, isAdmin } = useAuth();
+  const { user, login, register, verifyEmailOtp, sendEmailVerificationOtp, isAuthenticated, isAdmin } = useAuth();
 
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [email, setEmail] = useState('');
@@ -26,9 +28,15 @@ export default function LoginPage() {
   const [name, setName] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // If already authenticated, redirect automatically
+  // OTP Verification Modal State
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [simulatedOtp, setSimulatedOtp] = useState<string | null>(null);
+  const [otpError, setOtpError] = useState<string | null>(null);
+
+  // If already authenticated and verified, redirect automatically
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user?.isEmailVerified) {
       if (isAdmin || user?.isPaidUser) {
         router.push('/search');
       } else {
@@ -44,7 +52,12 @@ export default function LoginPage() {
     if (isRegisterMode) {
       const res = register(name, email, password);
       if (res.success) {
-        router.push('/planos');
+        if (res.requiresVerification) {
+          setSimulatedOtp(res.otpCode || null);
+          setShowOtpModal(true);
+        } else {
+          router.push('/planos');
+        }
       } else {
         setErrorMsg(res.message || 'Erro ao realizar cadastro.');
       }
@@ -52,9 +65,34 @@ export default function LoginPage() {
       const res = login(email, password);
       if (res.success) {
         router.push('/search');
+      } else if (res.requiresVerification) {
+        setSimulatedOtp(res.otpCode || null);
+        setShowOtpModal(true);
       } else {
         setErrorMsg(res.message || 'Falha no acesso. Verifique suas credenciais.');
       }
+    }
+  };
+
+  const handleVerifyOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    setOtpError(null);
+
+    const res = verifyEmailOtp(email, otpCode);
+    if (res.success) {
+      setShowOtpModal(false);
+      router.push('/planos');
+    } else {
+      setOtpError(res.message || 'Código de verificação incorreto.');
+    }
+  };
+
+  const handleResendOtp = () => {
+    const res = sendEmailVerificationOtp(email);
+    if (res.success && res.otpCode) {
+      setSimulatedOtp(res.otpCode);
+      setOtpError(null);
+      alert(`Novo código enviado para ${email}: ${res.otpCode}`);
     }
   };
 
@@ -67,13 +105,17 @@ export default function LoginPage() {
       />
       <div className="absolute inset-0 pointer-events-none z-0 bg-gradient-to-b from-background/40 via-background/20 to-background/60" />
       <div className="absolute inset-0 pointer-events-none z-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-accent/15 via-transparent to-transparent" />
+      
       {/* Header Bar */}
       <header className="relative z-10 border-b border-border/80 bg-surface/70 backdrop-blur-md px-6 md:px-12 h-16 flex items-center justify-between">
         <Logo size="md" />
 
         <div className="flex items-center gap-4">
           <button
-            onClick={() => setIsRegisterMode(!isRegisterMode)}
+            onClick={() => {
+              setIsRegisterMode(!isRegisterMode);
+              setErrorMsg(null);
+            }}
             className="text-xs font-bold text-text-secondary hover:text-accent transition-colors"
           >
             {isRegisterMode ? 'Já possui conta? Entrar' : 'Criar Conta Grátis'}
@@ -120,7 +162,7 @@ export default function LoginPage() {
             <div className="flex items-center gap-6 pt-2 text-xs text-text-muted font-mono">
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-accent" />
-                5 pesquisas gratuitas
+                3 pesquisas gratuitas
               </span>
               <span className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-accent" />
@@ -138,13 +180,13 @@ export default function LoginPage() {
                 </h2>
                 <p className="text-xs text-text-secondary">
                   {isRegisterMode
-                    ? 'Preencha seus dados para iniciar seu teste com 5 pesquisas grátis'
-                    : 'Entre com suas credenciais para acessar a plataforma'}
+                    ? 'Preencha seus dados para iniciar seu teste com 3 pesquisas grátis'
+                    : 'Entre com suas credenciais cadastradas para acessar a plataforma'}
                 </p>
               </div>
 
               {errorMsg && (
-                <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium text-center">
+                <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium text-center">
                   {errorMsg}
                 </div>
               )}
@@ -204,7 +246,7 @@ export default function LoginPage() {
                   type="submit"
                   className="w-full py-3.5 px-6 rounded-xl bg-accent hover:bg-accent-hover text-black font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-accent/10 flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]"
                 >
-                  <span>{isRegisterMode ? 'CRIAR CONTA & ESCOLHER PLANO' : 'ENTRAR NO PAINEL AGORA'}</span>
+                  <span>{isRegisterMode ? 'VERIFICAR E-MAIL & CRIAR CONTA' : 'ENTRAR NO PAINEL AGORA'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
@@ -212,6 +254,70 @@ export default function LoginPage() {
           </div>
         </div>
       </main>
+
+      {/* Email Verification OTP Modal */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="bg-surface border border-accent/40 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6 relative overflow-hidden">
+            <div className="text-center space-y-2">
+              <div className="w-12 h-12 rounded-full bg-accent/20 border border-accent/40 text-accent mx-auto flex items-center justify-center">
+                <Lock className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-extrabold text-white">Autenticação de E-mail</h3>
+              <p className="text-xs text-text-secondary">
+                Enviamos um código de verificação de 6 dígitos para <span className="text-accent font-bold">{email}</span>.
+              </p>
+            </div>
+
+            {simulatedOtp && (
+              <div className="p-3 rounded-xl bg-accent/10 border border-accent/30 text-accent text-xs font-mono text-center space-y-1">
+                <span className="block text-[10px] uppercase font-bold text-text-muted">Simulação de Envio de E-mail (Código de Teste):</span>
+                <span className="text-lg font-black tracking-widest text-white">{simulatedOtp}</span>
+              </div>
+            )}
+
+            {otpError && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center">
+                {otpError}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold text-text-muted mb-1 uppercase tracking-wider text-center">
+                  Digite o Código de 6 Dígitos
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  required
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  placeholder="000000"
+                  className="w-full bg-background border border-accent/50 rounded-xl px-4 py-3 text-center text-xl font-mono tracking-widest text-white focus:border-accent focus:outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 px-6 rounded-xl bg-accent hover:bg-accent-hover text-black font-extrabold text-xs uppercase tracking-wider shadow-lg flex items-center justify-center gap-2"
+              >
+                <span>CONFIRMAR E-MAIL & CONCLUIR CADASTRAR</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                className="w-full text-xs text-text-muted hover:text-accent flex items-center justify-center gap-1.5 transition-colors pt-2"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Reenviar código de verificação</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-border/80 bg-surface/50 backdrop-blur-md py-6 px-6 text-center text-xs text-text-muted font-mono">
